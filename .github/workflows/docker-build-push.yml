@@ -43,10 +43,10 @@ jobs:
           password: ${{ secrets.DROPLET_SSH_PASSWORD }}
           port: ${{ secrets.DROPLET_SSH_PORT }}
           script: |
-            docker pull breldan/kippradocker-portal
-            docker stop kippraportal || true
-            docker rm kippraportal || true
-            docker run -d --name kippraportal --network host -p 3000:3000 \
+            docker pull breldan/nx-kippraportal
+            docker stop nx-portal || true
+            docker rm nx-portal || true
+            docker run -d --name nx-portal --network host -p 3000:3000 \
               --env-file /root/kippraportal/secrets \
-              breldan/kippradocker-portal
+              breldan/nx-kippraportal
             docker image prune -a --force
