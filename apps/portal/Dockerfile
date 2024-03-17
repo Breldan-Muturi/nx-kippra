@@ -11,6 +11,7 @@ ENV NEXT_SHARP_PATH=/app/node_modules/sharp
 WORKDIR /app
 # Install dependencies based on the preferred package manager
 COPY ../package.json ../package-lock.json ./
+COPY ../nx.json ./
 # Copy the prisma schema into the container so postinstall can generate the prisma client
 #COPY prisma ./prisma
 RUN npm ci
@@ -25,7 +26,7 @@ COPY . .
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED 1
-RUN next build
+RUN nx build portal
 
 # Production image, copy all the files and run next
 FROM base AS runner
