@@ -46,7 +46,7 @@ jobs:
             docker pull breldan/nx-kippraportal
             docker stop nx-portal || true
             docker rm nx-portal || true
-            docker run -d --name nx-portal --network host -p 3000:3000 \
+            docker run -d --name nx-portal --network host -p 4000:4000 \
               --env-file /root/kippraportal/secrets \
               breldan/nx-kippraportal
             docker image prune -a --force
