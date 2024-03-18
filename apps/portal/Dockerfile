@@ -5,9 +5,9 @@ RUN apk add libc6-compat --no-cache
 WORKDIR /app
 
 # Copy the main workspace package.json, package-lock.json, and Nx configuration files
-COPY ../../package.json . \
-    ../../nx.json ./ \
-    ../../package-lock.json ./ \
+COPY ../package.json . \
+    ../nx.json ./ \
+    ../package-lock.json ./ \
     project.json ./
 
 # Install the root dependencies
