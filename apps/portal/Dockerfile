@@ -5,20 +5,20 @@ RUN apk add libc6-compat --no-cache
 WORKDIR /app
 
 # Copy the main workspace package.json, package-lock.json, and Nx configuration files
-COPY ../package.json . \
-    ../nx.json ./ \
-    ../package-lock.json ./ \
-    project.json ./
+COPY package.json .
+COPY nx.json .
+COPY package-lock.json .
+COPY apps/portal/project.json apps/portal
 
 # Install the root dependencies
 RUN npm ci
 
-# Copy the rest of the application files into the container
-COPY apps/portal/ .
+# Copy the app directory into the container
+COPY apps/portal/ apps/portal
 
 # Build the Next.js application
 # Use the Nx CLI to do this, which knows how to handle the monorepo structure
-RUN npx nx build portal
+RUN npx nx build portal --prod
 
 
 # Multi-stage build: Start from a fresh base image for the production environment
