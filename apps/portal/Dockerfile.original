@@ -1,0 +1,46 @@
+FROM node:20.10-alpine AS base
+
+FROM base AS deps
+
+RUN apk add libc6-compat --no-cache 
+
+WORKDIR /app
+COPY ../package.json ../package-lock.json ../nx.json ./
+RUN npm ci
+
+
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+ENV NEXT_TELEMETRY_DISABLED 1
+RUN npx nx build portal
+
+FROM base AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/apps/portal/public ./public
+
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/static ./.next/static
+
+USER nextjs
+
+ENV PORT 4000
+EXPOSE ${PORT}
+
+ENV HOSTNAME "0.0.0.0"
+
+# server.js is created by next build from the standalone output
+# https://nextjs.org/docs/pages/api-reference/next-config-js/output
+CMD ["node", "/app/apps/portal/server.js"]

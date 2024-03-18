@@ -1,63 +1,45 @@
-FROM node:20.10-alpine AS base
+FROM node:lts-alpine AS base
 
-# Install dependencies only when needed
-FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add libc6-compat --no-cache 
-
-# Setting the environment variable for sharp path 
-ENV NEXT_SHARP_PATH=/app/node_modules/sharp 
+RUN apk add libc6-compat --no-cache
 
 WORKDIR /app
-# Install dependencies based on the preferred package manager
-COPY ../package.json ../package-lock.json ./
-COPY ../nx.json ./
-# Copy the prisma schema into the container so postinstall can generate the prisma client
-#COPY prisma ./prisma
+
+# Copy the main workspace package.json, package-lock.json, and Nx configuration files
+COPY ../../package.json . \
+    ../../nx.json ./ \
+    ../../package-lock.json ./ \
+    project.json ./
+
+# Install the root dependencies
 RUN npm ci
 
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+# Copy the rest of the application files into the container
+COPY apps/portal/ .
 
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-ENV NEXT_TELEMETRY_DISABLED 1
+# Build the Next.js application
+# Use the Nx CLI to do this, which knows how to handle the monorepo structure
 RUN npx nx build portal
 
-# Production image, copy all the files and run next
-FROM base AS runner
+
+# Multi-stage build: Start from a fresh base image for the production environment
+FROM node:lts-alpine AS production
+
+# Set the working directory
 WORKDIR /app
 
+#  Copy over the built app and its dependencies from the previous stage
+COPY --from=base /app/apps/portal/.next ./.next
+COPY --from=base /app/node_modules ./node_modules
+COPY --from=base /app/apps/portal/public ./public
+
+# Set environment variables
 ENV NODE_ENV production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-ENV NEXT_TELEMETRY_DISABLED 1
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/apps/portal/public ./public
-
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/static ./.next/static
-
-USER nextjs
-
+ENV HOSTNAME "0.0.0.0"
 ENV PORT 4000
 EXPOSE ${PORT}
 
-# set hostname to localhost
-ENV HOSTNAME "0.0.0.0"
+# Set the user to non-root for security purposes
+USER node
 
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/next-config-js/output
-CMD ["node", "/app/apps/portal/server.js"]
+# Run the Next.js application using the built-in server
+CMD ["node_modules/.bin/next", "start"]
