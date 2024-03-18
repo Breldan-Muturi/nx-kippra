@@ -22,7 +22,7 @@ COPY apps/portal/ apps/portal
 
 # Build the Next.js application
 # Use the Nx CLI to do this, which knows how to handle the monorepo structure
-RUN npx nx build portal --prod
+RUN npx nx build portal
 
 
 # Multi-stage build: Start from a fresh base image for the production environment
