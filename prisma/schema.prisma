@@ -1,0 +1,291 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String                   @id @default(cuid())
+  name                  String
+  email                 String                   @unique
+  emailVerified         DateTime?
+  image                 String?
+  password              String?
+  phoneNumber           String?
+  role                  UserRole                 @default(USER)
+  citizenship           Citizenship              @default(KENYAN)
+  identification        Identification           @default(NATIONAL_ID)
+  nationalId            String?                  @unique
+  county                String?
+  occupation            String?
+  userOrganization      String?
+  address               String?
+  isTwoFactorEnabled    Boolean                  @default(false)
+  accounts              Account[]
+  ownedApplications     Application[]
+  applications          ApplicationParticipant[]
+  twoFactorConfirmation TwoFactorConfirmation?
+  organizations         UserOrganization[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model VerificationToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model PasswordResetToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoFactorToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoFactorConfirmation {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Program {
+  id               String            @id @default(cuid())
+  imgUrl           String?
+  code             String            @unique
+  summary          String?
+  title            String            @unique
+  serviceId        Int?
+  moodleCourseId   Int?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  topics           Topic[]
+  trainingSessions TrainingSession[]
+  Program_A        Program[]         @relation("ProgramPrerequisites")
+  Program_B        Program[]         @relation("ProgramPrerequisites")
+}
+
+model Topic {
+  id        String   @id @default(cuid())
+  title     String
+  summary   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  programId String
+  program   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+}
+
+model TrainingSession {
+  id                         String        @id @default(cuid())
+  startDate                  DateTime
+  endDate                    DateTime
+  venue                      Venue?        @default(NAIROBI)
+  mode                       Delivery      @default(ON_PREMISE)
+  citizenFee                 Int?
+  citizenOnlineFee           Int?
+  eastAfricaFee              Int?
+  eastAfricaOnlineFee        Int?
+  globalParticipantFee       Int?
+  globalParticipantOnlineFee Int?
+  onlineSlots                Int?
+  onlineSlotsTaken           Int?          @default(0)
+  onPremiseSlots             Int?
+  onPremiseSlotsTaken        Int?          @default(0)
+  programId                  String
+  applications               Application[]
+  program                    Program       @relation(fields: [programId], references: [id], onDelete: Cascade)
+}
+
+model Organization {
+  id                 String                   @id @default(cuid())
+  name               String                   @unique
+  phone              String                   @unique
+  email              String                   @unique
+  county             String
+  address            String
+  invites            String[]
+  contactPersonName  String                   @default("Breldan Muturi")
+  contactPersonEmail String                   @default("breldan@sohnandsol.com")
+  applications       Application[]
+  participants       ApplicationParticipant[]
+  users              UserOrganization[]
+}
+
+model UserOrganization {
+  userId         String
+  organizationId String
+  role           OrganizationRole
+  organization   Organization     @relation(fields: [organizationId], references: [id])
+  user           User             @relation(fields: [userId], references: [id])
+
+  @@id([userId, organizationId])
+}
+
+model Application {
+  id                String                      @id @default(cuid())
+  delivery          Delivery                    @default(ON_PREMISE)
+  sponsorType       SponsorType                 @default(SELF_SPONSORED)
+  organizationId    String?
+  trainingSessionId String
+  ownerId           String
+  applicationFee    Int
+  status            ApplicationStatus           @default(PENDING)
+  slotsCitizen      Int                         @default(0)
+  slotsEastAfrican  Int                         @default(0)
+  slotsGlobal       Int                         @default(0)
+  organization      Organization?               @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  owner             User                        @relation(fields: [ownerId], references: [id])
+  trainingSession   TrainingSession             @relation(fields: [trainingSessionId], references: [id])
+  offerLetter       ApplicationOfferLetter?
+  participants      ApplicationParticipant[]
+  proformaInvoice   ApplicationProformaInvoice?
+  receipt           ApplicationReceipt?
+}
+
+model ApplicationParticipant {
+  id                  String        @id @default(cuid())
+  email               String
+  name                String
+  citizenship         String
+  nationalId          String
+  organizationName    String
+  attendanceConfirmed Boolean       @default(false)
+  applicationId       String
+  userId              String?
+  organizationId      String?
+  application         Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  organization        Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user                User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ApplicationProformaInvoice {
+  id            String      @id @default(cuid())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  fileName      String
+  filePath      String
+  applicationId String      @unique
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+model ApplicationReceipt {
+  id            String      @id @default(cuid())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  fileName      String
+  filePath      String
+  applicationId String      @unique
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+model ApplicationOfferLetter {
+  id            String      @id @default(cuid())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  fileName      String
+  filePath      String
+  applicationId String      @unique
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+model ApplicationConfirmationToken {
+  id                String   @id @default(cuid())
+  email             String
+  token             String   @unique
+  expires           DateTime
+  trainingSessionId String
+
+  @@unique([email, token])
+}
+
+model Payment {
+  id                 String   @id @default(cuid())
+  amount             Int
+  date               DateTime
+  receivedFrom       String
+  paymentDescription String
+  method             String
+  invoiceLink        String
+  status             String
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum OrganizationRole {
+  OWNER
+  MEMBER
+}
+
+enum Delivery {
+  ON_PREMISE
+  ONLINE
+  BOTH_MODES
+}
+
+enum SponsorType {
+  SELF_SPONSORED
+  ORGANIZATION
+}
+
+enum Citizenship {
+  KENYAN
+  EAST_AFRICAN
+  GLOBAL
+}
+
+enum Identification {
+  NATIONAL_ID
+  PASSPORT
+}
+
+enum Venue {
+  KISUMU
+  MOMBASA
+  NAIVASHA
+  MACHAKOS
+  NAKURU
+  NAIROBI
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  COMPLETED
+}

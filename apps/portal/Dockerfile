@@ -19,7 +19,7 @@ COPY apps/portal/project.json apps/portal/
 RUN npm ci
 
 # Copy the app directory into the container
-COPY apps/portal/ apps/portal
+COPY apps/portal/ apps/portal/
 
 # Build the Next.js application
 # Use the Nx CLI to do this, which knows how to handle the monorepo structure

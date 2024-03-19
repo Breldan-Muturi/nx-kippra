@@ -12,6 +12,25 @@ const nextConfig = {
     // See: https://github.com/gregberge/svgr
     svgr: false,
   },
+  images: {
+    remotePatterns: [
+      {
+        hostname: 'd1muf25xaso8hp.cloudfront.net',
+      },
+      {
+        hostname: 'kippra.or.ke',
+      },
+      {
+        hostname: 'utfs.io',
+      },
+      {
+        hostname: 's3.amazonaws.com',
+      },
+      {
+        hostname: 'lh3.googleusercontent.com',
+      },
+    ],
+  },
   output: 'standalone',
 };
 
