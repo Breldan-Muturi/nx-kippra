@@ -16,16 +16,17 @@ RUN mkdir -p apps/portal
 COPY apps/portal/project.json apps/portal/
 
 # Install the root dependencies
+COPY prisma ./prisma
 RUN npm ci
+RUN npx prisma generate
+
 
 # Copy the app directory into the container
 COPY apps/portal/ apps/portal/
-COPY prisma ./prisma
 
 # Build the Next.js application
 # Use the Nx CLI to do this, which knows how to handle the monorepo structure
 RUN npx nx build portal
-RUN npx prisma generate
 
 
 # Multi-stage build: Start from a fresh base image for the production environment
