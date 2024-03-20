@@ -11,9 +11,7 @@ COPY package-lock.json .
 COPY tsconfig.base.json .
 
 # Create the directory to add the code for the portal
-RUN mkdir -p apps/portal && \
-    --chown=node:node apps/portal/ apps/portal/
-
+RUN mkdir -p apps/portal && 
 COPY apps/portal/project.json apps/portal/
 
 # Install the root dependencies
@@ -22,7 +20,7 @@ RUN npm ci && npx prisma generate
 
 
 # Copy the app directory into the container
-COPY --chown=node:node apps/portal/ apps/portal/
+COPY apps/portal/ apps/portal/
 
 # Build the Next.js application
 # Use the Nx CLI to do this, which knows how to handle the monorepo structure
@@ -32,9 +30,6 @@ RUN npx nx build portal
 # Multi-stage build: Start from a fresh base image for the production environment
 FROM node:lts-alpine AS production
 
-# Set the user to non-root for security purposes
-USER node
-
 # Set the working directory
 WORKDIR /app
 
@@ -42,6 +37,12 @@ WORKDIR /app
 COPY --from=base /app/apps/portal/.next ./.next
 COPY --from=base /app/node_modules ./node_modules
 COPY --from=base /app/apps/portal/public ./public
+
+# Change ownership of the /app directory to the node user
+RUN chown -R node:node /app
+
+# Set the user to non-root for security purposes
+USER node
 
 # Set environment variables
 ENV NODE_ENV production
