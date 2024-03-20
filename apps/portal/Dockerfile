@@ -11,7 +11,7 @@ COPY package-lock.json .
 COPY tsconfig.base.json .
 
 # Create the directory to add the code for the portal
-RUN mkdir -p apps/portal && 
+RUN mkdir -p apps/portal 
 COPY apps/portal/project.json apps/portal/
 
 # Install the root dependencies
