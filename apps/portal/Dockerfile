@@ -71,8 +71,9 @@ RUN chown nextjs:nodejs .next
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=base --chown=nextjs:nodejs /app/apps/portal/.next/standalone ./
-COPY --from=base --chown=nextjs:nodejs /app/apps/portal/.next/static ./.next/static
+COPY --from=base --chown=nextjs:nodejs /app/apps/portal/.next ./.next
+COPY --from=base /app/node_modules ./node_modules
+COPY --from=base /app/apps/portal/public ./public
 
 USER nextjs
 
@@ -84,4 +85,4 @@ ENV HOSTNAME "0.0.0.0"
 
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
-CMD ["node", "server.js"]
+CMD ["node_modules/.bin/next", "start"]
