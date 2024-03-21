@@ -1,12 +1,13 @@
-# Use an official Node runtime as a parent image
-FROM node:lts-alpine
+# Start with a Node.js base image
+FROM node:lts-alpine as builder
 
-# Set Puppeteer-related environment variables
+# Set up environment variables for Puppeteer to skip its download as we'll install dependencies manually
 ENV PUPPETEER_SKIP_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
-    NODE_ENV=production
+    # Temporarily set NODE_ENV to development to ensure dev dependencies are installed
+    NODE_ENV=development
 
-# Install necessary dependencies for Puppeteer
+# Install necessary dependencies for running Puppeteer under Alpine
 RUN apk add --no-cache \
     chromium \
     nss \
@@ -16,28 +17,42 @@ RUN apk add --no-cache \
     ca-certificates \
     ttf-freefont
 
-# Set working directory
+# Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Copy only package.json and package-lock.json (or npm-shrinkwrap.json) initially
-# This is done to leverage Docker cache to speed up build times
-COPY package*.json nx.json ./
+# Copy package.json and package-lock.json to leverage Docker caching
+COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install all dependencies (including dev dependencies)
+RUN npm ci
 
-# Assuming your Nx workspace configuration and necessary scripts are in the root,
-# you need to copy the whole workspace into the Docker image
-# This includes the apps and libs directories of your Nx workspace
+# Copy the rest of your Nx workspace into the container
 COPY . .
 
-# Build your NestJS application using Nx CLI
-# Replace 'puppeteer-app' with the actual name of your NestJS app within the Nx workspace
+# Build your NestJS application. Replace 'puppeteer' with your actual app name.
 RUN npx nx build puppeteer
 
-# Change the working directory to the distribution directory of your NestJS app
-# This path needs to be adjusted based on your Nx workspace configuration
+# Stage 2: Setup the runtime environment
+FROM node:lts-alpine
+
+ENV PUPPETEER_SKIP_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    # Set to production to avoid installing dev dependencies
+    NODE_ENV=production
+
+# Copy over the necessary runtime dependencies for Puppeteer from the builder stage
+COPY --from=builder /usr/lib/chromium/ /usr/lib/chromium/
+COPY --from=builder /usr/bin/chromium-browser /usr/bin/chromium-browser
+COPY --from=builder /usr/lib/libEGL.so /usr/lib/libEGL.so
+COPY --from=builder /usr/lib/libGLESv2.so /usr/lib/libGLESv2.so
+COPY --from=builder /usr/lib/libvk_swiftshader.so /usr/lib/libvk_swiftshader.so
+COPY --from=builder /usr/lib/libvulkan.so.1 /usr/lib/libvulkan.so.1
+
+# Set the working directory to where your built app is located
 WORKDIR /usr/src/app/dist/apps/puppeteer
 
-# Start your NestJS application
+# Copy the built app from the builder stage to the current stage
+COPY --from=builder /usr/src/app/dist/apps/puppeteer .
+
+# Start the application
 CMD ["node", "main.js"]
