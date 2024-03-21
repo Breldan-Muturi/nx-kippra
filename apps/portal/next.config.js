@@ -13,6 +13,7 @@ const nextConfig = {
     svgr: false,
   },
   images: {
+    // domains: ['s3.amazonaws.com'],
     remotePatterns: [
       {
         hostname: 'd1muf25xaso8hp.cloudfront.net',
@@ -25,6 +26,9 @@ const nextConfig = {
       },
       {
         hostname: 's3.amazonaws.com',
+        port: '',
+        protocol: 'https',
+        pathname: '**',
       },
       {
         hostname: 'lh3.googleusercontent.com',
