@@ -7,10 +7,10 @@ services:
       dockerfile: apps/portal/Dockerfile
     ports:
       - 4000:4000
-  # puppeteer:
-  #   image: breldan/nx-kipprapuppeteer
-  #   build:
-  #     context: .
-  #     dockerfile: apps/puppeteer/Dockerfile
-  #   ports:
-  #     - 3333:3333
+  puppeteer:
+    image: breldan/nx-kipprapuppeteer
+    build:
+      context: .
+      dockerfile: apps/puppeteer/Dockerfile
+    ports:
+      - 3333:3333
