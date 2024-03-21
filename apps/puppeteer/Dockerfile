@@ -1,23 +1,15 @@
-# Install dependencies only when needed
-FROM docker.io/node:lts-alpine as deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
-WORKDIR /usr/src/app
-COPY package*.json ./
-RUN npm install --omit=dev
+FROM ghcr.io/puppeteer/puppeteer:22.4.1
 
-# Production image, copy all the files and run nest
-FROM docker.io/node:lts-alpine as runner
-RUN apk add --no-cache dumb-init chromium
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-ENV NODE_ENV production
-ENV PORT 3333
+ENV PUPPETEER_SKIP_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable \
+    NODE_ENV=production
+
 WORKDIR /usr/src/app
-COPY --from=deps /usr/src/app/node_modules ./node_modules
-COPY --from=deps /usr/src/app/package.json ./package.json
+
+COPY package*.json ./
+RUN npm ci
 COPY apps/puppeteer .
-RUN chown -R node:node .
-USER node
-EXPOSE 3333
-CMD ["npm", "run", "start:prod"]
+COPY node_modules ./
+
+
+CMD ["node", "index.js"]
