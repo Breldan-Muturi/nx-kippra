@@ -16,8 +16,8 @@ ENV PORT 3333
 WORKDIR /usr/src/app
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY --from=deps /usr/src/app/package.json ./package.json
-COPY dist/apps/puppeteer .
+COPY apps/puppeteer .
 RUN chown -R node:node .
 USER node
 EXPOSE 3333
-CMD ["dumb-init", "node", "main.js"]
+CMD ["npm", "run", "start:prod"]
