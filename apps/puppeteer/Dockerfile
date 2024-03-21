@@ -15,7 +15,7 @@ RUN apk update && apk upgrade && \
 
 # Set up environment variables for Puppeteer to skip its download as we'll install dependencies manually
 ENV PUPPETEER_SKIP_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     # Temporarily set NODE_ENV to development to ensure dev dependencies are installed
     NODE_ENV=development
 
@@ -38,7 +38,7 @@ RUN npx nx build puppeteer
 FROM node:lts-alpine
 
 ENV PUPPETEER_SKIP_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     NODE_ENV=production
 
 WORKDIR /usr/src/app/
@@ -48,10 +48,10 @@ COPY --from=builder /usr/src/app/package*.json ./
 RUN npm ci --only=production
 
 # Copy over the necessary runtime dependencies for Puppeteer from the builder stage
-COPY --from=builder /usr/bin/chromium-browser /usr/bin/chromium-browser
+COPY --from=builder /usr/bin/chromium /usr/bin/chromium
 COPY --from=builder /usr/lib/chromium/ /usr/lib/chromium/
 # Ensure the chromium browser executable has the correct permissions
-RUN chmod +x /usr/bin/chromium-browser
+RUN chmod +x /usr/bin/chromium
 
 COPY --from=builder /usr/src/app/dist/apps/puppeteer ./dist/apps/puppeteer
 
