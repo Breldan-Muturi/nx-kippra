@@ -52,7 +52,5 @@ jobs:
             docker run -d --name nx-portal -p 4000:4000 \
               --env-file /root/nxkippra/secrets \
               breldan/nx-kippraportal
-            docker run -d --name nx-puppeteer -p 3333:3333 \
-              --env-file /root/nxkippra/secrets \
-              breldan/nx-kipprapuppeteer
+            f
             docker image prune -a --force
