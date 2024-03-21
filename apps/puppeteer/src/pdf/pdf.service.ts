@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import puppeteer from 'puppeteer';
 
 @Injectable()
 export class PdfService {
+  private readonly logger = new Logger(PdfService.name);
   constructor(private readonly configService: ConfigService) {}
 
   async generatePDF({
@@ -25,8 +26,11 @@ export class PdfService {
           ? this.configService.get('PUPPETEER_EXECUTABLE_PATH')
           : puppeteer.executablePath(),
     });
-    console.log('Nextjs url: ', this.configService.get('NEXT_PUBLIC_APP_URL'));
-    console.log(
+    this.logger.debug(
+      'Nextjs url: ',
+      this.configService.get('NEXT_PUBLIC_APP_URL'),
+    );
+    this.logger.debug(
       'Puppeteer secret: ',
       this.configService.get('PUPPETEER_SECRET'),
     );
@@ -54,7 +58,7 @@ export class PdfService {
       const pdfBuffer = Buffer.from(pdf.buffer);
       return { generatedPDF: pdfBuffer };
     } catch (e) {
-      console.log('Error with generating pdf: ', e);
+      this.logger.error('Error with generating pdf', e);
       return { error: 'Error with generating pdf' };
     } finally {
       await browser.close();
