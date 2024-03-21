@@ -22,7 +22,7 @@ FROM deps AS builder
 
 COPY . .
 # Build the Next.js application
-RUN npx nx build portal
+RUN npx nx run portal:build:production
 
 # Production stage for running the Next.js app
 FROM base AS runner
