@@ -15,23 +15,29 @@ const nextConfig = {
   images: {
     // domains: ['s3.amazonaws.com'],
     remotePatterns: [
+      // {
+      //   hostname: 'd1muf25xaso8hp.cloudfront.net',
+      // },
+      // {
+      //   hostname: 'kippra.or.ke',
+      // },
+      // {
+      //   hostname: 'utfs.io',
+      // },
+      // {
+      //   hostname: 's3.amazonaws.com',
+      //   port: '',
+      //   protocol: 'https',
+      //   pathname: '**',
+      // },
+      // {
+      //   hostname: 'lh3.googleusercontent.com',
+      // },
       {
-        hostname: 'd1muf25xaso8hp.cloudfront.net',
-      },
-      {
-        hostname: 'kippra.or.ke',
-      },
-      {
-        hostname: 'utfs.io',
-      },
-      {
-        hostname: 's3.amazonaws.com',
+        hostname: '**',
         port: '',
         protocol: 'https',
         pathname: '**',
-      },
-      {
-        hostname: 'lh3.googleusercontent.com',
       },
     ],
   },
