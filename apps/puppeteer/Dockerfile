@@ -33,7 +33,7 @@ COPY . .
 
 # Build your NestJS application using Nx CLI
 # Replace 'puppeteer-app' with the actual name of your NestJS app within the Nx workspace
-RUN npm run nx build puppeteer
+RUN npx nx build puppeteer
 
 # Change the working directory to the distribution directory of your NestJS app
 # This path needs to be adjusted based on your Nx workspace configuration
