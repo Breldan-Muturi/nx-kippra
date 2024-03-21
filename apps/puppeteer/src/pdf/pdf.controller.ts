@@ -6,7 +6,10 @@ export class PdfController {
   constructor(private readonly pdfService: PdfService) {}
 
   @Get('pdf')
-  generatePDF(@Query('path') path: string) {
-    return this.pdfService.generatePDF(path);
+  generatePDF(
+    @Query('applicationId') applicationId: string,
+    @Query('template') template: string,
+  ) {
+    return this.pdfService.generatePDF({ applicationId, template });
   }
 }

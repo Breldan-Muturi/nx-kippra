@@ -1,11 +1,11 @@
-"use server";
-import { currentRole } from "@/lib/auth";
-import { ApplicationStatus, Prisma, UserRole } from "@prisma/client";
-import { generatePDF } from "../pdf/generate-pdf.actions";
-import { uploadPDFile } from "../firebase/storage.actions";
-import { ActionReturnType } from "@/types/action-return.types";
-import { db } from "@/lib/db";
-import { approvedApplicationEmail } from "@/mail/application.mail";
+'use server';
+import { currentRole } from '@/lib/auth';
+import { ApplicationStatus, Prisma, UserRole } from '@prisma/client';
+import { uploadPDFile } from '../firebase/storage.actions';
+import { ActionReturnType } from '@/types/action-return.types';
+import { db } from '@/lib/db';
+import { approvedApplicationEmail } from '@/mail/application.mail';
+import { generatePDFFromApi } from '@/actions/pdf/generate-pdf-api.actions';
 
 export const adminApproveApplication = async (
   applicationId: string,
@@ -13,7 +13,7 @@ export const adminApproveApplication = async (
   // Only admins can approve applications, confirm that here.
   const role = await currentRole();
   if (role !== UserRole.ADMIN)
-    return { error: "You are not permited to approve applications" };
+    return { error: 'You are not permited to approve applications' };
 
   // Fetch the application, selecting the information needed to process this approval
   const existingApplication = await db.application.findUnique({
@@ -44,44 +44,46 @@ export const adminApproveApplication = async (
 
   // Confirm the application still exists
   if (!existingApplication) {
-    return { error: "An application with this Id does not exist" };
+    return { error: 'An application with this Id does not exist' };
   }
 
   // Confirm the application is pending for approval
   if (existingApplication.status !== ApplicationStatus.PENDING) {
-    return { error: "This application has already been approved" };
+    return { error: 'This application has already been approved' };
   }
 
   // Confirm the application participants are still valid users
   if (!existingApplication.owner) {
     return {
-      error: "This approval failed because there are no valid participants",
+      error: 'This approval failed because there are no valid participants',
     };
   } else if (existingApplication.owner.email === null) {
     return {
-      error: "The application owner does not have a valid email address",
+      error: 'The application owner does not have a valid email address',
     };
   }
-
-  // Define the template to generate the PDFs
-  const proformaTemplate = `/templates/${applicationId}/pro-forma-invoice`;
-  const offerTemplate = `/templates/${applicationId}/offer-letter`;
 
   // Begin Defining the proforma and offer to be saved in the DB
   let proformaInvoice: Prisma.ApplicationProformaInvoiceCreateInput = {
     application: { connect: { id: existingApplication.id } },
     fileName: `${applicationId}-proforma-invoice`,
-    filePath: "",
+    filePath: '',
   };
   let offerLetter: Prisma.ApplicationOfferLetterCreateInput = {
     application: { connect: { id: existingApplication.id } },
     fileName: `${applicationId}-offer`,
-    filePath: "",
+    filePath: '',
   };
 
   // Initialte PDF Generation without waiting here
-  const pdfProforma = generatePDF(proformaTemplate);
-  const pdfOffer = generatePDF(offerTemplate);
+  const pdfProforma = generatePDFFromApi({
+    applicationId: existingApplication.id,
+    template: 'pro-forma-invoice',
+  });
+  const pdfOffer = generatePDFFromApi({
+    applicationId: existingApplication.id,
+    template: 'offer-letter',
+  });
 
   // Wait for both promises to resolve
   const results = await Promise.allSettled([pdfProforma, pdfOffer]);
@@ -91,23 +93,21 @@ export const adminApproveApplication = async (
 
   // Handling the results with forEach
   results.forEach((result, i) => {
-    if (result.status === "fulfilled") {
-      const { generatedPDF, error } = result.value;
-      if (generatedPDF) {
+    if (result.status === 'fulfilled') {
+      const { success } = result.value;
+      if (success) {
         const fileName =
           i === 0 ? proformaInvoice.fileName : offerLetter.fileName;
-        uploads.push(uploadPDFile(generatedPDF, fileName));
-      } else if (error) {
-        errors.push(error);
+        uploads.push(uploadPDFile(result.value.generatedPDF, fileName));
+      } else {
+        errors.push(result.value.error);
       }
-    } else if (result.status === "rejected") {
-      errors.push("An error occured during PDF generation");
     }
   });
 
   // Return any errors from the PDF Generation Process
   if (errors.length > 0) {
-    return { error: errors.join(" ") };
+    return { error: errors.join(' ') };
   }
 
   // Wait for all upload operations to finish
@@ -116,11 +116,11 @@ export const adminApproveApplication = async (
   // Define the urls to pass to the application when the upload operations succeed
   // Otherwise return an error
   uploadResults.forEach((uploadResult, i) => {
-    if (uploadResult.status === "rejected") {
+    if (uploadResult.status === 'rejected') {
       errors.push(
-        uploadResult.reason || "An error occurred during file upload",
+        uploadResult.reason || 'An error occurred during file upload',
       );
-    } else if (uploadResult.status === "fulfilled") {
+    } else if (uploadResult.status === 'fulfilled') {
       const { error, success } = uploadResult.value;
       if (error) {
         errors.push(error);
@@ -136,7 +136,7 @@ export const adminApproveApplication = async (
 
   // Return any errors from the PDF Upload process
   if (errors.length > 0) {
-    return { error: errors.join(" ") };
+    return { error: errors.join(' ') };
   }
 
   // Update Application Status, Proforma-Invoice, and Offer Letter
@@ -163,7 +163,7 @@ export const adminApproveApplication = async (
     );
   } catch (error) {
     console.log(error);
-    return { error: "Failed to approve the application due to a system error" };
+    return { error: 'Failed to approve the application due to a system error' };
   }
 
   // Send Applcation Approval Email
@@ -187,10 +187,10 @@ export const adminApproveApplication = async (
       },
     });
 
-    return { success: "Application approved successfully" };
+    return { success: 'Application approved successfully' };
   } catch (error) {
     console.log(error);
-    return { error: "There was an error sending the notification email" };
+    return { error: 'There was an error sending the notification email' };
   }
 };
 
@@ -199,11 +199,11 @@ export const adminRejectApplication = async (
 ): Promise<ActionReturnType> => {
   const role = await currentRole();
   if (role !== UserRole.ADMIN)
-    return { error: "You are not permited to reject applications" };
+    return { error: 'You are not permited to reject applications' };
 
   // Update Application Status
   // Send Applcation Rejection Email
-  return { success: "Application approved successfully" };
+  return { success: 'Application approved successfully' };
 };
 
 export const adminSendEmail = async (
@@ -211,8 +211,8 @@ export const adminSendEmail = async (
 ): Promise<ActionReturnType> => {
   const role = await currentRole();
   if (role !== UserRole.ADMIN)
-    return { error: "Only admins can send application related email" };
+    return { error: 'Only admins can send application related email' };
 
   // Send Application Related Email
-  return { success: "Email successfully sent to the applicant" };
+  return { success: 'Email successfully sent to the applicant' };
 };

@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import NextAuth from "next-auth";
-import authConfig from "@/auth.config";
+import { NextResponse } from 'next/server';
+import NextAuth from 'next-auth';
+import authConfig from '@/auth.config';
 import {
   DEFAULT_LOGIN_REDIRECT,
   adminRoutes,
@@ -8,8 +8,8 @@ import {
   authRoutes,
   publicRoutes,
   templatePrefix,
-} from "@/routes";
-import { currentRole } from "@/lib/auth";
+} from '@/routes';
+import { currentRole } from '@/lib/auth';
 
 const { auth } = NextAuth(authConfig);
 
@@ -20,18 +20,18 @@ export default auth(async (req) => {
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
-  const isAdmin = (await currentRole()) === "ADMIN";
+  const isAdmin = (await currentRole()) === 'ADMIN';
   const isAdminRoute = nextUrl.pathname.startsWith(adminRoutes);
 
   // Check for puppeteer access on specific routes
   if (isTemplateRoute) {
-    const puppeteerToken = req.headers.get("x-puppeteer-secret");
-    if (puppeteerToken === process.env.PUPPETTER_SECRET) {
+    const puppeteerToken = req.headers.get('x-puppeteer-secret');
+    if (puppeteerToken === process.env.PUPPETEER_SECRET) {
       // Allow Puppetter request
       return NextResponse.next();
     } else {
       // Block unauthorized access by returining a 403 forbidden response
-      return new NextResponse("Access Denied", { status: 403 });
+      return new NextResponse('Access Denied', { status: 403 });
     }
   }
 
@@ -58,7 +58,7 @@ export default auth(async (req) => {
   }
 
   if (!isAdmin && isAdminRoute) {
-    return NextResponse.rewrite(new URL("/account/error", nextUrl));
+    return NextResponse.rewrite(new URL('/account/error', nextUrl));
   }
 
   return NextResponse.next();
@@ -66,5 +66,5 @@ export default auth(async (req) => {
 
 // Optionally, don't invoke Middleware on some paths
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
 };
