@@ -3,7 +3,7 @@ FROM node:lts-alpine as builder
 
 # Set up environment variables for Puppeteer to skip its download as we'll install dependencies manually
 ENV PUPPETEER_SKIP_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     # Temporarily set NODE_ENV to development to ensure dev dependencies are installed
     NODE_ENV=development
 
@@ -48,7 +48,7 @@ RUN npm ci --only=production
 
 # Copy over the necessary runtime dependencies for Puppeteer from the builder stage
 COPY --from=builder /usr/lib/chromium/ /usr/lib/chromium/
-COPY --from=builder /usr/lib/chromium-browser/ /usr/lib/chromium-browser/
+COPY --from=builder /usr/bin/chromium/ /usr/bin/chromium/
 COPY --from=builder /usr/src/app/dist/apps/puppeteer ./dist/apps/puppeteer
 
 WORKDIR /usr/src/app/dist/apps/puppeteer
