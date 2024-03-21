@@ -11,7 +11,7 @@ COPY package*.json ./
 RUN npm ci
 COPY apps/puppeteer/ .
 
-USER puppeteer
+
 EXPOSE ${PORT}
 
 CMD ["npm", "run" "start:prod"]
