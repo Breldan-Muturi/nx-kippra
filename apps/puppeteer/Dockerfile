@@ -1,5 +1,5 @@
 # Use an official Node runtime as a parent image
-FROM node:16-alpine
+FROM node:lts-alpine
 
 # Set Puppeteer-related environment variables
 ENV PUPPETEER_SKIP_DOWNLOAD=true \
@@ -21,10 +21,10 @@ WORKDIR /usr/src/app
 
 # Copy only package.json and package-lock.json (or npm-shrinkwrap.json) initially
 # This is done to leverage Docker cache to speed up build times
-COPY package*.json ./
+COPY package*.json nx.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install
 
 # Assuming your Nx workspace configuration and necessary scripts are in the root,
 # you need to copy the whole workspace into the Docker image
