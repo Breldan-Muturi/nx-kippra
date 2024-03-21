@@ -12,4 +12,4 @@ COPY apps/puppeteer .
 COPY node_modules ./
 
 
-CMD ["node", "index.js"]
+CMD ["npm", "run", "start:prod"]
