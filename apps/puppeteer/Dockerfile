@@ -11,10 +11,10 @@ COPY package*.json ./
 RUN npm ci
 COPY apps/puppeteer/ .
 
-# Create the puppeteer user
-RUN useradd -m puppeteer
+RUN npm run build
 
-USER puppeteer
 EXPOSE ${PORT}
+
+USER node
 
 CMD ["npm", "run" "start:prod"]
