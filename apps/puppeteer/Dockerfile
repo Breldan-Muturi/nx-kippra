@@ -40,14 +40,18 @@ ENV PUPPETEER_SKIP_DOWNLOAD=true \
     # Set to production to avoid installing dev dependencies
     NODE_ENV=production
 
-# Copy over the necessary runtime dependencies for Puppeteer from the builder stage
-COPY --from=builder /usr/lib/chromium/ /usr/lib/chromium/
-
-# Set the working directory to where your built app is located
-WORKDIR /usr/src/app/dist/apps/puppeteer
+WORKDIR /usr/src/app/
 
 # Copy the built app from the builder stage to the current stage
-COPY --from=builder /usr/src/app/dist/apps/puppeteer .
+COPY --from=builder /usr/src/app/package*.json ./
+
+RUN npm ci --only=production
+
+# Copy over the necessary runtime dependencies for Puppeteer from the builder stage
+COPY --from=builder /usr/lib/chromium/ /usr/lib/chromium/
+COPY --from=builder /usr/src/app/dist/apps/puppeteer ./dist/apps/puppeteer
+
+WORKDIR /usr/src/app/dist/apps/puppeteer
 
 # Start the application
 CMD ["node", "main.js"]
