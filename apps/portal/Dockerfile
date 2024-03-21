@@ -38,6 +38,7 @@ RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 # Copy built artifacts from the builder stage
 COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/standalone ./ 
 COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/static ./.next/static 
+COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/BUILD_ID ./.next/BUILD_ID 
 COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/public ./public
 # Copy node_modules from deps stage
 COPY --from=deps /app/node_modules ./node_modules
