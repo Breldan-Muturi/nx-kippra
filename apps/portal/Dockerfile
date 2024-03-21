@@ -17,7 +17,7 @@ COPY nx.json tsconfig.base.json ./
 COPY apps/portal/ .
 
 ENV NEXT_TELEMETRY_DISABLED 1
-RUN npx nx build portal
+RUN npm run build
 
 # Production image, copy all the files and run next
 FROM base AS runner
