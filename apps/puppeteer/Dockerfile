@@ -8,8 +8,7 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 RUN npm ci
-COPY apps/puppeteer .
-COPY node_modules ./
+COPY . .
 
 
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/main.js"]
