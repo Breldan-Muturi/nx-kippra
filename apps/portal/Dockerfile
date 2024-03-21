@@ -1,60 +1,55 @@
+# Base stage for shared environment setup
 FROM node:lts-alpine AS base
 
+# Install libc6-compat due to potential native dependencies such as sharp
 RUN apk add libc6-compat --no-cache
 
 WORKDIR /app
 
-# Copy the main workspace package.json, package-lock.json, and Nx configuration files
-COPY package.json .
-COPY nx.json .
-COPY package-lock.json .
-COPY tsconfig.base.json .
+# Dependencies stage to install all required packages
+FROM base AS deps
 
-# Create the directory to add the code for the portal
-RUN mkdir -p apps/portal 
-COPY apps/portal/project.json apps/portal/next.config.js apps/portal/
-
-# Install the root dependencies
+COPY package*json nx.json tsconfig.base.json ./
 COPY prisma ./prisma
+# Install root dependencies
 RUN npm ci && npx prisma generate
 
+# Copying specific Next.js app dependencies and configurations
+COPY apps/portal/project.json apps/portal/next.config.js apps/portal/
 
-# Copy the app directory into the container
-COPY apps/portal/ apps/portal/
+# Builder stage to compile the Next.js application using Nx
+FROM deps AS builder
 
+COPY . .
 # Build the Next.js application
-# Use the Nx CLI to do this, which knows how to handle the monorepo structure
 RUN npx nx build portal
 
+# Production stage for running the Next.js app
+FROM base AS runner
 
-FROM node:lts-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
-# Create non-root user and group
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# Add non-root user for security purposes
+RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 
-# Set the correct permission for prerender cache
-RUN mkdir -p .next/cache/fetch-cache
-RUN chown -R nextjs:nodejs /app
+# Copy built artifacts from the builder stage
+COPY --from=builder --chown=nextjs:nodejs /app/dist/apps/portal/.next/standalone ./ 
+COPY --from=builder --chown=nextjs:nodejs /app/dist/apps/portal/.next/static ./.next/static 
+COPY --from=builder --chown=nextjs:nodejs /app/dist/apps/portal/public ./public 
+# Copy node_modules from deps stage
+COPY --from=deps /app/node_modules ./node_modules
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=base --chown=nextjs:nodejs /app/apps/portal/.next ./.next
-COPY --from=base /app/node_modules ./node_modules
-COPY --from=base /app/apps/portal/public ./public
+# Correct permission setup for .next/cache
+RUN mkdir -p .next/cache && chown -R nextjs:nodejs .next/cache
 
 USER nextjs
 
 EXPOSE 4000
 
 ENV PORT 4000
-# set hostname to localhost
-ENV HOSTNAME "0.0.0.0"
+ENV HOSTNAME 0.0.0.0
 
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/next-config-js/output
-CMD ["node_modules/.bin/next", "start"]
+CMD ["node", "server.js"]
