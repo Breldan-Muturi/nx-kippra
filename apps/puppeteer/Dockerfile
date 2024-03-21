@@ -42,11 +42,6 @@ ENV PUPPETEER_SKIP_DOWNLOAD=true \
 
 # Copy over the necessary runtime dependencies for Puppeteer from the builder stage
 COPY --from=builder /usr/lib/chromium/ /usr/lib/chromium/
-COPY --from=builder /usr/bin/chromium-browser /usr/bin/chromium-browser
-COPY --from=builder /usr/lib/libEGL.so /usr/lib/libEGL.so
-COPY --from=builder /usr/lib/libGLESv2.so /usr/lib/libGLESv2.so
-COPY --from=builder /usr/lib/libvk_swiftshader.so /usr/lib/libvk_swiftshader.so
-COPY --from=builder /usr/lib/libvulkan.so.1 /usr/lib/libvulkan.so.1
 
 # Set the working directory to where your built app is located
 WORKDIR /usr/src/app/dist/apps/puppeteer
