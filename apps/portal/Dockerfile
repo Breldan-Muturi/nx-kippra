@@ -35,16 +35,14 @@ ENV NEXT_TELEMETRY_DISABLED 1
 # Add non-root user for security purposes
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 
-# Copy built artifacts from the builder stage
-COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/standalone ./ 
-COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/static ./.next/static 
-COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/BUILD_ID ./.next/BUILD_ID 
+# Copy built artifacts from the builder stage 
+COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/public ./public
 # Copy node_modules from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 
 # Adjust the COPY command for server.js to match its actual location
-COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/standalone/apps/portal/server.js ./server.js 
+# COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/standalone/apps/portal/server.js ./server.js 
 # Correct permission setup for .next/cache
 RUN mkdir -p .next/cache && chown -R nextjs:nodejs .next/cache
 
