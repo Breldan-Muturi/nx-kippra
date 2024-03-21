@@ -42,7 +42,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/public ./public
 COPY --from=deps /app/node_modules ./node_modules
 
 # Adjust the COPY command for server.js to match its actual location
-# COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/standalone/apps/portal/server.js ./server.js 
+COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/standalone/apps/portal/server.js ./server.js 
 # Correct permission setup for .next/cache
 RUN mkdir -p .next/cache && chown -R nextjs:nodejs .next/cache
 
