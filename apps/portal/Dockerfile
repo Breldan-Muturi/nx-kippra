@@ -1,28 +1,60 @@
-# Install dependencies only when needed
-FROM docker.io/node:lts-alpine as deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
-WORKDIR /usr/src/app
-COPY apps/portal/package*.json ./
-RUN npm install --omit=dev
+FROM node:lts-alpine AS base
 
-# Production image, copy all the files and run next
-FROM docker.io/node:lts-alpine as runner
-RUN apk add --no-cache dumb-init
+RUN apk add libc6-compat --no-cache
+
+WORKDIR /app
+
+# Copy the main workspace package.json, package-lock.json, and Nx configuration files
+COPY package.json .
+COPY nx.json .
+COPY package-lock.json .
+COPY tsconfig.base.json .
+
+# Create the directory to add the code for the portal
+RUN mkdir -p apps/portal 
+COPY apps/portal/project.json apps/portal/next.config.js apps/portal/
+
+# Install the root dependencies
+COPY prisma ./prisma
+RUN npm ci && npx prisma generate
+
+
+# Copy the app directory into the container
+COPY apps/portal/ apps/portal/
+
+# Build the Next.js application
+# Use the Nx CLI to do this, which knows how to handle the monorepo structure
+RUN npx nx build portal
+
+
+FROM node:lts-alpine AS runner
+WORKDIR /app
+
 ENV NODE_ENV production
-ENV PORT 4000
-WORKDIR /usr/src/app
-COPY --from=deps /usr/src/app/node_modules ./node_modules
-COPY --from=deps /usr/src/app/package.json ./package.json
-COPY apps/portal/public ./public
-COPY apps/portal/.next ./.next
-RUN chown -R node:node .
-USER node
-EXPOSE 4000
-# COPY --chown=node:node ./tools/scripts/entrypoints/api.sh /usr/local/bin/docker-entrypoint.sh
-# ENTRYPOINT [ "docker-entrypoint.sh" ]
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry.
 ENV NEXT_TELEMETRY_DISABLED 1
-CMD ["dumb-init", "node_modules/.bin/next", "start"]
+
+# Create non-root user and group
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Set the correct permission for prerender cache
+RUN mkdir -p .next/cache/fetch-cache
+RUN chown -R nextjs:nodejs /app
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=base --chown=nextjs:nodejs /app/apps/portal/.next ./.next
+COPY --from=base /app/node_modules ./node_modules
+COPY --from=base /app/apps/portal/public ./public
+
+USER nextjs
+
+EXPOSE 4000
+
+ENV PORT 4000
+# set hostname to localhost
+ENV HOSTNAME "0.0.0.0"
+
+# server.js is created by next build from the standalone output
+# https://nextjs.org/docs/pages/api-reference/next-config-js/output
+CMD ["node_modules/.bin/next", "start"]
