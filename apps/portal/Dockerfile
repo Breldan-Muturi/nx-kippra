@@ -12,7 +12,7 @@ COPY tsconfig.base.json .
 
 # Create the directory to add the code for the portal
 RUN mkdir -p apps/portal 
-COPY apps/portal/project.json apps/portal/
+COPY apps/portal/project.json apps/portal/next.config.js apps/portal/
 
 # Install the root dependencies
 COPY prisma ./prisma
