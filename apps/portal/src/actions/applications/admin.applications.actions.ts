@@ -102,6 +102,8 @@ export const adminApproveApplication = async (
       } else {
         errors.push(result.value.error);
       }
+    } else if (result.status === 'rejected') {
+      errors.push('An error occurred during PDF generation');
     }
   });
 

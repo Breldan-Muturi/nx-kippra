@@ -1,19 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import puppeteer from 'puppeteer';
+import { CreatePdfDto } from '../dtos/create-pdf.dto';
 
 @Injectable()
 export class PdfService {
   private readonly logger = new Logger(PdfService.name);
   constructor(private readonly configService: ConfigService) {}
 
-  async generatePDF({
-    applicationId,
-    template,
-  }: {
-    applicationId: string;
-    template: string;
-  }) {
+  async generatePDF({ applicationId, template }: CreatePdfDto) {
     const browser = await puppeteer.launch({
       args: [
         '--disable-setuid-sandbox',
