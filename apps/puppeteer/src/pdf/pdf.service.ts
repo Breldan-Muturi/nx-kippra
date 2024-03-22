@@ -26,6 +26,7 @@ export class PdfService {
         this.configService.get('NODE_ENV') === 'production'
           ? this.configService.get('PUPPETEER_EXECUTABLE_PATH')
           : puppeteer.executablePath(),
+      timeout: 60000,
     });
     try {
       const page = await browser.newPage();
