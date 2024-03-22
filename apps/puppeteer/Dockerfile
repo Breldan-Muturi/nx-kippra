@@ -20,6 +20,8 @@ ENV PUPPETEER_SKIP_DOWNLOAD=true \
     NODE_ENV=production
 
 WORKDIR /app
+COPY --from=builder /usr/src/app/package*.json ./
+RUN npm ci --only=production
 
 COPY --from=builder /usr/src/app/dist/apps/puppeteer ./
 
