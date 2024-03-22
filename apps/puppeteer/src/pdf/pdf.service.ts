@@ -9,6 +9,14 @@ export class PdfService {
   constructor(private readonly configService: ConfigService) {}
 
   async generatePDF({ applicationId, template }: CreatePdfDto) {
+    this.logger.debug(
+      'Nextjs url: ',
+      this.configService.get('PUPPETEER_ACCESS_ROUTE'),
+    );
+    this.logger.debug(
+      'Puppeteer secret: ',
+      this.configService.get('PUPPETEER_SECRET'),
+    );
     const browser = await puppeteer.launch({
       args: [
         '--disable-setuid-sandbox',
@@ -21,14 +29,6 @@ export class PdfService {
           ? this.configService.get('PUPPETEER_EXECUTABLE_PATH')
           : puppeteer.executablePath(),
     });
-    this.logger.debug(
-      'Nextjs url: ',
-      this.configService.get('NEXT_PUBLIC_APP_URL'),
-    );
-    this.logger.debug(
-      'Puppeteer secret: ',
-      this.configService.get('PUPPETEER_SECRET'),
-    );
     try {
       const page = await browser.newPage();
       await page.setExtraHTTPHeaders({
@@ -37,7 +37,7 @@ export class PdfService {
         ) as string,
       });
       const response = await page.goto(
-        `${this.configService.get('NEXT_PUBLIC_APP_URL')}/${applicationId}/${template}`,
+        `${this.configService.get('PUPPETEER_ACCESS_ROUTE')}/${applicationId}/${template}`,
         {
           waitUntil: 'networkidle2',
           timeout: 20000,
