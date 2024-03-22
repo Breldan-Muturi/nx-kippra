@@ -161,7 +161,7 @@ export const adminApproveApplication = async (
           },
         });
       },
-      { maxWait: 5000, timeout: 10000 },
+      { maxWait: 20000, timeout: 200000 },
     );
   } catch (error) {
     console.log(error);

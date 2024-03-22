@@ -10,12 +10,10 @@ export class PdfService {
 
   async generatePDF({ applicationId, template }: CreatePdfDto) {
     this.logger.debug(
-      'Nextjs url: ',
-      this.configService.get('PUPPETEER_ACCESS_ROUTE'),
+      `Nextjs url: ${this.configService.get('PUPPETEER_ACCESS_ROUTE')}/templates/${applicationId}/${template}`,
     );
     this.logger.debug(
-      'Puppeteer secret: ',
-      this.configService.get('PUPPETEER_SECRET'),
+      `Puppeteer secret: ${this.configService.get('PUPPETEER_SECRET')}`,
     );
     const browser = await puppeteer.launch({
       args: [
@@ -37,7 +35,7 @@ export class PdfService {
         ) as string,
       });
       const response = await page.goto(
-        `${this.configService.get('PUPPETEER_ACCESS_ROUTE')}/${applicationId}/${template}`,
+        `${this.configService.get('PUPPETEER_ACCESS_ROUTE')}/templates/${applicationId}/${template}`,
         {
           waitUntil: 'networkidle2',
           timeout: 20000,
