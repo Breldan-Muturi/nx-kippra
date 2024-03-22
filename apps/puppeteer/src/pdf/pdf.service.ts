@@ -16,18 +16,11 @@ export class PdfService {
       `Puppeteer secret: ${this.configService.get('PUPPETEER_SECRET')}`,
     );
     const browser = await puppeteer.launch({
-      args: [
-        '--disable-setuid-sandbox',
-        '--no-sandbox',
-        '--single-process',
-        '--no-zygote',
-        '--remote-debugging-port=0',
-      ],
+      args: ['--disable-setuid-sandbox', '--no-sandbox'],
       executablePath:
         this.configService.get('NODE_ENV') === 'production'
           ? this.configService.get('PUPPETEER_EXECUTABLE_PATH')
           : puppeteer.executablePath(),
-      timeout: 0,
     });
     try {
       const page = await browser.newPage();
