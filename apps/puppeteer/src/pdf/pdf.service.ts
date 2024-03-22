@@ -21,12 +21,13 @@ export class PdfService {
         '--no-sandbox',
         '--single-process',
         '--no-zygote',
+        '--remote-debugging-port=0',
       ],
       executablePath:
         this.configService.get('NODE_ENV') === 'production'
           ? this.configService.get('PUPPETEER_EXECUTABLE_PATH')
           : puppeteer.executablePath(),
-      timeout: 60000,
+      timeout: 0,
     });
     try {
       const page = await browser.newPage();
