@@ -35,11 +35,14 @@ ENV NEXT_TELEMETRY_DISABLED 1
 # Add non-root user for security purposes
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 
+# Copy necessary files to install production dependencies
+COPY --from=builder /app/package*.json ./
+# Install only production dependencies
+RUN npm ci --only=production
+
 # Copy built artifacts from the builder stage 
 COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/ ./.next/
 COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/public ./public
-# Copy node_modules from deps stage
-COPY --from=deps /app/node_modules ./node_modules
 
 # Adjust the COPY command for server.js to match its actual location
 COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/standalone/apps/portal/server.js ./server.js 
