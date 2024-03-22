@@ -40,7 +40,7 @@ export class PdfService {
         `${this.configService.get('PUPPETEER_ACCESS_ROUTE')}/templates/${applicationId}/${template}`,
         {
           waitUntil: 'networkidle2',
-          timeout: 20000,
+          timeout: 0,
         },
       );
       if (!response || response?.status() !== 200) {
