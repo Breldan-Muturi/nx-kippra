@@ -36,9 +36,9 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 
 # Copy necessary files to install production dependencies
-COPY --from=builder /app/package*.json ./
-# Install only production dependencies
-RUN npm ci --only=production
+# COPY --from=builder /app/package*.json ./
+# # Install only production dependencies
+# RUN npm ci --only=production
 
 # Copy built artifacts from the builder stage 
 COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/ ./.next/
