@@ -1,62 +1,18 @@
-# Start with a Node.js base image
-FROM node:lts-alpine as builder
-
-# Install necessary dependencies for running Puppeteer under Alpine
-RUN apk update && apk upgrade && \
-    apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    freetype-dev \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont && \
-    rm -rf /var/cache/apk/*
-
-# Set up environment variables for Puppeteer to skip its download as we'll install dependencies manually
-ENV PUPPETEER_SKIP_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
-    NODE_ENV=development
-
-# Set the working directory in the container
-WORKDIR /usr/src/app
-
-# Copy package.json and package-lock.json to leverage Docker caching
-COPY package*.json ./
-
-# Install all dependencies (including dev dependencies)
-RUN npm ci
-
-# Copy the rest of your Nx workspace into the container
-COPY . .
-
-# Build your NestJS application. Replace 'puppeteer' with your actual app name.
-RUN npx nx build puppeteer
-
-# Stage 2: Setup the runtime environment
-FROM node:lts-alpine
+FROM ghcr.io/puppeteer/puppeteer:22.4.1
 
 ENV PUPPETEER_SKIP_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable \
     NODE_ENV=production
 
-WORKDIR /usr/src/app/
+WORKDIR /usr/src/app
 
-# Copy the built app from the builder stage to the current stage
-COPY --from=builder /usr/src/app/package*.json ./
-RUN npm ci --only=production
+COPY package*.json ./
 
-# Copy over the necessary runtime dependencies for Puppeteer from the builder stage
-COPY --from=builder /usr/bin/chromium /usr/bin/chromium
-COPY --from=builder /usr/bin/chromium-browser /usr/bin/chromium-browser
-COPY --from=builder /usr/lib/chromium/ /usr/lib/chromium/
-# Ensure the chromium browser executable has the correct permissions
-RUN chmod +x /usr/bin/chromium
-RUN chmod +x /usr/bin/chromium-browser
+RUN npm ci
 
-COPY --from=builder /usr/src/app/dist/apps/puppeteer ./dist/apps/puppeteer
+COPY . .
 
-WORKDIR /usr/src/app/dist/apps/puppeteer
+RUN npx nx run puppeteer:build
 
-# Start the application
-CMD ["node", "main.js"]
+CMD ["node", "dist/apps/puppeteer/main.js"]
+
