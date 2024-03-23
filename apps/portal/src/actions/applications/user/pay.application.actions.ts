@@ -1,14 +1,8 @@
-import { currentUser } from "@/lib/auth";
-import { db } from "@/lib/db";
-// import { env } from "@/validation/env.validation";
-import {
-  ApplicationPaymentDetails,
-  PaymentForm,
-  PesaFlowCheckoutType,
-  paymentFormSchema,
-} from "@/validation/payment.validation";
-import { Delivery } from "@prisma/client";
-import { format } from "date-fns";
+import { db } from '@/lib/db';
+
+import { ApplicationPaymentDetails } from '@/validation/payment.validation';
+import { Delivery } from '@prisma/client';
+import { format } from 'date-fns';
 
 export type PayApplicationReturnType =
   | { error: string }
@@ -53,14 +47,14 @@ export const getPaymentApplicationPromise = async ({
   });
 
   if (!existingApplication) {
-    return { error: "This application no-longer exists" };
+    return { error: 'This application no-longer exists' };
   } else if (
     !existingApplication.owner.id ||
     existingApplication.owner.id !== userId
   ) {
     return {
       error:
-        "You are not the owner of this application and can therefore not initiate a payment on it",
+        'You are not the owner of this application and can therefore not initiate a payment on it',
     };
   } else {
     const {
@@ -75,7 +69,7 @@ export const getPaymentApplicationPromise = async ({
         program: { title },
       },
     } = existingApplication;
-    const billDesc = `Payment for ${title} from ${format(startDate, "PPP")}, to ${format(endDate, "PPP")} ${delivery === Delivery.ON_PREMISE && venue ? `to be held at ${venue}` : ""}`;
+    const billDesc = `Payment for ${title} from ${format(startDate, 'PPP')}, to ${format(endDate, 'PPP')} ${delivery === Delivery.ON_PREMISE && venue ? `to be held at ${venue}` : ''}`;
     return {
       paymentDetails: {
         applicationId: id,
@@ -89,50 +83,4 @@ export const getPaymentApplicationPromise = async ({
       },
     };
   }
-};
-
-export const initiatePayment = async (paymentForm: PaymentForm) => {
-  const user = await currentUser();
-  if (!user || !user.id) {
-    return { error: "Only logged in users can initiate payments" };
-  }
-
-  const validPayment = paymentFormSchema.safeParse(paymentForm);
-
-  if (!validPayment.success) {
-    return { error: "Invalid fields" };
-  }
-
-  const { applicationId, ...paymentDetails } = validPayment.data;
-
-  const paymentApplication = await db.application.findUnique({
-    where: { id: applicationId },
-    select: {
-      id: true,
-    },
-  });
-
-  if (!paymentApplication || !paymentApplication.id) {
-    return {
-      error: "Could not match this payment with an existing application",
-    };
-  }
-
-  const billRefNumber = `${new Date().toISOString()}_${applicationId}`;
-
-  const pesaflowCheckout: PesaFlowCheckoutType = {
-    apiClient: process.env.PESAFLOW_CLIENT_ID as string,
-    serviceId: process.env.PESAFLOW_SERVICE_ID as string,
-    currency: "KES",
-    billRefNumber,
-    callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments` as string,
-    notificationURL:
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/${applicationId}` as string,
-    format: "json",
-    sendSTK: true,
-    url: "",
-    key: process.env.PESAFLOW_API_KEY as string,
-    secret: process.env.PESAFLOW_API_SECRET as string,
-    ...paymentDetails,
-  };
 };

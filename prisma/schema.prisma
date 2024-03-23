@@ -240,6 +240,7 @@ model Application {
   slotsCitizen      Int                         @default(0)
   slotsEastAfrican  Int                         @default(0)
   slotsGlobal       Int                         @default(0)
+  payment           Payment?
 }
 
 model ApplicationParticipant {
@@ -302,12 +303,22 @@ model ApplicationConfirmationToken {
 }
 
 model Payment {
-  id                 String   @id @default(cuid())
-  amount             Int
-  date               DateTime
-  receivedFrom       String
-  paymentDescription String
-  method             String
-  invoiceLink        String
-  status             String
+  id                   String      @id @default(cuid())
+  applicationId        String      @unique
+  application          Application @relation(fields: [applicationId], references: [id])
+  returned_an_error    Boolean
+  invoice_link         String?
+  invoice_number       String?
+  error_status_code    String?
+  error_status_message String?
+  error_body           String?
+  payment_channel      String?
+  client_invoice_ref   String?
+  currency             String?
+  amount_paid          String?
+  invoice_amount       String?
+  status               String?
+  payment_date         String?
+  secure_hash          String?
+  last_payment_amount  String?
 }

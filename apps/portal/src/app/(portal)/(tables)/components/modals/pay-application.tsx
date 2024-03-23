@@ -1,6 +1,6 @@
-"use client";
-import { usePathname } from "next/navigation";
-import React, { useTransition } from "react";
+'use client';
+import { usePathname, useRouter } from 'next/navigation';
+import React, { useEffect, useTransition } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,62 +8,61 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { filterAdminApplications } from "@/actions/applications/filter.applications.actions";
-import { DefaultApplicationParams } from "@/validation/application.validation";
-import { FormFieldType } from "@/types/form-field.types";
+} from '@/components/ui/dialog';
+import { filterAdminApplications } from '@/actions/applications/filter.applications.actions';
+import { DefaultApplicationParams } from '@/validation/application.validation';
+import { FormFieldType } from '@/types/form-field.types';
 import {
-  ApplicationPaymentDetails,
   PaymentForm,
-  pesaflowCheckoutSchema,
-} from "@/validation/payment.validation";
-import { Form } from "@/components/ui/form";
-import ReusableForm from "@/components/form/ReusableForm";
-import SubmitButton from "@/components/form/SubmitButton";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { PayApplicationReturnType } from "@/actions/applications/user/pay.application.actions";
-import { toast } from "sonner";
+  paymentFormSchema,
+} from '@/validation/payment.validation';
+import { Form } from '@/components/ui/form';
+import ReusableForm from '@/components/form/ReusableForm';
+import SubmitButton from '@/components/form/SubmitButton';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { PayApplicationReturnType } from '@/actions/applications/user/pay.application.actions';
+import { toast } from 'sonner';
+import { initiatePayment } from '@/actions/payments/initiate.payment.actions';
 
 const payApplicationFields: FormFieldType<PaymentForm>[] = [
   {
-    name: "clientName",
-    type: "text",
-    label: "Payee full name",
-    placeholder: "eg. Ms. Anne Wanjiku",
+    name: 'clientName',
+    type: 'text',
+    label: 'Payee full name',
+    placeholder: 'eg. Ms. Anne Wanjiku',
   },
   {
-    name: "clientIDNumber",
-    type: "text",
-    label: "Payee ID/Passport Number",
-    placeholder: "eg. 331331331",
+    name: 'clientIDNumber',
+    type: 'text',
+    label: 'Payee ID/Passport Number',
+    placeholder: 'eg. 331331331',
   },
   {
-    name: "clientMSISD",
-    type: "number",
-    label: "Payee Phone Number",
-    placeholder: "eg. 254711223344",
+    name: 'clientMSISD',
+    type: 'number',
+    label: 'Payee Phone Number',
+    placeholder: 'eg. 254711223344',
     minValue: 1,
   },
   {
-    name: "clientEmail",
-    type: "email",
-    label: "Payee email",
-    placeholder: "eg. payee@email.com",
+    name: 'clientEmail',
+    type: 'email',
+    label: 'Payee email',
+    placeholder: 'eg. payee@email.com',
   },
 ];
 
 const PayApplication = ({
   payParams,
-  // paymentDetails,
   paymentInfo,
 }: {
   payParams: DefaultApplicationParams;
-  // paymentDetails: ApplicationPaymentDetails;
   paymentInfo: PayApplicationReturnType;
 }) => {
   const [isPending, startTransition] = useTransition();
   const path = usePathname();
+  const router = useRouter();
   const handleDismiss = () => filterAdminApplications({ path, ...payParams });
 
   const dismissModal = () => {
@@ -72,35 +71,42 @@ const PayApplication = ({
     });
   };
 
-  // Initialize default values
-  const defaultValues = {
-    applicationId: "",
-    billDesc: "",
-    amountExpected: 0,
-    clientEmail: "",
-    clientIDNumber: "",
-    clientMSISD: 0,
-    clientName: "",
-    pictureURL: "",
-  };
-
   const form = useForm<PaymentForm>({
-    mode: "onChange",
-    resolver: zodResolver(pesaflowCheckoutSchema),
-    defaultValues,
+    mode: 'onChange',
+    resolver: zodResolver(paymentFormSchema),
+    defaultValues: !('error' in paymentInfo)
+      ? paymentInfo.paymentDetails
+      : {
+          applicationId: '',
+          billDesc: '',
+          amountExpected: 0,
+          clientEmail: '',
+          clientIDNumber: '',
+          clientMSISD: 0,
+          clientName: '',
+          pictureURL: '',
+        },
   });
 
-  if ("error" in paymentInfo) {
+  if ('error' in paymentInfo) {
     toast.error(paymentInfo.error);
     dismissModal();
     return null;
-  } else {
-    // If there is no error we reassign the default values
-    Object.assign(defaultValues, paymentInfo.paymentDetails);
   }
 
-  const onSubmit = () => {
-    startTransition(() => {});
+  const onSubmit = (paymentForm: PaymentForm) => {
+    startTransition(() => {
+      initiatePayment(paymentForm)
+        .then((data) => {
+          if ('error' in data) {
+            toast.error(data.error);
+          } else {
+            toast.success(data.success);
+            window.open(data.invoiceLink, '_blank');
+          }
+        })
+        .finally(handleDismiss);
+    });
   };
 
   return (
@@ -115,8 +121,8 @@ const PayApplication = ({
         </DialogHeader>
         <div className="flex flex-grow rounded-md border-2 border-green-200 px-4 py-2">
           <p className="font text-3xl font-semibold text-green-600">
-            Ksh{" "}
-            {paymentInfo.paymentDetails.amountExpected.toLocaleString("en-US")}
+            Ksh{' '}
+            {paymentInfo.paymentDetails.amountExpected.toLocaleString('en-US')}
           </p>
         </div>
         <Form {...form}>
