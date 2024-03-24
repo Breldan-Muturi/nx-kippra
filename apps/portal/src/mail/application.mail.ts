@@ -175,7 +175,7 @@ export const paymentCompletedEmail = async ({
     await resend.emails.send({
       from,
       to: applicantEmail,
-      subject: `KIPPRA: Application Approval for ${title} ${venue ? `at ${venue} ` : ''}from ${formattedStartDate} to ${formattedEndDate}`,
+      subject: `KIPPRA: Payment confirmation`,
       html: `Your payment for the program for ${title} has been received. The training will ${venue ? `be at ${venue}` : 'be conducted online'} starting from ${formattedStartDate} to ${formattedEndDate}`,
       attachments: [paymentReceipt],
     });
