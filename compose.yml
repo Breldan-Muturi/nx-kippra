@@ -7,6 +7,8 @@ services:
       dockerfile: apps/portal/Dockerfile
     ports:
       - 4000:4000
+    env_file:
+      - .env
   puppeteer:
     image: breldan/nx-kipprapuppeteer
     build:
