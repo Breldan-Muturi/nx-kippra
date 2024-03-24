@@ -70,32 +70,17 @@ export const initiatePayment = async (
 
   // Set the data to be passed to PesaFlow
   const pesaflowCheckout: PesaFlowCheckoutType = {
-    apiClient:
-      process.env.NODE_ENV === 'production'
-        ? (process.env.PESAFLOW_CLIENT_ID as string)
-        : '133',
-    serviceId:
-      process.env.NODE_ENV === 'production'
-        ? String(applicationServiceId)
-        : '48798',
+    apiClient: process.env.PESAFLOW_CLIENT_ID as string,
+    serviceId: String(applicationServiceId),
     currency: 'KES',
     billRefNumber,
     callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments`,
     notificationURL: `https://nxportal.sohnandsol.com/api/payments/${applicationId}`,
     format: 'json',
     sendSTK: true,
-    url:
-      process.env.NODE_ENV === 'production'
-        ? (process.env.PESAFLOW_URL as string)
-        : 'https://test.pesaflow.com/PaymentAPI/iframev2.1.php',
-    key:
-      process.env.NODE_ENV === 'production'
-        ? (process.env.PESAFLOW_API_KEY as string)
-        : 'dTaI5iILm82p5Frc',
-    secret:
-      process.env.NODE_ENV === 'production'
-        ? (process.env.PESAFLOW_API_SECRET as string)
-        : 'XV7N7p2fh9GPKf4Wv2RE3S1T0Vrv44dj',
+    url: process.env.PESAFLOW_URL as string,
+    key: process.env.PESAFLOW_API_KEY as string,
+    secret: process.env.PESAFLOW_API_SECRET as string,
     amountExpected:
       process.env.NODE_ENV === 'production' ? amountExpected + 50 : 1,
     ...paymentDetails,

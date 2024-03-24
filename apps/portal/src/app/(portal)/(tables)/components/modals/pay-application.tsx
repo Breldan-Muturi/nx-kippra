@@ -119,10 +119,19 @@ const PayApplication = ({
             are not directly responsible for making this payment
           </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-grow rounded-md border-2 border-green-200 px-4 py-2">
-          <p className="font text-3xl font-semibold text-green-600">
-            Ksh{' '}
-            {paymentInfo.paymentDetails.amountExpected.toLocaleString('en-US')}
+        <div className="flex flex-col flex-grow space-y-2">
+          <div className="flex flex-col flex-grow rounded-md border-2 border-green-200 px-4 py-2">
+            <p className="font text-3xl font-semibold text-green-600">
+              Ksh{' '}
+              {paymentInfo.paymentDetails.amountExpected.toLocaleString(
+                'en-US',
+              )}
+            </p>
+          </div>
+          <p className="text-xs">
+            Inclusive of VAT, and eCitizen{' '}
+            <span className="text-red-600 font-semibold">Ksh 50</span>{' '}
+            convenience fee
           </p>
         </div>
         <Form {...form}>

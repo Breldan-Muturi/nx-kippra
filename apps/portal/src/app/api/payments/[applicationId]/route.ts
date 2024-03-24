@@ -15,16 +15,13 @@ type Props = {
 export async function POST(req: Request, { params: { applicationId } }: Props) {
   try {
     const paymentDetails = await req.json();
-    console.log(
-      `[${new Date().toISOString()}]/api/payments/: `,
-      paymentDetails,
-    );
     const validPayment = ipnSchema.safeParse(paymentDetails);
     if (!validPayment.success) {
       return NextResponse.json({
         message: 'The payment information is not valid',
       });
     }
+
     const existingApplication = await db.application.findUnique({
       where: { id: applicationId },
       select: {
@@ -42,7 +39,11 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
       },
     });
 
-    if (!existingApplication || !existingApplication.id) {
+    if (
+      !existingApplication ||
+      !existingApplication.id ||
+      !existingApplication.applicationFee
+    ) {
       return new Response(`Application id ${applicationId} not found`, {
         status: 400,
         statusText: `Application id ${applicationId} not found`,
@@ -53,10 +54,22 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
         error: 'There is no payment associated with this application',
       });
     }
+
+    if (process.env.NODE_ENV !== 'production') {
+      const feeAsString = (existingApplication.applicationFee + 50).toString();
+      validPayment.data = {
+        ...validPayment.data,
+        amount_paid: feeAsString,
+        invoice_amount: feeAsString,
+        last_payment_amount: feeAsString,
+      };
+    }
+
     const applicationReceipt = await generatePDFFromApi({
       applicationId: existingApplication.id,
       template: 'receipt',
     });
+
     if ('error' in applicationReceipt) {
       return new Response('Server error', {
         status: 500,
@@ -74,7 +87,6 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
         statusText: 'Receipt not saved successfully',
       });
     }
-
     const paymentUpdated = await db.payment.update({
       where: { id: existingApplication.payment.id },
       data: {
