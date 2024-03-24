@@ -13,6 +13,7 @@ type Props = {
 };
 
 export async function POST(req: Request, { params: { applicationId } }: Props) {
+  console.log('Mapping applicationId: ', applicationId);
   try {
     const paymentDetails = await req.json();
     const validPayment = ipnSchema.safeParse(paymentDetails);
@@ -22,6 +23,7 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
       });
     }
 
+    console.log('Fetching application');
     const existingApplication = await db.application.findUnique({
       where: { id: applicationId },
       select: {
@@ -55,6 +57,30 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
       });
     }
 
+    console.log('Amount paid: ', validPayment.data.amount_paid);
+    console.log('Invoice amount: ', validPayment.data.invoice_amount);
+    console.log('Last payment amount: ', validPayment.data.last_payment_amount);
+    console.log(
+      `Application for ${existingApplication.trainingSession.program.title} fetched, updating payment info...`,
+    );
+
+    // Updating payment info for development
+    const feeAsString = (existingApplication.applicationFee + 50).toString();
+    validPayment.data = {
+      ...validPayment.data,
+      amount_paid: feeAsString,
+      invoice_amount: feeAsString,
+      last_payment_amount: feeAsString,
+    };
+
+    console.log('Amount paid: ', validPayment.data.amount_paid);
+    console.log('Invoice amount: ', validPayment.data.invoice_amount);
+    console.log('Last payment amount: ', validPayment.data.last_payment_amount);
+    console.log(
+      `Application information updated, generating application receipt...`,
+    );
+
+    // Generating application receipt
     const applicationReceipt = await generatePDFFromApi({
       applicationId: existingApplication.id,
       template: 'receipt',
@@ -77,6 +103,10 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
         statusText: 'Receipt not saved successfully',
       });
     }
+
+    console.log(
+      `Application receipt generated and saved. Link: ${uploadedReceipt.success}, sending payment confirmation email ...`,
+    );
     const paymentUpdated = await db.payment.update({
       where: { id: existingApplication.payment.id },
       data: {
@@ -102,17 +132,20 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
         path: paymentUpdated.receipt_url,
       },
     });
+    console.log('Payment confirmation email sent');
 
     if (
       parseFloat(paymentUpdated.amount_paid) >=
       existingApplication.applicationFee
     ) {
+      console.log('Updating application ...');
       await db.application.update({
         where: { id: existingApplication.id },
         data: {
           status: ApplicationStatus.COMPLETED,
         },
       });
+      console.log('Application updated to completed');
       return new Response('Success', {
         status: 200,
         statusText: 'Application fee paid in full',
