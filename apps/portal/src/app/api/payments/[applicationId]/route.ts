@@ -3,6 +3,7 @@ import { generatePDFFromApi } from '@/actions/pdf/generate-pdf-api.actions';
 import { db } from '@/lib/db';
 import { paymentCompletedEmail } from '@/mail/application.mail';
 import { ipnSchema } from '@/validation/payment.validation';
+import { ApplicationStatus } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
 type Props = {
@@ -37,6 +38,7 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
           },
         },
         owner: { select: { email: true } },
+        applicationFee: true,
       },
     });
 
@@ -81,10 +83,10 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
       },
     });
 
-    if (!paymentUpdated.receipt_url) {
+    if (!paymentUpdated.receipt_url || !paymentUpdated.amount_paid) {
       return new Response('Server error', {
         status: 500,
-        statusText: 'Could not retrieve receipt url',
+        statusText: 'Could not retrieve payment details',
       });
     }
 
@@ -98,6 +100,22 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
         path: paymentUpdated.receipt_url,
       },
     });
+
+    if (
+      parseFloat(paymentUpdated.amount_paid) >=
+      existingApplication.applicationFee
+    ) {
+      await db.application.update({
+        where: { id: existingApplication.id },
+        data: {
+          status: ApplicationStatus.COMPLETED,
+        },
+      });
+      return new Response('Success', {
+        status: 200,
+        statusText: 'Application fee paid in full',
+      });
+    }
 
     return new Response('Success', {
       status: 200,
