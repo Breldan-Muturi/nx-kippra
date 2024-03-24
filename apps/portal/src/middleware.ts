@@ -18,10 +18,12 @@ export default auth(async (req) => {
   const isLoggedIn = !!req.auth;
   const isTemplateRoute = nextUrl.pathname.startsWith(templatePrefix);
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-  const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
+  const isPublicRoute = publicRoutes.some((route) => nextUrl.pathname.startsWith(route));
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
   const isAdmin = (await currentRole()) === 'ADMIN';
   const isAdminRoute = nextUrl.pathname.startsWith(adminRoutes);
+
+  console.log('isPublicRoute: ', isPublicRoute);
 
   // Check for puppeteer access on specific routes
   if (isTemplateRoute) {

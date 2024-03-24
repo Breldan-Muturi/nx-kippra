@@ -3,9 +3,10 @@
  * @type {string[]}
  */
 export const publicRoutes = [
-  "/",
-  "/account/new-verification",
-  "/api/uploadthing",
+  '/',
+  '/account/new-verification',
+  '/api/uploadthing',
+  '/api/payments',
 ];
 
 /**
@@ -14,30 +15,30 @@ export const publicRoutes = [
  * @type {string[]}
  */
 export const authRoutes = [
-  "/account",
-  "/account/register",
-  "/account/reset",
-  "/account/new-password",
+  '/account',
+  '/account/register',
+  '/account/reset',
+  '/account/new-password',
 ];
 
-export const adminRoutes = "/admin";
+export const adminRoutes = '/admin';
 
 /**
  * The prefix for api authentication routes
  * Routes that start with this prefix are used for API
  * @type {string}
  */
-export const apiAuthPrefix = "/api/auth";
+export const apiAuthPrefix = '/api/auth';
 
 /**
  * The default redirect path after logging in
  * @type {string}
  */
-export const DEFAULT_LOGIN_REDIRECT = "/";
+export const DEFAULT_LOGIN_REDIRECT = '/';
 
 /**
  * The prefix for template routes
  * Routes that start with this prefix are used for generating templates
  * @type {string}
  */
-export const templatePrefix = "/templates";
+export const templatePrefix = '/templates';

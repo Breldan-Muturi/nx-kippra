@@ -8,11 +8,11 @@ import {
   PesaFlowCheckoutType,
   paymentFormSchema,
   pesaflowCheckoutApiSchema,
-  pesaflowInvoiceSchema,
 } from '@/validation/payment.validation';
 import { createHmac } from 'crypto';
 import axios from 'axios';
 import { ConversionUtils } from 'turbocommons-ts';
+import { Payment } from '@prisma/client';
 
 export type InitiatePaymentReturn =
   | { error: string }
@@ -40,6 +40,7 @@ export const initiatePayment = async (
     select: {
       id: true,
       trainingSession: { select: { program: { select: { serviceId: true } } } },
+      payment: { select: { id: true, status: true } },
     },
   });
 
@@ -59,6 +60,12 @@ export const initiatePayment = async (
     };
   }
 
+  if (paymentApplication.payment?.status === 'settled') {
+    return {
+      error: 'Payment for this application is already settled',
+    };
+  }
+
   const billRefNumber = `${new Date().toISOString()}_${applicationId}`;
 
   // Set the data to be passed to PesaFlow
@@ -73,9 +80,8 @@ export const initiatePayment = async (
         : '48798',
     currency: 'KES',
     billRefNumber,
-    callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments` as string,
-    notificationURL:
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/${applicationId}` as string,
+    callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments`,
+    notificationURL: `https://nxportal.sohnandsol.com/api/payments/${applicationId}`,
     format: 'json',
     sendSTK: true,
     url:
@@ -159,23 +165,35 @@ export const initiatePayment = async (
 
     const invoiceData = axiosResponse.data;
 
-    const newPayment = await db.payment.create({
-      data: {
-        application: { connect: { id: applicationId } },
-        returned_an_error: false, // Or any other logic to determine this
-        invoice_link: invoiceData.invoice_link,
-        invoice_number: invoiceData.invoice_number,
-      },
-    });
+    let payment: Payment | undefined;
 
-    if (!newPayment || !newPayment.id || !newPayment.invoice_link) {
+    if (paymentApplication.payment?.id) {
+      payment = await db.payment.update({
+        where: { id: paymentApplication.payment.id },
+        data: {
+          invoice_link: invoiceData.invoice_link,
+          invoice_number: invoiceData.invoice_number,
+        },
+      });
+    } else {
+      payment = await db.payment.create({
+        data: {
+          application: { connect: { id: applicationId } },
+          returned_an_error: false, // Or any other logic to determine this
+          invoice_link: invoiceData.invoice_link,
+          invoice_number: invoiceData.invoice_number,
+        },
+      });
+    }
+
+    if (!payment || !payment.id || !payment.invoice_link) {
       return { error: 'Error with recording your payment details' };
     }
 
     return {
       success:
         'Your payment details have been recorded successfully, proceed to complete the payment on eCitizen pesaflow',
-      invoiceLink: newPayment.invoice_link,
+      invoiceLink: payment.invoice_link,
     };
   } catch (error) {
     if (axios.isAxiosError(error)) {

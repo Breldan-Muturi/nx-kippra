@@ -1,7 +1,7 @@
 'use server';
 import { currentRole } from '@/lib/auth';
 import { ApplicationStatus, Prisma, UserRole } from '@prisma/client';
-import { uploadPDFile } from '../firebase/storage.actions';
+import { uploadPDFile } from '@/actions/firebase/storage.actions';
 import { ActionReturnType } from '@/types/action-return.types';
 import { db } from '@/lib/db';
 import { approvedApplicationEmail } from '@/mail/application.mail';

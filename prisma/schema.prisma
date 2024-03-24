@@ -306,7 +306,9 @@ model Payment {
   id                   String      @id @default(cuid())
   applicationId        String      @unique
   application          Application @relation(fields: [applicationId], references: [id])
+  createdAt            DateTime    @default(now())
   returned_an_error    Boolean
+  updatedAt            DateTime?   @updatedAt()
   invoice_link         String?
   invoice_number       String?
   error_status_code    String?
@@ -321,4 +323,5 @@ model Payment {
   payment_date         String?
   secure_hash          String?
   last_payment_amount  String?
+  receipt_url          String?
 }
