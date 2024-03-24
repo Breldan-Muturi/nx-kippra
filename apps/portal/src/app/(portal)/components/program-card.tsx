@@ -4,11 +4,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
-import Link from "next/link";
-import React from "react";
+} from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import Link from 'next/link';
+import React from 'react';
 
 interface ProgramCardProps extends React.HTMLAttributes<HTMLDivElement> {
   id: string;
@@ -29,10 +29,10 @@ const ProgramCard = ({
       href={`/${id}`}
       className="rounded-lg hover:ring-2 hover:ring-green-400 focus:ring-2 focus:ring-green-400"
     >
-      <Card className={cn("flex h-28 flex-row items-center", className)}>
+      <Card className={cn('flex h-28 flex-row items-center', className)}>
         <CardHeader className="h-28 w-1/4 p-0">
           <Image
-            src={imgUrl ?? "/static/images/kippra_logo.png"}
+            src={imgUrl || '/static/images/kippra_logo.png'}
             alt={`${title}'s featured image`}
             className="h-full w-full rounded-l-md object-cover"
             width={100}
