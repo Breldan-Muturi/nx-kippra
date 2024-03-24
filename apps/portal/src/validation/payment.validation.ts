@@ -53,7 +53,7 @@ export type PesaFlowCheckoutType = z.infer<typeof pesaflowCheckoutSchema>;
 export const pesaflowCheckoutApiSchema = z.object({
   secureHash: validString('Missing secureHash'),
   apiClientID: characterCount(3, 3),
-  serviceID: characterCount(5, 5),
+  serviceID: validString('Should be at least 5 digits', 5),
   notificationURL: validUrl('The notification url is not valid'),
   callBackURLOnSuccess: validUrl('The callback url is not valid'),
   billRefNumber: validString('Enter a valid bill reference No'),

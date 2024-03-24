@@ -96,7 +96,8 @@ export const initiatePayment = async (
       process.env.NODE_ENV === 'production'
         ? (process.env.PESAFLOW_API_SECRET as string)
         : 'XV7N7p2fh9GPKf4Wv2RE3S1T0Vrv44dj',
-    amountExpected: process.env.NODE_ENV === 'production' ? amountExpected : 1,
+    amountExpected:
+      process.env.NODE_ENV === 'production' ? amountExpected + 50 : 1,
     ...paymentDetails,
   };
 
