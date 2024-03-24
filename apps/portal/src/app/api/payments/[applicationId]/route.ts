@@ -88,16 +88,16 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
       });
     }
 
-    await paymentCompletedEmail({
-      applicantEmail: existingApplication.owner.email,
-      endDate: existingApplication.trainingSession.endDate,
-      startDate: existingApplication.trainingSession.startDate,
-      title: existingApplication.trainingSession.program.title,
-      paymentReceipt: {
-        filename: `${existingApplication.id}-receipt`,
-        path: paymentUpdated.receipt_url,
-      },
-    });
+    // await paymentCompletedEmail({
+    //   applicantEmail: existingApplication.owner.email,
+    //   endDate: existingApplication.trainingSession.endDate,
+    //   startDate: existingApplication.trainingSession.startDate,
+    //   title: existingApplication.trainingSession.program.title,
+    //   paymentReceipt: {
+    //     filename: `${existingApplication.id}-receipt`,
+    //     path: paymentUpdated.receipt_url,
+    //   },
+    // });
 
     return new Response('Success', {
       status: 200,
