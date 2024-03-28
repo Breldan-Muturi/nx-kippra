@@ -1,5 +1,6 @@
 'use server';
 
+import { processAmountRange } from '@/helpers/payment.helpers';
 import { db } from '@/lib/db';
 import {
   FilterPaymentsType,
@@ -47,11 +48,9 @@ export const filterPayments = async (
 
   let userWhereCondition: Prisma.PaymentWhereInput = {};
   let filterCondition: Prisma.PaymentWhereInput = {};
-  let additionalCondition = '';
 
   if (existingUser.role !== UserRole.ADMIN) {
     userWhereCondition = { application: { ownerId: userId } };
-    additionalCondition = 'AND "application"."ownerId" = ${userId}';
   }
 
   const paymentsPromise = db.payment.findMany({
@@ -83,24 +82,24 @@ export const filterPayments = async (
     distinct: ['payment_channel'],
   });
 
-  const highestAmountQuery = `
-  SELECT MAX(CAST(amount_paid AS DECIMAL))
-  FROM "Payment"
-  INNER JOIN "Application" ON "Payment"."applicationId" = "Application"."id"
-  WHERE amount_paid IS NOT NULL AND amount_paid != '' ${additionalCondition};
-`;
-  const highestAmountPromise = db.$queryRawUnsafe(highestAmountQuery, {
-    userId: existingUser.id,
+  const highestAmountPromise = db.payment.aggregate({
+    where: {
+      ...userWhereCondition,
+      AND: [{ amount_paid: { not: null } }],
+    },
+    _max: {
+      amount_paid: true,
+    },
   });
 
-  const lowestAmountQuery = `
-  SELECT MIN(CAST(amount_paid AS DECIMAL))
-  FROM "Payment"
-  INNER JOIN "Application" ON "Payment"."applicationId" = "Application"."id"
-  WHERE amount_paid IS NOT NULL AND amount_paid != '' ${additionalCondition};
-`;
-  const lowestAmountPromise = db.$queryRawUnsafe(lowestAmountQuery, {
-    userId: existingUser.id,
+  const lowestAmountPromise = db.payment.aggregate({
+    where: {
+      ...userWhereCondition,
+      AND: [{ amount_paid: { not: null } }],
+    },
+    _min: {
+      amount_paid: true,
+    },
   });
 
   const [
@@ -117,20 +116,13 @@ export const filterPayments = async (
     lowestAmountPromise,
   ]);
 
-  const highestAmount = parseFloat(
-    (highestAmountResult as { max: string | null }[])[0]?.max ?? '0',
-  );
-  const lowestAmount = parseFloat(
-    (lowestAmountResult as { min: string | null }[])[0]?.min ?? '0',
-  );
-
   return {
     payments,
     paymentFilters: {
       channelFilter: channelFilter.map((filter) => filter.payment_channel),
       statusFilter: statusFilter.map((filter) => filter.status),
-      highestAmount,
-      lowestAmount,
+      highestAmount: processAmountRange(highestAmountResult._max.amount_paid),
+      lowestAmount: processAmountRange(lowestAmountResult._min.amount_paid),
     },
   };
 };

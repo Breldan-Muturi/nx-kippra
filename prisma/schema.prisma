@@ -317,11 +317,11 @@ model Payment {
   payment_channel      String?
   client_invoice_ref   String?
   currency             String?
-  amount_paid          String?
-  invoice_amount       String?
+  amount_paid          Decimal?    @default(1.00)
+  invoice_amount       Decimal?    @default(1.00)
   status               String?
-  payment_date         String?
+  payment_date         DateTime?   @default(now())
   secure_hash          String?
-  last_payment_amount  String?
+  last_payment_amount  Decimal?    @default(1.00)
   receipt_url          String?
 }

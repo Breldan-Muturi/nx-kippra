@@ -1,5 +1,6 @@
 import { uploadPDFile } from '@/actions/firebase/storage.actions';
 import { generatePDFFromApi } from '@/actions/pdf/generate-pdf-api.actions';
+import { processDateString, stringToDecimal } from '@/helpers/payment.helpers';
 import { db } from '@/lib/db';
 import { paymentCompletedEmail } from '@/mail/application.mail';
 import { ipnSchema } from '@/validation/payment.validation';
@@ -14,9 +15,19 @@ type Props = {
 
 export async function POST(req: Request, { params: { applicationId } }: Props) {
   try {
-    const paymentDetails = await req.json();
+    let paymentDetails = await req.json();
+
+    paymentDetails = {
+      ...paymentDetails,
+      amount_paid: stringToDecimal(paymentDetails.amount_paid),
+      invoice_amount: stringToDecimal(paymentDetails.invoice_amount),
+      last_payment_amount: stringToDecimal(paymentDetails.last_payment_amount),
+      payment_date: processDateString(paymentDetails.payment_date),
+    };
+
     const validPayment = ipnSchema.safeParse(paymentDetails);
     if (!validPayment.success) {
+      console.error('Payment processing was unsuccessful');
       return NextResponse.json({
         message: 'The payment information is not valid',
       });
@@ -46,7 +57,7 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
     ) {
       return new Response(`Application id ${applicationId} not found`, {
         status: 400,
-        statusText: `Application id ${applicationId} not found`,
+        statusText: `Application details for id ${applicationId} not found`,
       });
     }
     if (!existingApplication.payment?.id) {
@@ -55,6 +66,7 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
       });
     }
 
+    // Generating application receipt
     const applicationReceipt = await generatePDFFromApi({
       applicationId: existingApplication.id,
       template: 'receipt',
@@ -103,10 +115,8 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
       },
     });
 
-    if (
-      parseFloat(paymentUpdated.amount_paid) >=
-      existingApplication.applicationFee
-    ) {
+    const amountPaidDecimal = parseFloat(paymentUpdated.amount_paid.toString());
+    if (amountPaidDecimal >= existingApplication.applicationFee) {
       await db.application.update({
         where: { id: existingApplication.id },
         data: {

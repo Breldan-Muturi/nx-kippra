@@ -1,5 +1,6 @@
 import { uploadPDFile } from '@/actions/firebase/storage.actions';
 import { generatePDFFromApi } from '@/actions/pdf/generate-pdf-api.actions';
+import { processDateString, stringToDecimal } from '@/helpers/payment.helpers';
 import { db } from '@/lib/db';
 import { paymentCompletedEmail } from '@/mail/application.mail';
 import { ipnSchema } from '@/validation/payment.validation';
@@ -15,8 +16,16 @@ type Props = {
 export async function POST(req: Request, { params: { applicationId } }: Props) {
   console.log('Mapping applicationId: ', applicationId);
   try {
-    const paymentDetails = await req.json();
+    let paymentDetails = await req.json();
     console.log('Pesaflow return: ', paymentDetails);
+    paymentDetails = {
+      ...paymentDetails,
+      amount_paid: stringToDecimal(paymentDetails.amount_paid),
+      invoice_amount: stringToDecimal(paymentDetails.invoice_amount),
+      last_payment_amount: stringToDecimal(paymentDetails.last_payment_amount),
+      payment_date: processDateString(paymentDetails.payment_date),
+    };
+    console.log('Processed payment details: ', paymentDetails);
     const validPayment = ipnSchema.safeParse(paymentDetails);
     if (!validPayment.success) {
       return NextResponse.json({
@@ -49,7 +58,7 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
     ) {
       return new Response(`Application id ${applicationId} not found`, {
         status: 400,
-        statusText: `Application id ${applicationId} not found`,
+        statusText: `Application details for id ${applicationId} not found`,
       });
     }
     if (!existingApplication.payment?.id) {
@@ -66,12 +75,14 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
     );
 
     // Updating payment info for development
-    const feeAsString = (existingApplication.applicationFee + 50).toString();
+    const feePaid = parseFloat(
+      (existingApplication.applicationFee + 50).toFixed(2),
+    );
     validPayment.data = {
       ...validPayment.data,
-      amount_paid: feeAsString,
-      invoice_amount: feeAsString,
-      last_payment_amount: feeAsString,
+      amount_paid: feePaid,
+      invoice_amount: feePaid,
+      last_payment_amount: feePaid,
     };
 
     console.log('Amount paid: ', validPayment.data.amount_paid);
@@ -135,10 +146,8 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
     });
     console.log('Payment confirmation email sent');
 
-    if (
-      parseFloat(paymentUpdated.amount_paid) >=
-      existingApplication.applicationFee
-    ) {
+    const amountPaidDecimal = parseFloat(paymentUpdated.amount_paid.toString());
+    if (amountPaidDecimal >= existingApplication.applicationFee) {
       console.log('Updating application ...');
       await db.application.update({
         where: { id: existingApplication.id },

@@ -85,13 +85,13 @@ export const ipnSchema = z.object({
   payment_channel: z.string(),
   client_invoice_ref: z.string(),
   currency: z.string(),
-  amount_paid: z.string(),
-  invoice_amount: z.string(),
+  amount_paid: z.number().positive(),
+  invoice_amount: z.number().positive(),
   status: z.string(),
   invoice_number: z.string(),
-  payment_date: z.string(),
+  payment_date: z.date(),
   secure_hash: z.string(),
-  last_payment_amount: z.string(),
+  last_payment_amount: z.number().positive(),
 });
 export type IpnType = z.infer<typeof ipnSchema>;
 
