@@ -1,89 +1,84 @@
-import Navbar from "@/components/layouts/navbar";
-import { currentRole } from "@/lib/auth";
-import { cn } from "@/lib/utils";
-import React from "react";
-import Sidebar from "./components/sidebar";
-import { UserRole } from "@prisma/client";
-import { IoMdHome } from "react-icons/io";
-import { MdLibraryBooks } from "react-icons/md";
-import { CgOrganisation } from "react-icons/cg";
-import { MdPayment } from "react-icons/md";
-import { MdTask } from "react-icons/md";
-import { ImUsers } from "react-icons/im";
-import { BiSolidReport } from "react-icons/bi";
-import { SidebarLink } from "@/types/nav-links.types";
-import { LandPlot } from "lucide-react";
+import Navbar from '@/components/layouts/navbar';
+import { currentRole } from '@/lib/auth';
+import { cn } from '@/lib/utils';
+import React from 'react';
+import Sidebar from './components/sidebar';
+import { UserRole } from '@prisma/client';
+import { IoMdHome } from 'react-icons/io';
+import { MdLibraryBooks } from 'react-icons/md';
+import { CgOrganisation } from 'react-icons/cg';
+import { MdPayment } from 'react-icons/md';
+import { MdTask } from 'react-icons/md';
+import { ImUsers } from 'react-icons/im';
+import { BiSolidReport } from 'react-icons/bi';
+import { SidebarLink } from '@/types/nav-links.types';
+import { LandPlot } from 'lucide-react';
 
 const navLinks = (userRole?: UserRole): SidebarLink[] => {
   const dashboard: SidebarLink[] = [
     {
-      href: "/",
-      label: "Dashboard",
+      href: '/',
+      label: 'Dashboard',
       icon: <IoMdHome size="18" className="mr-1" />,
     },
 
     {
-      href: "/applications",
-      label: "Applications",
+      href: '/applications',
+      label: 'Applications',
       icon: <MdLibraryBooks size="18" className="mr-1" />,
+    },
+    {
+      href: '/payments',
+      label: 'Payments',
+      icon: <MdPayment size="18" className="mr-1" />,
     },
   ];
   const adminLinks: SidebarLink[] = [
     {
-      href: "/payments/admin",
-      label: "Payments",
-      icon: <MdPayment size="18" className="mr-1" />,
-    },
-    {
-      href: "/participants",
-      label: "Participants",
+      href: '/participants',
+      label: 'Participants',
       icon: <ImUsers size="18" className="mr-1" />,
     },
     {
-      href: "/completed-programs/admin",
-      label: "Completed courses",
+      href: '/completed-programs/admin',
+      label: 'Completed courses',
       icon: <MdTask size="18" className="mr-1" />,
     },
     {
-      href: "/organizations/admin",
-      label: "Organizations",
+      href: '/organizations/admin',
+      label: 'Organizations',
       icon: <CgOrganisation size="18" className="mr-1" />,
     },
     {
-      href: "/new-program",
-      label: "New program",
+      href: '/new-program',
+      label: 'New program',
       icon: <MdLibraryBooks size="18" className="mr-1" />,
     },
     {
-      href: "reports",
-      label: "Reports",
+      href: 'reports',
+      label: 'Reports',
       icon: <BiSolidReport size="18" className="mr-1" />,
     },
   ];
   const userLinks: SidebarLink[] = [
     {
-      href: "/new-inhouse-training",
-      label: "In house training",
+      href: '/new-inhouse-training',
+      label: 'In house training',
       icon: <LandPlot size="18" className="mr-1" />,
     },
     {
-      href: "/payments",
-      label: "Payments",
-      icon: <MdPayment size="18" className="mr-1" />,
-    },
-    {
-      href: "/organizations",
-      label: "Organizations",
+      href: '/organizations',
+      label: 'Organizations',
       icon: <CgOrganisation size="18" className="mr-1" />,
     },
     {
-      href: "/new-organization",
-      label: "Organizations",
+      href: '/new-organization',
+      label: 'Organizations',
       icon: <CgOrganisation size="18" className="mr-1" />,
     },
     {
-      href: "/completed-programs",
-      label: "Completed courses",
+      href: '/completed-programs',
+      label: 'Completed courses',
       icon: <MdTask size="18" className="mr-1" />,
     },
   ];
@@ -108,8 +103,8 @@ const PortalLayout = async ({ children }: { children: React.ReactNode }) => {
         {isLoggedIn && <Sidebar links={links} />}
         <div
           className={cn(
-            "sticky col-span-5 flex flex-col overflow-y-auto bg-neutral-100",
-            isLoggedIn && "md:col-span-5",
+            'sticky col-span-5 flex flex-col overflow-y-auto bg-neutral-100',
+            isLoggedIn && 'md:col-span-5',
           )}
         >
           {children}

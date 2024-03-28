@@ -108,3 +108,9 @@ export const pesaflowInvoiceSchema = z.object({
   returned_an_error: z.boolean(),
 });
 export type PesaflowInvoiceType = z.infer<typeof pesaflowInvoiceSchema>;
+
+export const filterPaymentsSchema = z.object({
+  userId: z.string(),
+  // To Do: Add payment status, add payment program, add payment amount filters.
+});
+export type FilterPaymentsType = z.infer<typeof filterPaymentsSchema>;

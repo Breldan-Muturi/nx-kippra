@@ -16,6 +16,7 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
   console.log('Mapping applicationId: ', applicationId);
   try {
     const paymentDetails = await req.json();
+    console.log('Pesaflow return: ', paymentDetails);
     const validPayment = ipnSchema.safeParse(paymentDetails);
     if (!validPayment.success) {
       return NextResponse.json({

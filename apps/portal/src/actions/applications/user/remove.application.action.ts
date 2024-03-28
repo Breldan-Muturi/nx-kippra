@@ -1,15 +1,15 @@
-"use server";
+'use server';
 
-import { formatVenues } from "@/helpers/enum.helpers";
-import { currentUser } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { formatVenues } from '@/helpers/enum.helpers';
+import { currentUser } from '@/lib/auth';
+import { db } from '@/lib/db';
 import {
   removeMeOwnerEmail,
   removeMeParticipantEmail,
-} from "@/mail/application.mail";
-import { ActionReturnType } from "@/types/action-return.types";
-import { Citizenship, Delivery } from "@prisma/client";
-import { format } from "date-fns";
+} from '@/mail/application.mail';
+import { ActionReturnType } from '@/types/action-return.types';
+import { Citizenship, Delivery } from '@prisma/client';
+import { format } from 'date-fns';
 
 export const userRemoveApplication = async (
   applicationId: string,
@@ -17,7 +17,7 @@ export const userRemoveApplication = async (
   const user = await currentUser();
 
   if (!user || !user.email || !user.name) {
-    return { error: "You need to be logged in to proceed with this action" };
+    return { error: 'You need to be logged in to proceed with this action' };
   }
 
   // Attempt to find the participant based on the existing user details
@@ -30,7 +30,7 @@ export const userRemoveApplication = async (
   });
 
   if (!participant) {
-    return { error: "We did not find a participant matching your details" };
+    return { error: 'We did not find a participant matching your details' };
   }
 
   // Retrieve the application details to understand the fee structure
@@ -61,7 +61,7 @@ export const userRemoveApplication = async (
   });
 
   if (!applicationDetails || !applicationDetails.id) {
-    return { error: "The Application was not found" };
+    return { error: 'The Application was not found' };
   }
 
   const {
@@ -132,6 +132,7 @@ export const userRemoveApplication = async (
             applicationFee: { decrement: feeAdjustment },
             // To Do: Will the application status be reverted?
             // To Do: How will payments be handled?
+            // To Do: If payment is settled then maintain the slots
             // To Do: How will receipts and offer letters be handled?
           },
         });
@@ -142,37 +143,37 @@ export const userRemoveApplication = async (
       },
     );
   } catch (error) {
-    console.log("Error removing participant: ", error);
+    console.log('Error removing participant: ', error);
     return {
       error:
-        "There was an error with removing you from this application. Please try again later",
+        'There was an error with removing you from this application. Please try again later',
     };
   }
 
   try {
     await removeMeParticipantEmail({
       removedParticipantEmail: participant.email,
-      endDate: format(trainingEnd, "PPP"),
-      startDate: format(trainingStart, "PPP"),
+      endDate: format(trainingEnd, 'PPP'),
+      startDate: format(trainingStart, 'PPP'),
       title,
       venue: trainingVenue ? formatVenues(trainingVenue) : undefined,
     });
     await removeMeOwnerEmail({
       removedPatricipantOwner: applicationDetails.owner.email,
       name: participant.name,
-      endDate: format(trainingEnd, "PPP"),
-      startDate: format(trainingStart, "PPP"),
+      endDate: format(trainingEnd, 'PPP'),
+      startDate: format(trainingStart, 'PPP'),
       title,
       venue: trainingVenue ? formatVenues(trainingVenue) : undefined,
     });
     return {
-      success: "You have successfully been removed from this application",
+      success: 'You have successfully been removed from this application',
     };
   } catch (error) {
-    console.log("Error informing application participants and owner: ", error);
+    console.log('Error informing application participants and owner: ', error);
     return {
       error:
-        "You have been removed from the application, but there was an error with sending notification emails",
+        'You have been removed from the application, but there was an error with sending notification emails',
     };
   }
 };
