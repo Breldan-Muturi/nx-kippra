@@ -81,19 +81,51 @@ export const pesaflowCheckoutApiSchema = z.object({
 });
 export type PesaFlowCheckoutApiType = z.infer<typeof pesaflowCheckoutApiSchema>;
 
-export const ipnSchema = z.object({
-  payment_channel: z.string(),
-  client_invoice_ref: z.string(),
+export const paymentReferenceApiSchema = z.object({
+  payment_reference: z.string(),
+  payment_date: z.string(),
+  inserted_at: z.string(),
   currency: z.string(),
-  amount_paid: z.number().positive(),
-  invoice_amount: z.number().positive(),
-  status: z.string(),
-  invoice_number: z.string(),
-  payment_date: z.date(),
-  secure_hash: z.string(),
-  last_payment_amount: z.number().positive(),
+  amount: z.string(),
 });
+
+export const paymentApiResponseSchema = z.object({
+  status: z.string(),
+  secure_hash: z.string(),
+  phone_number: z.string(),
+  payment_reference: z.array(paymentReferenceApiSchema).nonempty(),
+  payment_date: z.string(),
+  payment_channel: z.string(),
+  last_payment_amount: z.number().positive(),
+  invoice_number: z.string(),
+  invoice_amount: z.number().positive(),
+  currency: z.string(),
+  client_invoice_ref: z.string(),
+  amount_paid: z.number().positive(),
+});
+
+export const ipnSchema = paymentApiResponseSchema
+  .omit({
+    payment_reference: true,
+    payment_date: true,
+  })
+  .extend({
+    payment_date: z.date(),
+  });
 export type IpnType = z.infer<typeof ipnSchema>;
+
+export const ipnReferenceSchema = paymentReferenceApiSchema
+  .pick({
+    payment_reference: true,
+    currency: true,
+  })
+  .extend({
+    payment_date: z.date(),
+    inserted_at: z.date(),
+    amount: z.number(),
+  });
+export type IpnReferenceType = z.infer<typeof ipnReferenceSchema>;
+export const ipnReferenceArraySchema = z.array(ipnReferenceSchema).nonempty();
 
 export const pesaflowInvoiceSchema = z.object({
   body: z.object({

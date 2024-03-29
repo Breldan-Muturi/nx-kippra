@@ -1,12 +1,20 @@
 import { db } from '@/lib/db';
 
 import { ApplicationPaymentDetails } from '@/validation/payment.validation';
-import { Delivery } from '@prisma/client';
+import { Delivery, InvoiceStatus } from '@prisma/client';
 import { format } from 'date-fns';
 
 export type PayApplicationReturnType =
   | { error: string }
-  | { paymentDetails: ApplicationPaymentDetails };
+  | {
+      paymentDetails: ApplicationPaymentDetails;
+      existingInvoices?: {
+        invoiceNumber: string;
+        invoiceEmail: string;
+        invoiceLink: string;
+        createdAt: Date;
+      }[];
+    };
 
 export const getPaymentApplicationPromise = async ({
   id,
@@ -21,6 +29,15 @@ export const getPaymentApplicationPromise = async ({
       id: true,
       applicationFee: true,
       delivery: true,
+      invoice: {
+        where: { invoiceStatus: InvoiceStatus.PENDING },
+        select: {
+          invoiceEmail: true,
+          invoiceNumber: true,
+          invoiceLink: true,
+          createdAt: true,
+        },
+      },
       owner: {
         select: {
           id: true,
@@ -62,6 +79,7 @@ export const getPaymentApplicationPromise = async ({
       applicationFee,
       delivery,
       owner: { email, name, nationalId, phoneNumber, image },
+      invoice,
       trainingSession: {
         startDate,
         endDate,
@@ -70,6 +88,7 @@ export const getPaymentApplicationPromise = async ({
       },
     } = existingApplication;
     const billDesc = `Payment for ${title} from ${format(startDate, 'PPP')}, to ${format(endDate, 'PPP')} ${delivery === Delivery.ON_PREMISE && venue ? `to be held at ${venue}` : ''}`;
+
     return {
       paymentDetails: {
         applicationId: id,
@@ -81,6 +100,7 @@ export const getPaymentApplicationPromise = async ({
         clientName: name || undefined,
         pictureURL: image || undefined,
       },
+      existingInvoices: invoice,
     };
   }
 };

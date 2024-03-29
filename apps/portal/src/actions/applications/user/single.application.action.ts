@@ -1,5 +1,5 @@
-import { db } from "@/lib/db";
-import { UserRole } from "@prisma/client";
+import { db } from '@/lib/db';
+import { UserRole } from '@prisma/client';
 
 const applicationParticipantPromise = async (id: string) => {
   return await db.application.findUnique({
@@ -60,7 +60,6 @@ const applicationAdminPromise = async (id: string) => {
       sponsorType: true,
       applicationFee: true,
       offerLetter: true,
-      receipt: true,
       status: true,
       proformaInvoice: true,
       slotsCitizen: true,
@@ -142,7 +141,7 @@ export const getApplicationByIdPromise = async ({
     },
   });
   if (!user || !user.id) {
-    return { error: "Only registered users can view applications" };
+    return { error: 'Only registered users can view applications' };
   }
 
   const isApplicationAdmin =
@@ -154,7 +153,7 @@ export const getApplicationByIdPromise = async ({
     if (!applicationAdmin || !applicationAdmin.id) {
       return {
         error:
-          "Error retrieving application information, please try again later",
+          'Error retrieving application information, please try again later',
       };
     } else {
       return { isApplicationAdmin, applicationAdmin };
@@ -174,17 +173,17 @@ export const getApplicationByIdPromise = async ({
     if (!applicationParticipant || !applicationParticipant.id) {
       return {
         error:
-          "Error retrieving application information. Please try again later",
+          'Error retrieving application information. Please try again later',
       };
     } else {
       return { isApplicationAdmin, applicationParticipant };
     }
   }
   console.log(
-    "Server action error: Only admins or application participants and owners can view details",
+    'Server action error: Only admins or application participants and owners can view details',
   );
   return {
     error:
-      "Only admins or application participants and owners can view details",
+      'Only admins or application participants and owners can view details',
   };
 };

@@ -236,11 +236,11 @@ model Application {
   status            ApplicationStatus           @default(PENDING)
   proformaInvoice   ApplicationProformaInvoice?
   offerLetter       ApplicationOfferLetter?
-  receipt           ApplicationReceipt?
   slotsCitizen      Int                         @default(0)
   slotsEastAfrican  Int                         @default(0)
   slotsGlobal       Int                         @default(0)
-  payment           Payment?
+  payment           Payment[]
+  invoice           Invoice[]
 }
 
 model ApplicationParticipant {
@@ -272,16 +272,6 @@ model ApplicationProformaInvoice {
   application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 }
 
-model ApplicationReceipt {
-  id            String      @id @default(cuid())
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt()
-  fileName      String
-  filePath      String
-  applicationId String      @unique
-  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-}
-
 model ApplicationOfferLetter {
   id            String      @id @default(cuid())
   createdAt     DateTime    @default(now())
@@ -302,26 +292,59 @@ model ApplicationConfirmationToken {
   @@unique([email, token])
 }
 
+enum InvoiceStatus {
+  PENDING
+  SETTLED
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  applicationId String
+  invoiceNumber String        @unique
+  invoiceLink   String        @unique
+  invoiceEmail  String
+  invoiceStatus InvoiceStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt()
+  application   Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
 model Payment {
-  id                   String      @id @default(cuid())
-  applicationId        String      @unique
-  application          Application @relation(fields: [applicationId], references: [id])
-  createdAt            DateTime    @default(now())
-  returned_an_error    Boolean
-  updatedAt            DateTime?   @updatedAt()
-  invoice_link         String?
-  invoice_number       String?
-  error_status_code    String?
-  error_status_message String?
-  error_body           String?
-  payment_channel      String?
-  client_invoice_ref   String?
-  currency             String?
-  amount_paid          Decimal?    @default(1.00)
-  invoice_amount       Decimal?    @default(1.00)
-  status               String?
-  payment_date         DateTime?   @default(now())
-  secure_hash          String?
-  last_payment_amount  Decimal?    @default(1.00)
-  receipt_url          String?
+  id                  String             @id @default(cuid())
+  applicationId       String
+  application         Application        @relation(fields: [applicationId], references: [id])
+  status              String
+  secure_hash         String
+  phone_number        String
+  payment_references  PaymentReference[]
+  payment_date        DateTime
+  payment_channel     String
+  last_payment_amount Float
+  invoice_number      String
+  invoice_amount      Float
+  currency            String
+  client_invoice_ref  String
+  amount_paid         Float
+  paymentReceipt      PaymentReceipt?
+}
+
+model PaymentReference {
+  id                String   @id @default(cuid())
+  paymentId         String
+  payment           Payment  @relation(fields: [paymentId], references: [id])
+  payment_reference String
+  payment_date      DateTime
+  inserted_at       DateTime
+  currency          String
+  amount            Float
+}
+
+model PaymentReceipt {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  fileName  String
+  filePath  String
+  paymentId String   @unique
+  payment   Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 }

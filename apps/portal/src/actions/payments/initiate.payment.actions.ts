@@ -12,7 +12,7 @@ import {
 import { createHmac } from 'crypto';
 import axios from 'axios';
 import { ConversionUtils } from 'turbocommons-ts';
-import { Payment } from '@prisma/client';
+import { ApplicationStatus, Invoice, Payment } from '@prisma/client';
 
 export type InitiatePaymentReturn =
   | { error: string }
@@ -40,7 +40,8 @@ export const initiatePayment = async (
     select: {
       id: true,
       trainingSession: { select: { program: { select: { serviceId: true } } } },
-      payment: { select: { id: true, status: true } },
+      invoice: { select: { id: true } },
+      status: true,
     },
   });
 
@@ -60,7 +61,7 @@ export const initiatePayment = async (
     };
   }
 
-  if (paymentApplication.payment?.status === 'settled') {
+  if (paymentApplication.status === ApplicationStatus.COMPLETED) {
     return {
       error: 'Payment for this application is already settled',
     };
@@ -151,35 +152,23 @@ export const initiatePayment = async (
 
     const invoiceData = axiosResponse.data;
 
-    let payment: Payment | undefined;
+    const invoice = await db.invoice.create({
+      data: {
+        application: { connect: { id: applicationId } },
+        invoiceEmail: pesaflowCheckout.clientEmail,
+        invoiceLink: invoiceData.invoice_link,
+        invoiceNumber: invoiceData.invoice_number,
+      },
+    });
 
-    if (paymentApplication.payment?.id) {
-      payment = await db.payment.update({
-        where: { id: paymentApplication.payment.id },
-        data: {
-          invoice_link: invoiceData.invoice_link,
-          invoice_number: invoiceData.invoice_number,
-        },
-      });
-    } else {
-      payment = await db.payment.create({
-        data: {
-          application: { connect: { id: applicationId } },
-          returned_an_error: false, // Or any other logic to determine this
-          invoice_link: invoiceData.invoice_link,
-          invoice_number: invoiceData.invoice_number,
-        },
-      });
-    }
-
-    if (!payment || !payment.id || !payment.invoice_link) {
+    if (!invoice || !invoice.id || !invoice.invoiceLink) {
       return { error: 'Error with recording your payment details' };
     }
 
     return {
       success:
         'Your payment details have been recorded successfully, proceed to complete the payment on eCitizen pesaflow',
-      invoiceLink: payment.invoice_link,
+      invoiceLink: invoice.invoiceLink,
     };
   } catch (error) {
     if (axios.isAxiosError(error)) {

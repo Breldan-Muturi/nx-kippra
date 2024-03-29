@@ -1,6 +1,6 @@
 'use client';
-import { usePathname, useRouter } from 'next/navigation';
-import React, { useEffect, useTransition } from 'react';
+import { usePathname } from 'next/navigation';
+import React, { useTransition } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -24,6 +24,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { PayApplicationReturnType } from '@/actions/applications/user/pay.application.actions';
 import { toast } from 'sonner';
 import { initiatePayment } from '@/actions/payments/initiate.payment.actions';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { format } from 'date-fns';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 const payApplicationFields: FormFieldType<PaymentForm>[] = [
   {
@@ -62,8 +71,8 @@ const PayApplication = ({
 }) => {
   const [isPending, startTransition] = useTransition();
   const path = usePathname();
-  const router = useRouter();
   const handleDismiss = () => filterAdminApplications({ path, ...payParams });
+  const handleWindow = (target: string) => window.open(target, '_blank');
 
   const dismissModal = () => {
     startTransition(() => {
@@ -102,22 +111,76 @@ const PayApplication = ({
             toast.error(data.error);
           } else {
             toast.success(data.success);
-            window.open(data.invoiceLink, '_blank');
+            handleWindow(data.invoiceLink);
           }
         })
         .finally(handleDismiss);
     });
   };
 
+  const title = paymentInfo.existingInvoices?.length
+    ? 'Complete payment for this application'
+    : 'Initiate payment for this application';
+
+  const description = paymentInfo.existingInvoices?.length
+    ? 'You can optionally enter the details of a different payee. If you are not directly responsible for making this payment'
+    : 'We detected existing invoice links for this application. Complete this payment using these links, or initiate a new payment';
+
+  const initiatePaymentForm = (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="grid grid-cols-1 gap-2"
+      >
+        <ReusableForm formFields={payApplicationFields} />
+        <DialogFooter>
+          <SubmitButton
+            label="Initiate Payment"
+            className="mt-4 flex-grow"
+            isSubmitting={isPending}
+          />
+        </DialogFooter>
+      </form>
+    </Form>
+  );
+
+  const paymentTabs = (
+    <Tabs defaultValue="existing" className="w-full">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="existing">Existing Invoice</TabsTrigger>
+        <TabsTrigger value="new">Initiate Payment</TabsTrigger>
+      </TabsList>
+      <TabsContent value="existing">
+        {paymentInfo.existingInvoices?.map(
+          ({ createdAt, invoiceEmail, invoiceLink, invoiceNumber }) => {
+            const formatedDate = format(createdAt, 'PPP');
+            return (
+              <Card key={invoiceNumber}>
+                <CardContent>
+                  <CardDescription>
+                    {`This invoice, invoice no: ${invoiceNumber}, was created on ${formatedDate} by ${invoiceEmail}`}
+                  </CardDescription>
+                  <CardFooter>
+                    <Button onClick={() => handleWindow(invoiceLink)}>
+                      Complete payment
+                    </Button>
+                  </CardFooter>
+                </CardContent>
+              </Card>
+            );
+          },
+        )}
+      </TabsContent>
+      <TabsContent value="new">{initiatePaymentForm}</TabsContent>
+    </Tabs>
+  );
+
   return (
     <Dialog open onOpenChange={dismissModal}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Initiate payment for this application</DialogTitle>
-          <DialogDescription>
-            You can optionally enter the details of a different payee. If you
-            are not directly responsible for making this payment
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col flex-grow space-y-2">
           <div className="flex flex-col flex-grow rounded-md border-2 border-green-200 px-4 py-2">
@@ -134,21 +197,9 @@ const PayApplication = ({
             convenience fee
           </p>
         </div>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="grid grid-cols-1 gap-2"
-          >
-            <ReusableForm formFields={payApplicationFields} />
-            <DialogFooter>
-              <SubmitButton
-                label="Initiate Payment"
-                className="mt-4 flex-grow"
-                isSubmitting={isPending}
-              />
-            </DialogFooter>
-          </form>
-        </Form>
+        {paymentInfo.existingInvoices?.length
+          ? initiatePaymentForm
+          : paymentTabs}
       </DialogContent>
     </Dialog>
   );

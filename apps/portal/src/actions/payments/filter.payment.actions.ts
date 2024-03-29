@@ -63,7 +63,6 @@ export const filterPayments = async (
   const statusFiltersPromise = db.payment.findMany({
     where: {
       ...userWhereCondition,
-      AND: [{ status: { not: null } }],
     },
     select: {
       status: true,
@@ -74,7 +73,6 @@ export const filterPayments = async (
   const channelFiltersPromise = db.payment.findMany({
     where: {
       ...userWhereCondition,
-      AND: [{ payment_channel: { not: null } }],
     },
     select: {
       payment_channel: true,
@@ -85,7 +83,6 @@ export const filterPayments = async (
   const highestAmountPromise = db.payment.aggregate({
     where: {
       ...userWhereCondition,
-      AND: [{ amount_paid: { not: null } }],
     },
     _max: {
       amount_paid: true,
@@ -95,7 +92,6 @@ export const filterPayments = async (
   const lowestAmountPromise = db.payment.aggregate({
     where: {
       ...userWhereCondition,
-      AND: [{ amount_paid: { not: null } }],
     },
     _min: {
       amount_paid: true,
@@ -121,8 +117,8 @@ export const filterPayments = async (
     paymentFilters: {
       channelFilter: channelFilter.map((filter) => filter.payment_channel),
       statusFilter: statusFilter.map((filter) => filter.status),
-      highestAmount: processAmountRange(highestAmountResult._max.amount_paid),
-      lowestAmount: processAmountRange(lowestAmountResult._min.amount_paid),
+      highestAmount: processAmountRange(highestAmountResult._max?.amount_paid),
+      lowestAmount: processAmountRange(lowestAmountResult._min?.amount_paid),
     },
   };
 };

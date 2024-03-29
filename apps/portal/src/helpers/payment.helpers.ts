@@ -10,11 +10,11 @@ export const processDateString = (dateString: string): Date => {
 };
 
 export const processAmountRange = (
-  rangeItem: Prisma.Decimal | null,
+  rangeItem: number | null | undefined,
 ): number => {
-  if (rangeItem === null) {
+  if (!rangeItem || rangeItem === null) {
     return 0;
   } else {
-    return parseFloat(rangeItem.toString());
+    return rangeItem;
   }
 };
