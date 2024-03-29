@@ -96,21 +96,27 @@ export const paymentApiResponseSchema = z.object({
   payment_reference: z.array(paymentReferenceApiSchema).nonempty(),
   payment_date: z.string(),
   payment_channel: z.string(),
-  last_payment_amount: z.number().positive(),
+  last_payment_amount: z.string(),
   invoice_number: z.string(),
-  invoice_amount: z.number().positive(),
+  invoice_amount: z.string(),
   currency: z.string(),
   client_invoice_ref: z.string(),
-  amount_paid: z.number().positive(),
+  amount_paid: z.string(),
 });
 
 export const ipnSchema = paymentApiResponseSchema
   .omit({
     payment_reference: true,
     payment_date: true,
+    last_payment_amount: true,
+    invoice_amount: true,
+    amount_paid: true,
   })
   .extend({
     payment_date: z.date(),
+    last_payment_amount: z.number().positive(),
+    invoice_amount: z.number().positive(),
+    amount_paid: z.number().positive(),
   });
 export type IpnType = z.infer<typeof ipnSchema>;
 

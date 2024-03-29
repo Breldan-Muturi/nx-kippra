@@ -26,12 +26,7 @@ import { toast } from 'sonner';
 import { initiatePayment } from '@/actions/payments/initiate.payment.actions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-} from '@/components/ui/card';
+import { Card, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 const payApplicationFields: FormFieldType<PaymentForm>[] = [
@@ -118,11 +113,14 @@ const PayApplication = ({
     });
   };
 
-  const title = paymentInfo.existingInvoices?.length
+  const invoicesExist =
+    paymentInfo.existingInvoices && paymentInfo.existingInvoices.length >= 1;
+
+  const title = invoicesExist
     ? 'Complete payment for this application'
     : 'Initiate payment for this application';
 
-  const description = paymentInfo.existingInvoices?.length
+  const description = invoicesExist
     ? 'You can optionally enter the details of a different payee. If you are not directly responsible for making this payment'
     : 'We detected existing invoice links for this application. Complete this payment using these links, or initiate a new payment';
 
@@ -154,18 +152,23 @@ const PayApplication = ({
         {paymentInfo.existingInvoices?.map(
           ({ createdAt, invoiceEmail, invoiceLink, invoiceNumber }) => {
             const formatedDate = format(createdAt, 'PPP');
+            const highlightClass = 'font-semibold text-green-600';
             return (
-              <Card key={invoiceNumber}>
-                <CardContent>
-                  <CardDescription>
-                    {`This invoice, invoice no: ${invoiceNumber}, was created on ${formatedDate} by ${invoiceEmail}`}
-                  </CardDescription>
-                  <CardFooter>
-                    <Button onClick={() => handleWindow(invoiceLink)}>
-                      Complete payment
-                    </Button>
-                  </CardFooter>
-                </CardContent>
+              <Card key={invoiceNumber} className="px-4 py-3 space-y-2">
+                <CardDescription>
+                  This invoice, invoice no:{' '}
+                  <span className={highlightClass}>{invoiceNumber}</span>, was
+                  created on{' '}
+                  <span className={highlightClass}>{formatedDate}</span> by{' '}
+                  <span className={highlightClass}>{invoiceEmail}</span>
+                </CardDescription>
+                <Button
+                  size="sm"
+                  variant="custom"
+                  onClick={() => handleWindow(invoiceLink)}
+                >
+                  Complete payment
+                </Button>
               </Card>
             );
           },
@@ -197,9 +200,7 @@ const PayApplication = ({
             convenience fee
           </p>
         </div>
-        {paymentInfo.existingInvoices?.length
-          ? initiatePaymentForm
-          : paymentTabs}
+        {invoicesExist ? paymentTabs : initiatePaymentForm}
       </DialogContent>
     </Dialog>
   );

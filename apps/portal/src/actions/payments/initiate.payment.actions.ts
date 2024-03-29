@@ -67,7 +67,7 @@ export const initiatePayment = async (
     };
   }
 
-  const billRefNumber = `${new Date().toISOString()}_${applicationId}`;
+  const billRefNumber = `${new Date().toISOString()}_${applicationId}_${paymentApplication.invoice.length}`;
 
   // Set the data to be passed to PesaFlow
   const pesaflowCheckout: PesaFlowCheckoutType = {

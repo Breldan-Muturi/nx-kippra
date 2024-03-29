@@ -20,6 +20,7 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
   console.log('Mapping applicationId: ', applicationId);
   try {
     const paymentDetails = await req.json();
+    console.log('Payment details: ', paymentDetails);
     const validApiResponse = paymentApiResponseSchema.safeParse(paymentDetails);
     if (!validApiResponse.success) {
       console.error('Api response validation error: ', validApiResponse.error);
@@ -28,12 +29,18 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
     const {
       payment_reference: apiPaymentReference,
       payment_date,
+      amount_paid,
+      invoice_amount,
+      last_payment_amount,
       ...paymentApiInfo
     } = validApiResponse.data;
 
     // Process payment info
     const paymentInfo = {
       ...paymentApiInfo,
+      amount_paid: stringToDecimal(amount_paid),
+      invoice_amount: stringToDecimal(invoice_amount),
+      last_payment_amount: stringToDecimal(last_payment_amount),
       payment_date: processDateString(payment_date),
     };
     console.log('Processed payment info: ', paymentInfo);
