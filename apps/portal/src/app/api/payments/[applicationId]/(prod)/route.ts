@@ -22,7 +22,10 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
     const validApiResponse = paymentApiResponseSchema.safeParse(paymentDetails);
     if (!validApiResponse.success) {
       console.error('Api response validation error: ', validApiResponse.error);
-      return;
+      return new Response('Api response validation error', {
+        status: 500,
+        statusText: 'Api response did not pass payment details validation',
+      });
     }
     const {
       payment_reference: apiPaymentReference,
@@ -38,7 +41,10 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
     const validPayment = ipnSchema.safeParse(paymentInfo);
     if (!validPayment.success) {
       console.error('Invalid payment info: ', validPayment.error);
-      return;
+      return new Response('Invalid payment info', {
+        status: 500,
+        statusText: 'Payment info did not pass payment details validation',
+      });
     }
 
     // Process payment references
@@ -54,7 +60,10 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
       ipnReferenceArraySchema.safeParse(payment_reference);
     if (!validPaymentReference.success) {
       console.error('Invalid payment reference: ', validPaymentReference.error);
-      return;
+      return new Response('Invalid payment reference', {
+        status: 500,
+        statusText: 'Payment reference did not pass schema validation',
+      });
     }
 
     const existingApplication = await db.application.findUnique({
@@ -84,12 +93,18 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
       !existingApplication.applicationFee
     ) {
       console.error('There was an issue fetching the application details');
-      return;
+      return new Response('Missing application details', {
+        status: 404,
+        statusText: 'Missing application details',
+      });
     }
     const relevantInvoice = existingApplication?.invoice[0];
     if (!relevantInvoice || !relevantInvoice.invoiceNumber) {
       console.error('This invoice could not be found');
-      return;
+      return new Response('Missing invoice details', {
+        status: 404,
+        statusText: 'Missing invoice details',
+      });
     }
 
     // Generating application receipt
@@ -100,7 +115,10 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
 
     if ('error' in applicationReceipt) {
       console.error('There was an error in generating the application receipt');
-      return;
+      return new Response('Application receipt error', {
+        status: 500,
+        statusText: 'There was an error generating the application receipt',
+      });
     }
 
     const uploadedReceipt = await uploadPDFile(
@@ -112,7 +130,10 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
       console.error(
         'There was an error in saving the application receipt to the database',
       );
-      return;
+      return new Response('Application receipt error', {
+        status: 500,
+        statusText: 'There was an error saving the application receipt',
+      });
     }
 
     const newPayment = await db.payment.create({
@@ -123,7 +144,10 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
     });
     if (!newPayment) {
       console.error('There was an error saving the application payment');
-      return;
+      return new Response('Payment save error', {
+        status: 500,
+        statusText: 'There was an error saving the application payment',
+      });
     }
 
     await db.invoice.update({
@@ -131,35 +155,45 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
       data: { invoiceStatus: InvoiceStatus.SETTLED },
     });
 
-    const paymentReferenceCreate: Prisma.PaymentReferenceCreateInput[] =
+    const paymentReferenceCreate: Prisma.PaymentReferenceCreateManyInput[] =
       validPaymentReference.data.map((reference) => ({
-        payment: { connect: { id: newPayment.id } },
+        paymentId: newPayment.id,
         ...reference,
       }));
 
-    await db.$transaction(
-      async (prisma) =>
-        paymentReferenceCreate.map((paymentRef) =>
-          prisma.paymentReference.create({
-            data: paymentRef,
-          }),
-        ),
+    const updatedPaymentReferences = await db.$transaction(
+      async (prisma) => {
+        return await prisma.paymentReference.createMany({
+          data: paymentReferenceCreate,
+        });
+      },
       {
         maxWait: 20000,
         timeout: 20000,
       },
     );
 
+    if (updatedPaymentReferences.count === 0) {
+      console.error('No payment references saved');
+      return new Response('Payment references error', {
+        status: 500,
+        statusText: 'No payment references saved',
+      });
+    }
+
     const receipt = await db.paymentReceipt.create({
       data: {
         payment: { connect: { id: newPayment.id } },
-        fileName: `${existingApplication.id}-receipt`,
+        fileName: `${existingApplication.id}-receipt-${existingApplication.payment.length + 1}`,
         filePath: uploadedReceipt.success,
       },
     });
     if (!receipt) {
       console.error('There was an error saving the application receipt');
-      return;
+      return new Response('Application receipt error', {
+        status: 500,
+        statusText: 'There was an error saving the application receipt',
+      });
     }
 
     await paymentCompletedEmail({
@@ -180,10 +214,17 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
           status: ApplicationStatus.COMPLETED,
         },
       });
-      return;
+      return new Response('Application completed', {
+        status: 200,
+        statusText:
+          'Payment completed successfully, application updated to completed',
+      });
     }
 
-    return;
+    return new Response('Payment successful', {
+      status: 200,
+      statusText: 'Payment recorded successfully, payment incomplete',
+    });
   } catch (error) {
     console.error('Error processing payment details: ', error);
     return;
