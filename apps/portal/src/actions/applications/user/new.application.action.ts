@@ -1,12 +1,12 @@
-"use server";
+'use server';
 
-import { db } from "@/lib/db";
-import { generateApplicationConfirmationToken } from "@/lib/tokens";
-import { newApplicationEmail } from "@/mail/application.mail";
-import { ActionReturnType } from "@/types/action-return.types";
-import { ValidatedApplicationForm } from "@/validation/application.validation";
-import { newOrganizationSchema } from "@/validation/organization.validation";
-import { OrganizationRole, Prisma, SponsorType } from "@prisma/client";
+import { db } from '@/lib/db';
+import { generateApplicationConfirmationToken } from '@/lib/tokens';
+import { newApplicationEmail } from '@/mail/application.mail';
+import { ActionReturnType } from '@/types/actions.types';
+import { ValidatedApplicationForm } from '@/validation/application.validation';
+import { newOrganizationSchema } from '@/validation/organization.validation';
+import { OrganizationRole, Prisma, SponsorType } from '@prisma/client';
 
 type NewApplicationReturnType = ActionReturnType & {
   applicationId?: string;
@@ -33,15 +33,15 @@ export const userNewApplication = async (
     programTitle,
   } = data;
 
-  console.log("Verifying user...");
+  console.log('Verifying user...');
   const existingUserId = await db.user.findUnique({
     where: { id: userId },
     select: { id: true },
   });
-  console.log("User id: ", existingUserId?.id);
+  console.log('User id: ', existingUserId?.id);
 
   if (!existingUserId || !existingUserId.id) {
-    return { error: "This user does not exist." };
+    return { error: 'This user does not exist.' };
   }
 
   // Utility for creating organization applications
@@ -60,11 +60,11 @@ export const userNewApplication = async (
     slotsGlobal,
   });
 
-  let applicationId: string = "";
+  let applicationId: string = '';
 
   // Creating a self sponsored application
   if (sponsorType === SponsorType.SELF_SPONSORED) {
-    console.log("Creating self sponsored application...");
+    console.log('Creating self sponsored application...');
     const selfSponsoredApplication = await db.application.create({
       data: {
         delivery,
@@ -78,27 +78,27 @@ export const userNewApplication = async (
         slotsGlobal,
       },
     });
-    console.log("Self sponsored application Id: ", selfSponsoredApplication.id);
+    console.log('Self sponsored application Id: ', selfSponsoredApplication.id);
     if (selfSponsoredApplication) {
       applicationId = selfSponsoredApplication.id;
-    } else return { error: "Error with creating self sponsored application" };
+    } else return { error: 'Error with creating self sponsored application' };
   }
 
   // Creating an existing organization application
   if (organizationId) {
-    console.log("Creating existing organization sponsored application...");
+    console.log('Creating existing organization sponsored application...');
     const existingOrganizationApplication = await db.application.create({
       data: setOrganizationApplication(organizationId),
     });
     console.log(
-      "Existing organization application Id: ",
+      'Existing organization application Id: ',
       existingOrganizationApplication.id,
     );
     // Consider returning the name of the organization
     if (existingOrganizationApplication) {
       applicationId = existingOrganizationApplication.id;
     } else {
-      return { error: "Error creating existing organization application" };
+      return { error: 'Error creating existing organization application' };
     }
   }
 
@@ -106,7 +106,7 @@ export const userNewApplication = async (
   if (newOrganization) {
     const validOrganization = newOrganizationSchema.safeParse(newOrganization);
     if (!validOrganization.success) {
-      return { error: "Invalid organization fields" };
+      return { error: 'Invalid organization fields' };
     }
     const {
       name,
@@ -152,17 +152,17 @@ export const userNewApplication = async (
         applicationId = newOrganizationApplicationId;
       }
     } catch (error) {
-      console.log("Transaction error: ", error);
+      console.log('Transaction error: ', error);
       return {
         error:
-          "There was an issue creating an application with a new organization",
+          'There was an issue creating an application with a new organization',
       };
     }
   }
 
   // Sending emails to participants
   const emailPromises = participantEmails.map(async (participantEmail) => {
-    console.log("Sending emails...");
+    console.log('Sending emails...');
     const tokenExpiry = new Date(trainingSessionStartDate);
     tokenExpiry.setDate(tokenExpiry.getDate() - 7);
 
@@ -173,7 +173,7 @@ export const userNewApplication = async (
         trainingSessionId,
       });
 
-    console.log("Application, emails sent");
+    console.log('Application, emails sent');
     return newApplicationEmail({
       email,
       endDate: trainingSessionEndDate,
@@ -187,12 +187,12 @@ export const userNewApplication = async (
   const emailsSent = await Promise.all(emailPromises);
   if (emailsSent && applicationId) {
     return {
-      success: "Application created successfully",
+      success: 'Application created successfully',
       applicationId,
     };
   } else {
     return {
-      error: "Error with creating applications",
+      error: 'Error with creating applications',
     };
   }
 };

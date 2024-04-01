@@ -2,7 +2,7 @@
 import { currentRole } from '@/lib/auth';
 import { ApplicationStatus, Prisma, UserRole } from '@prisma/client';
 import { uploadPDFile } from '@/actions/firebase/storage.actions';
-import { ActionReturnType } from '@/types/action-return.types';
+import { ActionReturnType } from '@/types/actions.types';
 import { db } from '@/lib/db';
 import { approvedApplicationEmail } from '@/mail/application.mail';
 import { generatePDFFromApi } from '@/actions/pdf/generate-pdf-api.actions';

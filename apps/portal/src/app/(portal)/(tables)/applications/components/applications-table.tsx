@@ -1,42 +1,32 @@
-"use client";
+'use client';
 
-import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import React, { useMemo, useTransition } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { FilterPaginateAppliationType } from "@/validation/application.validation";
-import ApplicationViews from "./application-views";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { usePathname } from "next/navigation";
+import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import React, { useMemo, useTransition } from 'react';
+import { FilterPaginateAppliationType } from '@/validation/application.validation';
+import { usePathname } from 'next/navigation';
 import {
   FilterApplicationTableType,
   SingleTableApplication,
   filterAdminApplications,
   filterUserApplications,
-} from "@/actions/applications/filter.applications.actions";
-import { SubmitHandler } from "react-hook-form";
-import ApplicationsPagination from "./application-pagination";
-import ApplicationsFilter from "./applications-filter";
-import { filterApplicationsForm } from "./application-filter-fields";
-import applicationActionsColumn from "../../applications/components/application-action-column";
-import applicationProgramColumn from "../../applications/components/application-program-column";
-import applicationTrainingSessionColumn from "../../applications/components/application-training-session-column";
-import applicationStatusColumn from "../../applications/components/application-status-column";
-import tableSelectColumn from "./table-select-column";
-import applicantColumn from "../../applications/components/applicant-column";
-import applicationTypeColumn from "../../applications/components/application-type-column";
-import applicationFeeColumn from "../../applications/components/application-fee-column";
-import handleTableColumns from "./handle-table-columns";
+} from '@/actions/applications/filter.applications.actions';
+import { SubmitHandler } from 'react-hook-form';
+import TablesPagination from '../../components/table/table-pagination';
+import ApplicationsFilter from './filters/applications-filter-form';
+import { filterApplicationsForm } from './filters/application-filter-fields';
+import applicationActionsColumn from './columns/application-column-action';
+import applicationProgramColumn from './columns/application-column-program';
+import applicationTrainingSessionColumn from './columns/application-column-training-session';
+import applicationStatusColumn from './columns/application-column-status';
+import tableSelectColumn from '../../components/table/table-select-column';
+import applicantColumn from './columns/application-column-applicant';
+import applicationTypeColumn from './columns/application-column-type';
+import applicationFeeColumn from './columns/application-column-fee';
+import handleTableColumns from '../../components/table/handle-table-columns';
+import { TableActionProps } from '../../components/table/table-action';
+import { FileCheck2, Send, ShieldX } from 'lucide-react';
+import TableViews from '../../components/table/table-views';
+import ReusableTable from '../../components/table/reusable-table';
 
 const ApplicationsTable = ({
   existingUser,
@@ -63,7 +53,7 @@ const ApplicationsTable = ({
   const changePageSize = (newPageSize: string) => {
     startTransition(() => {
       filterAdminApplications({
-        page: "1", // Reset to page 1 to avoid out of bounds error
+        page: '1', // Reset to page 1 to avoid out of bounds error
         path,
         pageSize: newPageSize,
         ...filterParams,
@@ -161,7 +151,7 @@ const ApplicationsTable = ({
 
   // Parse hiddenColumns from a comma-separated string to an array
   const hiddenColumnsArray = useMemo(
-    () => (hiddenColumns ? hiddenColumns.split(",") : []),
+    () => (hiddenColumns ? hiddenColumns.split(',') : []),
     [hiddenColumns],
   );
 
@@ -197,9 +187,33 @@ const ApplicationsTable = ({
   });
 
   const someSelected = Object.keys(table.getState().rowSelection).length > 0;
+  const applicationActions: TableActionProps[] | undefined = someSelected
+    ? [
+        {
+          content: 'Approve applications',
+          icon: <FileCheck2 color="green" className="h-5 w-5" />,
+          isPending,
+          tooltipContentClassName: 'text-green-600',
+          className: 'mr-2',
+        },
+        {
+          content: 'Reject applications',
+          icon: <ShieldX color="red" className="h-5 w-5" />,
+          isPending,
+          tooltipContentClassName: 'text-red-600',
+          className: 'mr-2',
+        },
+
+        {
+          content: 'Send mass emails',
+          icon: <Send className="h-5 w-5" />,
+          isPending,
+        },
+      ]
+    : undefined;
 
   return (
-    <div className="flex flex-col space-y-4">
+    <div className="flex flex-col space-y-4 w-max">
       <ApplicationsFilter
         isPending={isPending}
         customSubmit={onSubmit}
@@ -208,71 +222,16 @@ const ApplicationsTable = ({
         startTransition={startTransition}
       />
       <div className="space-y-2 pb-4">
-        <ApplicationViews
+        <TableViews
           columnIds={allColumnIds}
           hiddenColumnArray={hiddenColumnsArray}
           isPending={isPending}
-          isSomeSelected={someSelected}
           updateViews={updateViews}
+          actions={applicationActions}
         />
-        <ScrollArea className="whitespace-nowrap rounded-md border md:w-[1150px] lg:w-[1150px]">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map(({ id, headers }, i) => (
-                <TableRow key={`${i}-${id}`} className="bg-background">
-                  {headers.map(
-                    ({ id, isPlaceholder, column, getContext }, i) => {
-                      const isFirstorLast = (i = 1 || i == headers.length - 1);
-                      return (
-                        <TableHead
-                          key={`${i}-${id}`}
-                          className={isFirstorLast ? "rounded-t-md" : undefined}
-                        >
-                          {isPlaceholder
-                            ? null
-                            : flexRender(column.columnDef.header, getContext())}
-                        </TableHead>
-                      );
-                    },
-                  )}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table
-                  .getRowModel()
-                  .rows.map(({ id, getIsSelected, getVisibleCells }, i) => (
-                    <TableRow
-                      key={`${i}-${id}`}
-                      data-state={getIsSelected() && "selected"}
-                    >
-                      {getVisibleCells().map(
-                        ({ id, column, getContext }, i) => (
-                          <TableCell key={`${i}-${id}`}>
-                            {flexRender(column.columnDef.cell, getContext())}
-                          </TableCell>
-                        ),
-                      )}
-                    </TableRow>
-                  ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    key="No application"
-                    colSpan={visibleColumns.length}
-                    className="h-24 text-center"
-                  >
-                    No applications found
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        <ReusableTable table={table} />
       </div>
-      <ApplicationsPagination
+      <TablesPagination
         changePage={changePage}
         changePageSize={changePageSize}
         isPending={isPending}

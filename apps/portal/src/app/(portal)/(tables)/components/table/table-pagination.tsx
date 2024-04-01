@@ -1,5 +1,5 @@
-"use client";
-import { Button } from "@/components/ui/button";
+'use client';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -8,18 +8,17 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { PaginationType } from "@/validation/pagination.validation";
+} from '@/components/ui/select';
+import { PaginationType } from '@/validation/pagination.validation';
 import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-} from "lucide-react";
-import React from "react";
+} from 'lucide-react';
+import React from 'react';
 
-interface ApplicationsPaginationProps
-  extends React.ComponentPropsWithoutRef<"div"> {
+interface TablesPaginationProps extends React.ComponentPropsWithoutRef<'div'> {
   isPending: boolean;
   pagination: PaginationType;
   count: number;
@@ -27,13 +26,13 @@ interface ApplicationsPaginationProps
   changePageSize: (newPageSize: string) => void;
 }
 
-const ApplicationsPagination = ({
+const TablesPagination = ({
   isPending,
   pagination: { page, pageSize },
   count,
   changePage,
   changePageSize,
-}: ApplicationsPaginationProps) => {
+}: TablesPaginationProps) => {
   const pageInt = parseInt(page);
   const pageSizeInt = parseInt(pageSize);
   // Calculates the paginated table startIndex and endIndex
@@ -50,8 +49,8 @@ const ApplicationsPagination = ({
     { length: Math.min(Math.ceil(count / 10), 10) },
     (_, i) => `${(i + 1) * 10}`,
   );
-  if (!pageSizeOptions.includes("100") && count > 50)
-    pageSizeOptions.push("100");
+  if (!pageSizeOptions.includes('100') && count > 50)
+    pageSizeOptions.push('100');
 
   // Make sure the current page size is included in the options
   if (!pageSizeOptions.includes(pageSize)) {
@@ -134,4 +133,4 @@ const ApplicationsPagination = ({
   );
 };
 
-export default ApplicationsPagination;
+export default TablesPagination;

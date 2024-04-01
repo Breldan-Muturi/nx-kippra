@@ -1,15 +1,15 @@
-"use server";
+'use server';
 
 import {
   NewApplicationForm,
   ValidatedApplicationForm,
   newApplicationSchema,
-} from "@/validation/application.validation";
-import { SponsorType } from "@prisma/client";
-import { validateNewOrganization } from "../organization/validate.organization.actions";
-import { currentUserId } from "@/lib/auth";
-import { ActionReturnType } from "@/types/action-return.types";
-import { db } from "@/lib/db";
+} from '@/validation/application.validation';
+import { SponsorType } from '@prisma/client';
+import { validateNewOrganization } from '../organization/validate.organization.actions';
+import { currentUserId } from '@/lib/auth';
+import { ActionReturnType } from '@/types/actions.types';
+import { db } from '@/lib/db';
 
 type ValidateApplicationType = ActionReturnType & {
   validatedApplication?: ValidatedApplicationForm;
@@ -20,13 +20,13 @@ export const validateApplication = async (
 ): Promise<ValidateApplicationType> => {
   const userId = await currentUserId();
   if (!userId) {
-    return { error: "Only authenticated users can create applications" };
+    return { error: 'Only authenticated users can create applications' };
   }
 
   // const { id: userId, email } = user;
   const validFields = newApplicationSchema.safeParse(data);
   // Consider returning Zod Errors
-  if (!validFields.success) return { error: "Invalid fields" };
+  if (!validFields.success) return { error: 'Invalid fields' };
 
   const {
     delivery,
@@ -64,7 +64,7 @@ export const validateApplication = async (
         return { error: validOrganization.error };
       }
     } else {
-      return { error: "New organization fields are invalid" };
+      return { error: 'New organization fields are invalid' };
     }
   }
 
@@ -129,7 +129,7 @@ export const validateApplication = async (
   };
 
   return {
-    success: "This application is valid, proceed to confirm",
+    success: 'This application is valid, proceed to confirm',
     validatedApplication: applicationData,
   };
 };

@@ -5,6 +5,7 @@ import {
   validString,
   validUrl,
 } from './reusable.validation';
+import { paginationSchema } from './pagination.validation';
 
 export const paymentFormSchema = z.object({
   amountExpected: z.number().positive(),
@@ -147,8 +148,47 @@ export const pesaflowInvoiceSchema = z.object({
 });
 export type PesaflowInvoiceType = z.infer<typeof pesaflowInvoiceSchema>;
 
-export const filterPaymentsSchema = z.object({
-  userId: z.string(),
-  // To Do: Add payment status, add payment program, add payment amount filters.
-});
+export const filterPaymentsSchema = z
+  .object({
+    userId: z.string(),
+    hiddenColumns: z.string().optional(),
+    status: z.string().optional(),
+    method: z.string().optional(),
+    invoiceNumber: z.string().optional(),
+    programTitle: z.string().optional(),
+    payeeName: z.string().optional(),
+    viewPayment: z.string().optional(),
+  })
+  .merge(paginationSchema);
 export type FilterPaymentsType = z.infer<typeof filterPaymentsSchema>;
+
+export const filterPaymentFormSchema = filterPaymentsSchema.pick({
+  status: true,
+  method: true,
+  invoiceNumber: true,
+  programTitle: true,
+  payeeName: true,
+});
+export type FilterPaymentFormType = z.infer<typeof filterPaymentFormSchema>;
+
+export const paymentsSearchParamsSchema = filterPaymentsSchema.omit({
+  userId: true,
+});
+export type PaymentsSearchParamsType = z.infer<
+  typeof paymentsSearchParamsSchema
+>;
+export const viewPaymentsRedirectSchema = paymentsSearchParamsSchema.omit({
+  viewPayment: true,
+});
+export type ViewPaymentsRedirectType = z.infer<
+  typeof viewPaymentsRedirectSchema
+>;
+
+export const filterPaymentsRedirectSchema = filterPaymentsSchema
+  .omit({ userId: true })
+  .extend({
+    path: validString('Pass a redirect path', 1),
+  });
+export type FilterPaymentsRedirectType = z.infer<
+  typeof filterPaymentsRedirectSchema
+>;

@@ -1,9 +1,9 @@
-"use server";
+'use server';
 
-import { currentUserId } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { deletedApplicationEmail } from "@/mail/application.mail";
-import { ActionReturnType } from "@/types/action-return.types";
+import { currentUserId } from '@/lib/auth';
+import { db } from '@/lib/db';
+import { deletedApplicationEmail } from '@/mail/application.mail';
+import { ActionReturnType } from '@/types/actions.types';
 
 export const userDeleteApplication = async (
   applicationId: string,
@@ -11,7 +11,7 @@ export const userDeleteApplication = async (
   const userId = await currentUserId();
 
   if (!userId) {
-    return { error: "First log in to delete this application" };
+    return { error: 'First log in to delete this application' };
   }
 
   const existingUser = await db.user.findUnique({
@@ -21,7 +21,7 @@ export const userDeleteApplication = async (
 
   if (!existingUser || !existingUser.id) {
     return {
-      error: "This user does not exist, and cannot delete applications",
+      error: 'This user does not exist, and cannot delete applications',
     };
   }
 
@@ -43,13 +43,13 @@ export const userDeleteApplication = async (
   });
 
   if (!existingApplication || !existingApplication.id) {
-    return { error: "This application cannot be deleted as it does not exist" };
+    return { error: 'This application cannot be deleted as it does not exist' };
   }
 
   if (existingUser.id !== existingApplication.owner.id) {
     return {
       error:
-        "Only the owner/applicant of this application is allowed to delete it",
+        'Only the owner/applicant of this application is allowed to delete it',
     };
   }
 
@@ -57,7 +57,7 @@ export const userDeleteApplication = async (
     ...existingApplication.participants
       .filter(({ email }) => email !== null)
       .map(({ email }) => email),
-    existingApplication.owner.email ?? "",
+    existingApplication.owner.email ?? '',
   ];
 
   try {
@@ -71,12 +71,12 @@ export const userDeleteApplication = async (
       venue: existingApplication.trainingSession.venue ?? undefined,
     });
     await db.application.delete({ where: { id: applicationId } });
-    return { success: "Application deleted successfully" };
+    return { success: 'Application deleted successfully' };
   } catch (error) {
-    console.log("Error deleting application: ", error);
+    console.log('Error deleting application: ', error);
     return {
       error:
-        "Something went wrong deleting this application. Please try again later",
+        'Something went wrong deleting this application. Please try again later',
     };
   }
 };

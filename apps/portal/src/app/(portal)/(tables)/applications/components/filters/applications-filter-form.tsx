@@ -1,21 +1,21 @@
-"use client";
-import ReusableForm from "@/components/form/ReusableForm";
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-import { cn } from "@/lib/utils";
-import { FormFieldType } from "@/types/form-field.types";
+'use client';
+import ReusableForm from '@/components/form/ReusableForm';
+import { Button } from '@/components/ui/button';
+import { Form } from '@/components/ui/form';
+import { cn } from '@/lib/utils';
+import { FormFieldType } from '@/types/form-field.types';
 import {
   FilterApplicationType,
   FilterPaginateAppliationType,
   filterPaginateApplicationSchema,
-} from "@/validation/application.validation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, Loader2, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+} from '@/validation/application.validation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CheckCircle2, Loader2, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import React from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
 
-type ApplicationFilterProps = React.ComponentPropsWithoutRef<"div"> & {
+type ApplicationFilterProps = React.ComponentPropsWithoutRef<'div'> & {
   filterValues: FilterPaginateAppliationType;
   filterForm: FormFieldType<FilterApplicationType>[];
   customSubmit: SubmitHandler<FilterPaginateAppliationType>;
@@ -29,6 +29,7 @@ const ApplicationsFilter = ({
   customSubmit,
   isPending,
   startTransition,
+  className,
   ...props
 }: ApplicationFilterProps) => {
   const { path, page, pageSize, ...filterParams } = filterValues;
@@ -36,23 +37,29 @@ const ApplicationsFilter = ({
 
   const form = useForm<FilterPaginateAppliationType>({
     resolver: zodResolver(filterPaginateApplicationSchema),
-    defaultValues: { path, page: "1", pageSize, ...filterParams },
-    mode: "onChange",
+    defaultValues: { path, page: '1', pageSize, ...filterParams },
+    mode: 'onChange',
   });
 
   const { watch, reset, handleSubmit } = form;
   const isAnyFieldFilled = () => {
     const { page, pageSize, path, hiddenColumns, ...filterFields } = watch();
     return Object.values(filterFields).some(
-      (value) => value !== null && value !== "" && value,
+      (value) => value !== null && value !== '' && value,
     );
   };
 
   const onClear = () => {
+    reset({
+      status: undefined,
+      type: undefined,
+      applicantName: '',
+      organizationName: '',
+      programTitle: '',
+    });
     startTransition(() => {
-      reset();
       const searchParams = new URLSearchParams({
-        page: "1",
+        page: '1',
         pageSize,
       });
       const clearPath = `${path}?${searchParams.toString()}`;
@@ -67,7 +74,8 @@ const ApplicationsFilter = ({
       >
         <div
           className={cn(
-            "grid w-full grid-cols-1 items-center gap-y-3 md:grid-cols-2 md:gap-x-3 lg:grid-cols-5 lg:items-start",
+            'grid w-full grid-cols-1 items-center gap-y-3 md:grid-cols-2 md:gap-x-3 lg:grid-cols-5 lg:items-start',
+            className,
           )}
           {...props}
         >

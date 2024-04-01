@@ -4,18 +4,18 @@ import {
   Delivery,
   Prisma,
   SponsorType,
-} from "@prisma/client";
-import { z } from "zod";
-import { newOrganizationSchema } from "./organization.validation";
-import { characterCount, email, validString } from "./reusable.validation";
-import { paginationSchema } from "./pagination.validation";
+} from '@prisma/client';
+import { z } from 'zod';
+import { newOrganizationSchema } from './organization.validation';
+import { characterCount, email, validString } from './reusable.validation';
+import { paginationSchema } from './pagination.validation';
 
 export const applicationParticipantSchema = z.object({
   userId: z.string().optional(),
   name: z.string(),
   email,
   citizenship: z.nativeEnum(Citizenship),
-  nationalId: validString("Enter a valid national Id", 5),
+  nationalId: validString('Enter a valid national Id', 5),
   organizationId: z.string().optional(),
   organizationName: characterCount(4, 100),
 });
@@ -127,19 +127,19 @@ export const newApplicationSchema = z
       ].every(Boolean);
       let message: string | undefined, path: (string | number)[] | undefined;
       if (!hasParticipant) {
-        message = "At least one participant required";
-        path = ["sponsorType"];
+        message = 'At least one participant required';
+        path = ['sponsorType'];
       } else if (sponsorType === SponsorType.SELF_SPONSORED && !selfSponsored) {
         message =
-          "Self sponsored organizations should not have organization info";
-        path = ["sponsorType"];
+          'Self sponsored organizations should not have organization info';
+        path = ['sponsorType'];
       } else if (isExistingOrganization && !existingOrganization) {
         (message =
-          "Select an organization from the dropdown and clear the new organization"),
-          (path = ["organizationId"]);
+          'Select an organization from the dropdown and clear the new organization'),
+          (path = ['organizationId']);
       } else if (!validOrganization) {
-        message = "Complete the form for the new organization details";
-        path = ["isExistingOrganization"];
+        message = 'Complete the form for the new organization details';
+        path = ['isExistingOrganization'];
       }
       return {
         message,
@@ -152,12 +152,12 @@ export type NewApplicationForm = z.infer<typeof newApplicationSchema>;
 
 export type ValidatedApplicationForm = Omit<
   NewApplicationForm,
-  | "isExistingOrganization"
-  | "isOnlyParticipant"
-  | "participants"
-  | "citizenFee"
-  | "eastAfricanFee"
-  | "globalFee"
+  | 'isExistingOrganization'
+  | 'isOnlyParticipant'
+  | 'participants'
+  | 'citizenFee'
+  | 'eastAfricanFee'
+  | 'globalFee'
 > & {
   applicationParticipants:
     | Prisma.ApplicationParticipantCreateNestedManyWithoutApplicationInput
@@ -169,20 +169,20 @@ export type ValidatedApplicationForm = Omit<
 
 export type ApplicationTypeForm = Pick<
   NewApplicationForm,
-  "sponsorType" | "delivery"
+  'sponsorType' | 'delivery'
 >;
 export type OrganizationDetailsForm = Pick<
   NewApplicationForm,
-  "isExistingOrganization" | "organizationId" | "newOrganization"
+  'isExistingOrganization' | 'organizationId' | 'newOrganization'
 >;
 
 export const filterApplicationSchema = z.object({
-  path: z.string().min(1, "Pass a redirect path"),
+  path: z.string().min(1, 'Pass a redirect path'),
   status: z.nativeEnum(ApplicationStatus).optional(),
   type: z.nativeEnum(SponsorType).optional(),
-  programId: z.string().optional(),
-  organizationId: z.string().optional(),
-  applicantId: z.string().optional(),
+  programTitle: z.string().optional(),
+  organizationName: z.string().optional(),
+  applicantName: z.string().optional(),
   hiddenColumns: z.string().optional(),
 });
 
@@ -218,7 +218,7 @@ export type FilterAdminApplicationType = z.infer<
 
 export type FilterApplicationType = Omit<
   z.infer<typeof filterApplicationSchema>,
-  "hiddenColumns"
+  'hiddenColumns'
 >;
 
 export const filterPaginateApplicationSchema =
@@ -229,7 +229,7 @@ export type FilterPaginateAppliationType = z.infer<
 
 export type DefaultApplicationParams = Omit<
   FilterPaginateAppliationType,
-  "path"
+  'path'
 >;
 export type ViewApplicationParams = DefaultApplicationParams & {
   viewApplication: string;

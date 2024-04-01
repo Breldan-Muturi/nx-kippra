@@ -7,7 +7,7 @@ import {
   removeMeOwnerEmail,
   removeMeParticipantEmail,
 } from '@/mail/application.mail';
-import { ActionReturnType } from '@/types/action-return.types';
+import { ActionReturnType } from '@/types/actions.types';
 import { Citizenship, Delivery } from '@prisma/client';
 import { format } from 'date-fns';
 

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React, { useTransition } from "react";
-import { Button } from "@/components/ui/button";
+import React, { useTransition } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
@@ -9,15 +9,15 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
-import { DefaultApplicationParams } from "@/validation/application.validation";
-import { usePathname } from "next/navigation";
+} from '@/components/ui/sheet';
+import { DefaultApplicationParams } from '@/validation/application.validation';
+import { usePathname } from 'next/navigation';
 import {
   filterAdminApplications,
   filterUserApplications,
-} from "@/actions/applications/filter.applications.actions";
-import { ViewApplicationReturnType } from "@/actions/applications/user/single.application.action";
-import { toast } from "sonner";
+} from '@/actions/applications/filter.applications.actions';
+import { ViewApplicationReturnType } from '@/actions/applications/user/single.application.action';
+import { toast } from 'sonner';
 
 const ApplicationSheet = ({
   viewParams,
@@ -40,7 +40,7 @@ const ApplicationSheet = ({
     });
   };
   let applicationInfo: string | undefined;
-  if ("error" in application) {
+  if ('error' in application) {
     // Display the error and dismiss the sheet
     toast.error(application.error);
     handleDismiss();
@@ -56,7 +56,7 @@ const ApplicationSheet = ({
     <Sheet open onOpenChange={dismissModal}>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Edit profile</SheetTitle>
+          <SheetTitle>View Application Details</SheetTitle>
           <SheetDescription>
             Make changes to your profile here. Click save when you are done.
           </SheetDescription>

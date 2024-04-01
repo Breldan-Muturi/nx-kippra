@@ -148,7 +148,7 @@ const PayApplication = ({
         <TabsTrigger value="existing">Existing Invoice</TabsTrigger>
         <TabsTrigger value="new">Initiate Payment</TabsTrigger>
       </TabsList>
-      <TabsContent value="existing">
+      <TabsContent value="existing" className="space-y-3">
         {paymentInfo.existingInvoices?.map(
           ({ createdAt, invoiceEmail, invoiceLink, invoiceNumber }) => {
             const formatedDate = format(createdAt, 'PPP');

@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
-import React from "react";
+} from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+import React from 'react';
 
 export type TableActionsType = {
   isVisible?: boolean;
@@ -16,10 +16,10 @@ export type TableActionsType = {
   isPending: boolean;
 };
 
-export type TableActionProps = React.ComponentPropsWithoutRef<"button"> &
+export type TableActionProps = React.ComponentPropsWithoutRef<'button'> &
   TableActionsType;
 
-const ApplicantAction = ({
+const TableAction = ({
   isVisible = true,
   content,
   icon,
@@ -35,7 +35,7 @@ const ApplicantAction = ({
         <Button
           variant="outline"
           size="icon"
-          className={cn("h-8 w-8 rounded-full", className)}
+          className={cn('h-8 w-8 rounded-full', className)}
           title={content}
           {...props}
         >
@@ -44,7 +44,7 @@ const ApplicantAction = ({
       </TooltipTrigger>
       <TooltipContent
         className={cn(
-          "rounded-md border bg-background p-2  text-gray-600",
+          'rounded-md border bg-background p-2  text-gray-600',
           tooltipContentClassName,
         )}
       >
@@ -54,4 +54,4 @@ const ApplicantAction = ({
   );
 };
 
-export default ApplicantAction;
+export default TableAction;

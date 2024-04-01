@@ -1,12 +1,12 @@
 import {
   ApplicationTableUser,
   SingleTableApplication,
-} from "@/actions/applications/filter.applications.actions";
-import { ColumnDef } from "@tanstack/react-table";
-import ApplicantAction, {
+} from '@/actions/applications/filter.applications.actions';
+import { ColumnDef } from '@tanstack/react-table';
+import TableAction, {
   TableActionProps,
-} from "../../components/table/table-action";
-import { ApplicationStatus, UserRole } from "@prisma/client";
+} from '../../../components/table/table-action';
+import { ApplicationStatus, UserRole } from '@prisma/client';
 import {
   Banknote,
   ClipboardX,
@@ -15,20 +15,19 @@ import {
   Send,
   ShieldX,
   Trash2,
-} from "lucide-react";
-
-type HandleSingleApplication = (applicationId: string) => void;
+} from 'lucide-react';
+import { ActionTriggerType } from '@/types/actions.types';
 
 interface ApplicationActionColumnProps {
   existingUser: ApplicationTableUser;
   isPending: boolean;
-  viewApplication: HandleSingleApplication;
-  approveApplication: HandleSingleApplication;
-  rejectApplication: HandleSingleApplication;
-  sendEmail: HandleSingleApplication;
-  payApplication: HandleSingleApplication;
-  removeApplication: HandleSingleApplication;
-  deleteApplication: HandleSingleApplication;
+  viewApplication: ActionTriggerType;
+  approveApplication: ActionTriggerType;
+  rejectApplication: ActionTriggerType;
+  sendEmail: ActionTriggerType;
+  payApplication: ActionTriggerType;
+  removeApplication: ActionTriggerType;
+  deleteApplication: ActionTriggerType;
 }
 
 const applicationActionsColumn = ({
@@ -43,8 +42,8 @@ const applicationActionsColumn = ({
   deleteApplication,
 }: ApplicationActionColumnProps): ColumnDef<SingleTableApplication> => {
   return {
-    id: "actions",
-    header: "Actions",
+    id: 'actions',
+    header: 'Actions',
     cell: ({ row }) => {
       const {
         owner: { name, id: ownerId },
@@ -61,7 +60,7 @@ const applicationActionsColumn = ({
 
       const applicationActions: TableActionProps[] = [
         {
-          content: `View ${isAdmin ? `${name}'s` : ""} application`,
+          content: `View ${isAdmin ? `${name}'s` : ''} application`,
           icon: <MousePointerSquare className="size-5" />,
           isPending,
           onClick: () => viewApplication(id),
@@ -69,12 +68,12 @@ const applicationActionsColumn = ({
         {
           content: `Approve ${name} application`,
           isVisible:
-            status !==
-              (ApplicationStatus.APPROVED || ApplicationStatus.COMPLETED) &&
+            status !== ApplicationStatus.APPROVED &&
+            status !== ApplicationStatus.COMPLETED &&
             isAdmin,
           icon: <FileCheck2 color="green" className="size-5" />,
           isPending,
-          tooltipContentClassName: "text-green-600",
+          tooltipContentClassName: 'text-green-600',
           onClick: () => approveApplication(id),
         },
         {
@@ -82,35 +81,35 @@ const applicationActionsColumn = ({
           isVisible: status !== ApplicationStatus.COMPLETED && isAdmin,
           icon: <ShieldX color="red" className="size-5" />,
           isPending,
-          tooltipContentClassName: "text-red-600",
+          tooltipContentClassName: 'text-red-600',
           onClick: () => rejectApplication(id),
         },
         {
-          content: "Initiate payment for this application",
+          content: 'Initiate payment for this application',
           isVisible: isOwner && status === ApplicationStatus.APPROVED,
           icon: <Banknote color="green" className="size-5" />,
           isPending,
-          tooltipContentClassName: "text-green-600",
+          tooltipContentClassName: 'text-green-600',
           onClick: () => payApplication(id),
         },
         {
-          content: "Delete this application",
+          content: 'Delete this application',
           isVisible: isOwner,
           icon: <Trash2 color="red" className="size-5" />,
           isPending,
-          tooltipContentClassName: "text-red-600",
+          tooltipContentClassName: 'text-red-600',
           onClick: () => deleteApplication(id),
         },
         {
-          content: "Remove me from this application",
+          content: 'Remove me from this application',
           isVisible: !!isParticipant,
           icon: <ClipboardX color="red" className="size-5" />,
           isPending,
-          tooltipContentClassName: "text-red-600",
+          tooltipContentClassName: 'text-red-600',
           onClick: () => removeApplication(id),
         },
         {
-          content: `Send an email to ${isAdmin ? name : "the portal admin"}`,
+          content: `Send an email to ${isAdmin ? name : 'the portal admin'}`,
           icon: <Send className="h-5 w-5" />,
           isPending,
           onClick: () => sendEmail(id),
@@ -119,7 +118,7 @@ const applicationActionsColumn = ({
       return (
         <div className="flex items-center space-x-2">
           {applicationActions.map((action) => (
-            <ApplicantAction key={action.content} {...action} />
+            <TableAction key={action.content} {...action} />
           ))}
         </div>
       );

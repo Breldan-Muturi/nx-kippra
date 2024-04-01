@@ -1,16 +1,17 @@
-"use server";
+'use server';
 
-import { Hero } from "@/components/layouts/hero";
-import { db } from "@/lib/db";
-import SectionWrapper from "../components/section-wrapper";
-import ResponsiveGrid from "@/components/layouts/responsive-grid";
-import ProgramCard from "../components/program-card";
-import { DatePresets, FormFieldType } from "@/types/form-field.types";
-import { FilterTrainingSessionSchemaType } from "@/validation/training-session.validation";
-import TrainingCalendarFilter from "../components/training-calendar-filter";
-import { Delivery, Prisma, Venue } from "@prisma/client";
-import TrainingSessionCard from "../components/training-session";
-import { formatDeliveryMode, formatVenues } from "@/helpers/enum.helpers";
+import { Hero } from '@/components/layouts/hero';
+import { db } from '@/lib/db';
+import SectionWrapper from '../components/section-wrapper';
+import ResponsiveGrid from '@/components/layouts/responsive-grid';
+import ProgramCard from '../components/program-card';
+import { DatePresets, FormFieldType } from '@/types/form-field.types';
+import { FilterTrainingSessionSchemaType } from '@/validation/training-session.validation';
+import TrainingCalendarFilter from '../components/training-calendar-filter';
+import { Delivery, Prisma, Venue } from '@prisma/client';
+import TrainingSessionCard from '../components/training-session';
+import { formatDeliveryMode, formatVenues } from '@/helpers/enum.helpers';
+import { processSearchString } from '@/helpers/filter.helpers';
 
 interface PageProps {
   searchParams: {
@@ -34,9 +35,8 @@ const Homepage = async ({
   };
 
   const searchTrainingSessionString = name
-    ?.split(" ")
-    .filter((word) => word.length > 0)
-    .join(" & ");
+    ? processSearchString(name)
+    : undefined;
 
   const searchTrainingSessionFilter: Prisma.TrainingSessionWhereInput =
     searchTrainingSessionString
@@ -62,7 +62,7 @@ const Homepage = async ({
         select: { title: true, id: true },
       },
     },
-    orderBy: { startDate: "asc" },
+    orderBy: { startDate: 'asc' },
   });
 
   const trainingSessionFiltersPromise = db.trainingSession.findMany({
@@ -121,19 +121,19 @@ const Homepage = async ({
 
   const datePresets: DatePresets[] = [
     {
-      dateLabel: "Today",
+      dateLabel: 'Today',
       value: 0,
     },
     {
-      dateLabel: "Tomorrow",
+      dateLabel: 'Tomorrow',
       value: 1,
     },
     {
-      dateLabel: "In 3 days",
+      dateLabel: 'In 3 days',
       value: 3,
     },
     {
-      dateLabel: "In a week",
+      dateLabel: 'In a week',
       value: 7,
     },
   ];
@@ -141,43 +141,43 @@ const Homepage = async ({
   const trainingFilterFields: FormFieldType<FilterTrainingSessionSchemaType>[] =
     [
       {
-        name: "name",
-        type: "search",
-        label: "Course",
-        placeholder: "Search by course name",
+        name: 'name',
+        type: 'search',
+        label: 'Course',
+        placeholder: 'Search by course name',
       },
       {
-        name: "venue",
-        type: "select",
-        label: "Venue",
-        selectLabel: "Select Venue",
-        placeholder: "Select Venue",
+        name: 'venue',
+        type: 'select',
+        label: 'Venue',
+        selectLabel: 'Select Venue',
+        placeholder: 'Select Venue',
         options: trainingVenues,
       },
       {
-        name: "mode",
-        type: "select",
-        label: "Delivery Mode",
-        selectLabel: "Select mode",
-        placeholder: "Delivery mode",
+        name: 'mode',
+        type: 'select',
+        label: 'Delivery Mode',
+        selectLabel: 'Select mode',
+        placeholder: 'Delivery mode',
         options: trainingModes,
       },
       {
-        name: "startDate",
-        label: "Start Date",
-        placeholder: "Select start date",
-        selectLabel: "Select one",
-        type: "date",
+        name: 'startDate',
+        label: 'Start Date',
+        placeholder: 'Select start date',
+        selectLabel: 'Select one',
+        type: 'date',
         minDate,
         maxDate,
         datePresets,
       },
       {
-        name: "endDate",
-        label: "End Date",
-        placeholder: "Select end date",
-        selectLabel: "Select one",
-        type: "date",
+        name: 'endDate',
+        label: 'End Date',
+        placeholder: 'Select end date',
+        selectLabel: 'Select one',
+        type: 'date',
         minDate,
         maxDate,
         datePresets,

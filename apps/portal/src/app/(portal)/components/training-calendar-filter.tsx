@@ -1,21 +1,21 @@
-"use client";
-import ReusableForm from "@/components/form/ReusableForm";
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-import { filterCourse } from "@/actions/training-session/training-session.actions";
-import { FormFieldType } from "@/types/form-field.types";
-import { cn } from "@/lib/utils";
+'use client';
+import ReusableForm from '@/components/form/ReusableForm';
+import { Button } from '@/components/ui/button';
+import { Form } from '@/components/ui/form';
+import { filterCourse } from '@/actions/training-session/training-session.actions';
+import { FormFieldType } from '@/types/form-field.types';
+import { cn } from '@/lib/utils';
 import {
   FilterTrainingSessionSchemaType,
   filterTrainingSessionsSchema,
-} from "@/validation/training-session.validation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, Loader2, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React, { useTransition } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+} from '@/validation/training-session.validation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CheckCircle2, Loader2, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import React, { useTransition } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
 interface TrainingCalendarFilterProps
-  extends React.ComponentPropsWithoutRef<"div"> {
+  extends React.ComponentPropsWithoutRef<'div'> {
   filterFields: FormFieldType<FilterTrainingSessionSchemaType>[];
   filterValues: FilterTrainingSessionSchemaType;
 }
@@ -31,7 +31,7 @@ const TrainingCalendarFilter = ({
 
   const form = useForm<FilterTrainingSessionSchemaType>({
     resolver: zodResolver(filterTrainingSessionsSchema),
-    mode: "onChange",
+    mode: 'onChange',
     defaultValues: filterValues,
   });
 
@@ -39,7 +39,7 @@ const TrainingCalendarFilter = ({
 
   const isAnyFieldFilled = () => {
     return Object.values(watch()).some(
-      (value) => value !== null && value !== "" && value,
+      (value) => value !== null && value !== '' && value,
     );
   };
 
@@ -51,13 +51,13 @@ const TrainingCalendarFilter = ({
 
   const onClear = () => {
     reset({
-      name: "",
+      name: '',
       mode: undefined,
       endDate: undefined,
       venue: undefined,
       startDate: undefined,
     });
-    router.push("/", { scroll: false });
+    router.push('/', { scroll: false });
   };
 
   return (
@@ -68,7 +68,7 @@ const TrainingCalendarFilter = ({
       >
         <div
           className={cn(
-            "grid w-full grid-cols-1 items-center gap-y-3 md:grid-cols-2 md:gap-x-3 lg:grid-cols-5 lg:items-start",
+            'grid w-full grid-cols-1 items-center gap-y-3 md:grid-cols-2 md:gap-x-3 lg:grid-cols-5 lg:items-start',
           )}
           {...props}
         >

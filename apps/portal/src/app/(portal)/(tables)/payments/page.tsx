@@ -1,20 +1,40 @@
-import { filterPayments } from '@/actions/payments/filter.payment.actions';
+import { filterPaymentsTable } from '@/actions/payments/filter.payment.actions';
 import { currentUserId } from '@/lib/auth';
-import { FilterPaymentsType } from '@/validation/payment.validation';
+import {
+  FilterPaymentsType,
+  PaymentsSearchParamsType,
+  ViewPaymentsRedirectType,
+  filterPaymentsSchema,
+  viewPaymentsRedirectSchema,
+} from '@/validation/payment.validation';
 import { redirect } from 'next/navigation';
 import React from 'react';
+import PaymentsTable from './components/payments-table';
+import { getSinglePayment } from '@/actions/payments/single.payment.actions';
+import PaymentSheetView from './components/sheets/payment-sheet-view';
 
-const Payments = async () => {
+const Payments = async ({
+  searchParams,
+}: {
+  searchParams: PaymentsSearchParamsType;
+}) => {
   const userId = await currentUserId();
   if (!userId) {
     return redirect('/account');
   }
-  const filterPaymentsParams: FilterPaymentsType = {
+  const filterPaymentsParams: FilterPaymentsType = filterPaymentsSchema.parse({
     userId,
-  };
+    ...searchParams,
+  });
 
-  const [paymentsPromise] = await Promise.allSettled([
-    filterPayments(filterPaymentsParams),
+  const viewParams: ViewPaymentsRedirectType =
+    viewPaymentsRedirectSchema.parse(searchParams);
+
+  const paymentId = filterPaymentsParams.viewPayment;
+
+  const [paymentsPromise, singlePaymentPromise] = await Promise.allSettled([
+    filterPaymentsTable(filterPaymentsParams),
+    paymentId ? getSinglePayment({ userId, paymentId }) : Promise.resolve(null),
   ]);
 
   if (
@@ -26,16 +46,24 @@ const Payments = async () => {
     );
   }
 
-  const payments = paymentsPromise.value.payments;
-  const paymentFilters = paymentsPromise.value.paymentFilters;
+  const paymentDetailsInfo =
+    singlePaymentPromise.status === 'fulfilled'
+      ? singlePaymentPromise.value
+      : null;
 
   return (
-    <div className="flex flex-col p-4 w-[800px]">
-      <p className="text-green-600 font-semibold">Payment Filters</p>
-      <p>{JSON.stringify(paymentFilters)}</p>
-      <p className="text-green-600 font-semibold">Payments</p>
-      <p>{JSON.stringify(payments)}</p>
-    </div>
+    <>
+      <PaymentsTable
+        paymentsInfo={paymentsPromise.value}
+        tableParams={filterPaymentsParams}
+      />
+      {paymentDetailsInfo && (
+        <PaymentSheetView
+          payment={paymentDetailsInfo}
+          viewParams={viewParams}
+        />
+      )}
+    </>
   );
 };
 
