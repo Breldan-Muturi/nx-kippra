@@ -1,24 +1,24 @@
 import { SingleTableApplication } from '@/actions/applications/filter.applications.actions';
 import { ColumnDef } from '@tanstack/react-table';
-import ApplicantCell from '../../../components/table/applicant-cell';
+import TableUserCell from '../../../../../../components/table/table-user-cell';
 
 const applicantColumn: ColumnDef<SingleTableApplication> = {
   id: 'applicant',
   header: 'Applicant',
   cell: ({ row }) => {
-    let applicationOrganization: string | null = null;
+    let userTableOrganization: string | null = null;
     const {
       owner: { name, image },
       organization,
     } = row.original;
     if (organization) {
-      applicationOrganization = organization.name;
+      userTableOrganization = organization.name;
     }
     return (
-      <ApplicantCell
-        applicantName={name ?? 'Unnamed applicant'}
-        applicantImage={image ?? undefined}
-        applicationOrganization={applicationOrganization}
+      <TableUserCell
+        userName={name ?? 'Unnamed applicant'}
+        userImage={image ?? undefined}
+        userTableOrganization={userTableOrganization}
       />
     );
   },

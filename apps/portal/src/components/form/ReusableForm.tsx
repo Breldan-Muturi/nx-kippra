@@ -1,26 +1,28 @@
-import React from "react";
-import TextField from "./TextField";
-import CheckField from "./CheckField";
-import PasswordField from "./PasswordField";
+import React from 'react';
+import TextField from './TextField';
+import CheckField from './CheckField';
+import PasswordField from './PasswordField';
 import {
   CheckFieldType,
   ComboBoxFieldType,
   DateFieldType,
   FileUploadFieldType,
   FormFieldType,
+  ImageUploadFieldType,
   PasswordFieldType,
   SearchFieldType,
   SelectFieldType,
   SwitchFieldType,
   TextFieldType,
-} from "@/types/form-field.types";
-import { FieldValues } from "react-hook-form";
-import DateField from "./DateField";
-import SelectField from "./SelectField";
-import SearchField from "./SearchField";
-import ComboboxField from "./combobox/ComboboxField";
-import FileUploadField from "./FileUploadField";
-import SwitchField from "./SwitchField";
+} from '@/types/form-field.types';
+import { FieldValues } from 'react-hook-form';
+import DateField from './DateField';
+import SelectField from './SelectField';
+import SearchField from './SearchField';
+import ComboboxField from './combobox/ComboboxField';
+import FileUploadField from './FileUploadField';
+import SwitchField from './SwitchField';
+import ImageUploadField from './images/ImageUploadField';
 
 interface ReusableFormProps<T extends FieldValues> {
   formFields: FormFieldType<T>[];
@@ -35,28 +37,31 @@ const ReusableForm = <T extends FieldValues>({
         const { type, name } = field;
         const key = `${name}-${i}`;
         switch (type) {
-          case "checkbox":
+          case 'checkbox':
             const checkField = field as CheckFieldType<T>;
             return <CheckField key={key} {...checkField} />;
-          case "password":
+          case 'password':
             const passwordField = field as PasswordFieldType<T>;
             return <PasswordField key={key} {...passwordField} />;
-          case "date":
+          case 'singleImage':
+            const imageUploadField = field as ImageUploadFieldType<T>;
+            return <ImageUploadField key={key} {...imageUploadField} />;
+          case 'date':
             const dateField = field as DateFieldType<T>;
             return <DateField key={key} {...dateField} />;
-          case "select":
+          case 'select':
             const selectField = field as SelectFieldType<T>;
             return <SelectField key={key} {...selectField} />;
-          case "search":
+          case 'search':
             const searchField = field as SearchFieldType<T>;
             return <SearchField key={key} {...searchField} />;
-          case "combobox":
+          case 'combobox':
             const comboboxField = field as ComboBoxFieldType<T>;
             return <ComboboxField key={key} {...comboboxField} />;
-          case "file":
+          case 'file':
             const fileUploadField = field as FileUploadFieldType<T>;
             return <FileUploadField key={key} {...fileUploadField} />;
-          case "switch":
+          case 'switch':
             const switchField = field as SwitchFieldType<T>;
             return <SwitchField key={key} {...switchField} />;
           default:

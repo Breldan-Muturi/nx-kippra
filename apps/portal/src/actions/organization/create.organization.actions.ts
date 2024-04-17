@@ -1,10 +1,10 @@
-"use server";
+'use server';
 
-import { currentUserId } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { NewOrganizationForm } from "@/validation/organization.validation";
-import { Organization, OrganizationRole } from "@prisma/client";
-import { validateNewOrganization } from "./validate.organization.actions";
+import { currentUserId } from '@/lib/auth';
+import { db } from '@/lib/db';
+import { NewOrganizationForm } from '@/validation/organization/organization.validation';
+import { Organization, OrganizationRole } from '@prisma/client';
+import { validateNewOrganization } from './validate.organization.actions';
 
 export const userNewOrganization = async (data: {
   organization: NewOrganizationForm;
@@ -15,21 +15,21 @@ export const userNewOrganization = async (data: {
   organization?: Organization;
 }> => {
   const { organization, userId: userIdProp } = data;
-  let userId: string = "";
+  let userId: string = '';
 
   if (userIdProp) {
     userId = userIdProp;
   } else {
-    userId = (await currentUserId()) || "";
-    if (userId === "") {
-      return { error: "You are not authorized" };
+    userId = (await currentUserId()) || '';
+    if (userId === '') {
+      return { error: 'You are not authorized' };
     }
   }
 
   const validatedResponse = await validateNewOrganization(organization);
   if (validatedResponse.error) return { error: validatedResponse.error };
   if (!validatedResponse.validatedData)
-    return { error: "Could not validate new organization" };
+    return { error: 'Could not validate new organization' };
   const {
     organizationAddress,
     organizationEmail,
@@ -59,10 +59,10 @@ export const userNewOrganization = async (data: {
     });
 
     return {
-      success: "New organization created successfully",
+      success: 'New organization created successfully',
       organization: newOrganization,
     };
   } catch {
-    return { error: "Something went wrong creating the organization" };
+    return { error: 'Something went wrong creating the organization' };
   }
 };

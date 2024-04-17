@@ -4,8 +4,8 @@ import { db } from '@/lib/db';
 import { generateApplicationConfirmationToken } from '@/lib/tokens';
 import { newApplicationEmail } from '@/mail/application.mail';
 import { ActionReturnType } from '@/types/actions.types';
-import { ValidatedApplicationForm } from '@/validation/application.validation';
-import { newOrganizationSchema } from '@/validation/organization.validation';
+import { ValidatedApplicationForm } from '@/validation/applications/user.application.validation';
+import { newOrganizationSchema } from '@/validation/organization/organization.validation';
 import { OrganizationRole, Prisma, SponsorType } from '@prisma/client';
 
 type NewApplicationReturnType = ActionReturnType & {

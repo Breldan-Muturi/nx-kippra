@@ -1,12 +1,12 @@
-import { currentUserId } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { OrganizationRole } from "@prisma/client";
-import { NextResponse } from "next/server";
-import React from "react";
-import ApplicationForm from "./components/ApplicationForm";
-import { SelectOptions } from "@/types/form-field.types";
+import { currentUserId } from '@/lib/auth';
+import { db } from '@/lib/db';
+import { OrganizationRole } from '@prisma/client';
+import { NextResponse } from 'next/server';
+import React from 'react';
+import ApplicationForm from './components/application-form';
+import { SelectOptions } from '@/types/form-field.types';
 // import { env } from "process";
-import { ParticipantSelectOption } from "@/validation/application.validation";
+import { ParticipantSelectOption } from '@/validation/applications/user.application.validation';
 
 interface ApplicationPageProps {
   params: {
@@ -22,7 +22,7 @@ const ApplicationPage = async ({
 
   if (!userId)
     return NextResponse.rewrite(
-      new URL("/account/error", process.env.NEXT_PUBLIC_APP_URL),
+      new URL('/account/error', process.env.NEXT_PUBLIC_APP_URL),
     );
 
   const trainingSessionApplicationDataPromise = db.trainingSession.findUnique({
@@ -92,7 +92,7 @@ const ApplicationPage = async ({
 
   if (!trainingSessionApplicationData)
     return NextResponse.rewrite(
-      new URL("/account/error", process.env.NEXT_PUBLIC_APP_URL),
+      new URL('/account/error', process.env.NEXT_PUBLIC_APP_URL),
     );
 
   const organizationOptions: SelectOptions[] = userOwnedOrganizations.map(

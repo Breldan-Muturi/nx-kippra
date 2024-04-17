@@ -1,14 +1,20 @@
-"use server";
+'use server';
 
-import { db } from "@/lib/db";
+import { db } from '@/lib/db';
 import {
   NewOrganizationForm,
   newOrganizationSchema,
-} from "@/validation/organization.validation";
+} from '@/validation/organization/organization.validation';
 
-export const validateNewOrganization = async (data: NewOrganizationForm) => {
+export type ValidOrganizationReturn =
+  | { error: string }
+  | { success: string; validNewOrganization: NewOrganizationForm };
+
+export const validateNewOrganization = async (
+  data: NewOrganizationForm,
+): Promise<ValidOrganizationReturn> => {
   const validatedFields = newOrganizationSchema.safeParse(data);
-  if (!validatedFields.success) return { error: "Invalid Fields" };
+  if (!validatedFields.success) return { error: 'Invalid Fields' };
   const {
     organizationAddress,
     organizationEmail,
@@ -16,37 +22,33 @@ export const validateNewOrganization = async (data: NewOrganizationForm) => {
     ...organizationFields
   } = validatedFields.data;
 
-  const existingOrganizationNamePromise = db.organization.findUnique({
-    where: { name: organizationFields.name },
-  });
-  const existingOrganizationPhonePromise = db.organization.findUnique({
-    where: { phone: organizationPhone },
-  });
-  const existingOrganizationEmailPromise = db.organization.findUnique({
-    where: { email: organizationEmail.toLowerCase() },
-  });
-
   const [
     existingOrganizationName,
     existingOrganizationPhone,
     existingOrganizationEmail,
   ] = await Promise.all([
-    existingOrganizationNamePromise,
-    existingOrganizationPhonePromise,
-    existingOrganizationEmailPromise,
+    db.organization.findUnique({
+      where: { name: organizationFields.name },
+    }),
+    db.organization.findUnique({
+      where: { phone: organizationPhone },
+    }),
+    db.organization.findUnique({
+      where: { email: organizationEmail.toLowerCase() },
+    }),
   ]);
 
   if (existingOrganizationName)
-    return { error: "An organization with the same name already exists" };
+    return { error: 'An organization with the same name already exists' };
   if (existingOrganizationPhone)
     return {
-      error: "An organization with the same phone number already exists",
+      error: 'An organization with the same phone number already exists',
     };
   if (existingOrganizationEmail)
-    return { error: "An organization with the same email already exists" };
+    return { error: 'An organization with the same email already exists' };
 
   return {
-    success: "New organization is valid",
-    validatedData: validatedFields.data,
+    success: 'New organization is valid',
+    validNewOrganization: validatedFields.data,
   };
 };

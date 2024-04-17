@@ -10,7 +10,7 @@ import {
   FilterUserApplicationType,
   filterAdminApplicationSchema,
   filterUserApplicationSchema,
-} from '@/validation/application.validation';
+} from '@/validation/applications/user.application.validation';
 import { Prisma, UserRole } from '@prisma/client';
 import { ColumnDef } from '@tanstack/react-table';
 import filterRedirect from '../redirect.actions';

@@ -1,6 +1,6 @@
 import { FilterPaymentFieldsType } from '@/actions/payments/filter.payment.actions';
 import { FormFieldType } from '@/types/form-field.types';
-import { FilterPaymentFormType } from '@/validation/payment.validation';
+import { FilterPaymentFormType } from '@/validation/payment/payment.validation';
 
 export const filterPaymentsForm = ({
   channelFilter,

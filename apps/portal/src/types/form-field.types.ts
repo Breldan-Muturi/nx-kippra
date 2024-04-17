@@ -1,16 +1,8 @@
-import { OurFileRouterKeys } from "@/app/api/uploadthing/core";
-import { ComponentPropsWithRef, HTMLInputTypeAttribute } from "react";
-import {
-  ArrayPath,
-  FieldArrayWithId,
-  FieldValues,
-  Path,
-  PathValue,
-  UseFieldArrayProps,
-  UseFieldArrayReturn,
-} from "react-hook-form";
-import { FileDisplayProps, FileUploaderProps } from "./file.types";
-import { CheckTypeProps } from "./check.types";
+import { OurFileRouterKeys } from '@/app/api/uploadthing/core';
+import { HTMLInputTypeAttribute } from 'react';
+import { FieldValues, Path, PathValue } from 'react-hook-form';
+import { FileDisplayProps, FileUploaderProps } from './file.types';
+import { CheckTypeProps } from './check.types';
 
 type BaseFormFieldType<T extends FieldValues> = {
   name: Path<T>;
@@ -36,15 +28,20 @@ export type ComboboxSelectOptions<T extends FieldValues> = SelectOptions & {
 };
 
 export type SearchFieldType<T extends FieldValues> = BaseFormFieldType<T> & {
-  type: "search";
+  type: 'search';
 };
 
 export type PasswordFieldType<T extends FieldValues> = BaseFormFieldType<T> & {
-  type: "password";
+  type: 'password';
 };
 
+export type ImageUploadFieldType<T extends FieldValues> =
+  BaseFormFieldType<T> & {
+    type: 'singleImage';
+  };
+
 export type CheckFieldType<T extends FieldValues> = BaseFormFieldType<T> & {
-  type: "checkbox";
+  type: 'checkbox';
   checkComponent?: ({
     value,
     onChange,
@@ -53,13 +50,13 @@ export type CheckFieldType<T extends FieldValues> = BaseFormFieldType<T> & {
 };
 
 export type SelectFieldType<T extends FieldValues> = BaseFormFieldType<T> & {
-  type: "select";
+  type: 'select';
   selectLabel?: string;
   options: SelectOptions[];
 };
 
 export type ComboBoxFieldType<T extends FieldValues> = BaseFormFieldType<T> & {
-  type: "combobox";
+  type: 'combobox';
   noResults?: string;
   comboboxOptions: ComboboxSelectOptions<T>[];
   comboboxTrigger: (value: PathValue<T, Path<T>>) => React.ReactNode;
@@ -70,7 +67,7 @@ export type ComboBoxFieldType<T extends FieldValues> = BaseFormFieldType<T> & {
 };
 
 export type DateFieldType<T extends FieldValues> = BaseFormFieldType<T> & {
-  type: "date";
+  type: 'date';
   selectLabel?: string;
   minDate?: Date;
   maxDate?: Date;
@@ -79,14 +76,14 @@ export type DateFieldType<T extends FieldValues> = BaseFormFieldType<T> & {
 
 export type FileUploadFieldType<T extends FieldValues> =
   BaseFormFieldType<T> & {
-    type: "file";
+    type: 'file';
     endpoint: OurFileRouterKeys;
     fileUploadComponent?: (props: FileUploaderProps) => React.ReactNode;
     fileDisplayComponent?: (props: FileDisplayProps) => React.ReactNode;
   };
 
 export type SwitchFieldType<T extends FieldValues> = BaseFormFieldType<T> & {
-  type: "switch";
+  type: 'switch';
   label: string;
   description: React.ReactNode;
   asset?: React.ReactNode;
@@ -95,14 +92,15 @@ export type SwitchFieldType<T extends FieldValues> = BaseFormFieldType<T> & {
 export type TextFieldType<T extends FieldValues> = BaseFormFieldType<T> & {
   type?: Exclude<
     HTMLInputTypeAttribute,
-    | "search"
-    | "password"
-    | "checkbox"
-    | "select"
-    | "date"
-    | "combobox"
-    | "file"
-    | "array"
+    | 'search'
+    | 'password'
+    | 'checkbox'
+    | 'select'
+    | 'date'
+    | 'combobox'
+    | 'file'
+    | 'array'
+    | 'singleImage'
   >;
   minValue?: number;
 };
@@ -111,6 +109,7 @@ export type FormFieldType<T extends FieldValues> =
   | TextFieldType<T>
   | SearchFieldType<T>
   | PasswordFieldType<T>
+  | ImageUploadFieldType<T>
   | CheckFieldType<T>
   | SelectFieldType<T>
   | ComboBoxFieldType<T>

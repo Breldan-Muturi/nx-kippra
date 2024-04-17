@@ -2,7 +2,7 @@ import { SinglePaymentDetail } from '@/actions/payments/filter.payment.actions';
 import { ColumnDef } from '@tanstack/react-table';
 import TableAction, {
   TableActionProps,
-} from '../../../components/table/table-action';
+} from '../../../../../../components/table/table-action';
 import { Download, MousePointerSquare } from 'lucide-react';
 import { ActionTriggerType } from '@/types/actions.types';
 

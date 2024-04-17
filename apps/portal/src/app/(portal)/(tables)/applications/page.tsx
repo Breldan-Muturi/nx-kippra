@@ -2,25 +2,25 @@ import {
   DefaultApplicationParams,
   FilterAdminApplicationType,
   FilterUserApplicationType,
-} from '@/validation/application.validation';
+} from '@/validation/applications/user.application.validation';
 import React from 'react';
 import ApplicationsTable from './components/applications-table';
 import {
   PaginationType,
   paginationSchema as zodPaginationSchema,
 } from '@/validation/pagination.validation';
-import ApproveApplication from '../components/modals/approve-application';
-import RejectApplication from '../components/modals/reject-application';
-import SendEmail from '../components/modals/send-email';
+import ApproveApplication from './components/modals/application-modal-approve';
+import RejectApplication from './components/modals/application-modal-reject';
+import SendEmail from './components/modals/application-modal-email';
 import { filterApplicationsTable } from '@/actions/applications/filter.applications.actions';
-import DeleteApplication from '../components/modals/delete-application';
+import DeleteApplication from './components/modals/application-modal-delete';
 import { currentUser } from '@/lib/auth';
 import { UserRole } from '@prisma/client';
 import { getApplicationByIdPromise } from '@/actions/applications/user/single.application.action';
-import PayApplication from '../components/modals/pay-application';
+import PayApplication from './components/modals/application-modal-pay';
 import { getPaymentApplicationPromise } from '@/actions/applications/user/pay.application.actions';
-import RemoveApplication from '../components/modals/remove-me-application';
-import ApplicationSheet from '../components/sheet/application-sheet';
+import RemoveApplication from './components/modals/application-modal-remove';
+import ApplicationSheet from './components/sheets/application-sheet-view';
 
 const ApplicationsPage = async ({
   searchParams: {

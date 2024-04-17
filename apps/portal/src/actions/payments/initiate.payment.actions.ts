@@ -8,7 +8,7 @@ import {
   PesaFlowCheckoutType,
   paymentFormSchema,
   pesaflowCheckoutApiSchema,
-} from '@/validation/payment.validation';
+} from '@/validation/payment/payment.validation';
 import { createHmac } from 'crypto';
 import axios from 'axios';
 import { ConversionUtils } from 'turbocommons-ts';

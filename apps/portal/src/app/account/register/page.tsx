@@ -1,54 +1,57 @@
-"use client";
-import ComposableDescription from "@/components/form/ComposableDescription";
-import SubmitButton from "@/components/form/SubmitButton";
-import { Form } from "@/components/ui/form";
-import { register } from "@/actions/account/register.actions";
-import { FormFieldType } from "@/types/form-field.types";
-import { RegisterForm, registerSchema } from "@/validation/account.validation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
-import React, { useTransition } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { toast } from "sonner";
-import SocialLogin from "../components/SocialLogin";
-import FormHeader from "@/components/form/FormHeader";
-import AccountForm from "../components/AccountForm";
+'use client';
+import ComposableDescription from '@/components/form/ComposableDescription';
+import SubmitButton from '@/components/form/SubmitButton';
+import { Form } from '@/components/ui/form';
+import { register } from '@/actions/account/register.actions';
+import { FormFieldType } from '@/types/form-field.types';
+import {
+  RegisterForm,
+  registerSchema,
+} from '@/validation/account/account.validation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
+import React, { useTransition } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import SocialLogin from '../components/SocialLogin';
+import FormHeader from '@/components/form/FormHeader';
+import AccountForm from '../components/AccountForm';
 
 const registerFields: FormFieldType<RegisterForm>[] = [
   {
-    name: "firstName",
-    label: "First name",
-    placeholder: "eg. Anne",
+    name: 'firstName',
+    label: 'First name',
+    placeholder: 'eg. Anne',
   },
   {
-    name: "lastName",
-    label: "Last name",
-    placeholder: "eg. Wanjiku",
+    name: 'lastName',
+    label: 'Last name',
+    placeholder: 'eg. Wanjiku',
   },
   // To Do: Add a utility for common fields.
   {
-    name: "email",
-    label: "Email",
-    placeholder: "eg. annewanjiku@email.com",
-    type: "email",
-    className: "col-span-2",
+    name: 'email',
+    label: 'Email',
+    placeholder: 'eg. annewanjiku@email.com',
+    type: 'email',
+    className: 'col-span-2',
   },
   {
-    name: "password",
-    label: "Password",
-    placeholder: "Enter a strong password",
-    type: "password",
+    name: 'password',
+    label: 'Password',
+    placeholder: 'Enter a strong password',
+    type: 'password',
   },
   {
-    name: "confirmPassword",
-    label: "Confirm Password",
-    placeholder: "Repeat password to confirm",
-    type: "password",
+    name: 'confirmPassword',
+    label: 'Confirm Password',
+    placeholder: 'Repeat password to confirm',
+    type: 'password',
   },
   {
-    name: "termsConditons",
-    type: "checkbox",
-    className: "items-start py-2",
+    name: 'termsConditons',
+    type: 'checkbox',
+    className: 'items-start py-2',
     description: (
       <ComposableDescription label="I agree with KIPPRA's">
         <Link
@@ -73,13 +76,13 @@ const RegisterPage = () => {
   const [isPending, startTransition] = useTransition();
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
-    mode: "onChange",
+    mode: 'onChange',
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
       termsConditons: false,
     },
   });

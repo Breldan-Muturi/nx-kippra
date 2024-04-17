@@ -21,3 +21,30 @@ export const uploadPDFile = async (
     return { error: 'Error uploading file' };
   }
 };
+
+type UploadImageType = {
+  contentType: Blob['type'];
+  buffer: Buffer;
+  fileName: string;
+};
+type UploadImageReturn = { error: string } | { fileUrl: string };
+
+export const uploadImage = async ({
+  contentType,
+  buffer,
+  fileName,
+}: UploadImageType): Promise<UploadImageReturn> => {
+  await initApp();
+  const bucket = getStorage().bucket();
+  const file = bucket.file(fileName);
+  try {
+    await file.save(buffer, {
+      metadata: { contentType },
+    });
+    const fileUrl = await getDownloadURL(file);
+    return { fileUrl };
+  } catch (error) {
+    console.error('Error pushing image to Firebase: ', error);
+    return { error: 'There was an error pushing the image to Firebase' };
+  }
+};

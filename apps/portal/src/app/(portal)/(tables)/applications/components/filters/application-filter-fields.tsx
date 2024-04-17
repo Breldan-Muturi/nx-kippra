@@ -1,6 +1,6 @@
 import { ApplicationFilterType } from '@/actions/applications/filter.applications.actions';
 import { FormFieldType } from '@/types/form-field.types';
-import { FilterApplicationType } from '@/validation/application.validation';
+import { FilterApplicationType } from '@/validation/applications/user.application.validation';
 
 export const filterApplicationsForm = ({
   filterStatus,
@@ -30,21 +30,21 @@ export const filterApplicationsForm = ({
       name: 'programTitle',
       type: 'search',
       label: 'Program Title',
-      placeholder: 'Search program title',
+      placeholder: 'Search program',
       disabled,
     },
     {
       name: 'organizationName',
       type: 'search',
       label: 'Organization Name',
-      placeholder: 'Search organization name',
+      placeholder: 'Search organization',
       disabled,
     },
     {
-      name: 'applicantName',
+      name: 'userName',
       type: 'search',
       label: 'Applicant Name',
-      placeholder: 'Search applicant name',
+      placeholder: 'Search applicant',
       disabled,
     },
   ];

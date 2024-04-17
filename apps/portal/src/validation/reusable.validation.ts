@@ -1,16 +1,16 @@
-import { Path } from "react-hook-form";
-import { ZodObject, ZodRawShape, z } from "zod";
+import { Path } from 'react-hook-form';
+import { ZodObject, ZodRawShape, z } from 'zod';
 
-export const PASSWORD_MISMATCH_MESSAGE = "Passwords do not match";
-export const DATES_MISMATCH_MESSAGE = "End date cannot come before start date";
+export const PASSWORD_MISMATCH_MESSAGE = 'Passwords do not match';
+export const DATES_MISMATCH_MESSAGE = 'End date cannot come before start date';
 
-export const email = z.string().email("Enter a valid email");
-export const requiredField = z.string().min(1, "This field is required");
+export const email = z.string().email('Enter a valid email');
+export const requiredField = z.string().min(1, 'This field is required');
 export const validUrl = (message?: string) =>
-  z.string().url(message ?? "Please enter a valid url");
+  z.string().url(message ?? 'Please enter a valid url');
 
 export const validString = (errorMessage?: string, count?: number) => {
-  const message = errorMessage ?? "A required variable is missing";
+  const message = errorMessage ?? 'A required variable is missing';
   const number = count ?? 1;
   return z.string().min(number, message);
 };
@@ -54,6 +54,21 @@ export const validateDateRange = <T extends ZodRawShape>(
     {
       message: message ?? DATES_MISMATCH_MESSAGE,
       path: [endDate],
+    },
+  );
+};
+
+export const AllowedImageTypes: Blob['type'][] = ['image/png', 'image/jpeg'];
+
+export const validImageUpload = (optional: boolean = false) => {
+  return z.any().refine(
+    (file: File | string) => {
+      if (optional && !file) return true;
+      if (typeof file === 'string') return true;
+      return file instanceof File && AllowedImageTypes.includes(file.type);
+    },
+    {
+      message: `The file must be one of the following types: ${AllowedImageTypes.join(', ')}`,
     },
   );
 };

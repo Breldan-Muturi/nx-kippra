@@ -1,14 +1,14 @@
-import type { NextAuthConfig } from "next-auth";
-import credentials from "next-auth/providers/credentials";
-import { loginSchema } from "@/validation/account.validation";
-import { getUserByEmail } from "@/helpers/user.helper";
-import bcrypt from "bcryptjs";
-import Google from "next-auth/providers/google";
-import Facebook from "next-auth/providers/facebook";
+import type { NextAuthConfig } from 'next-auth';
+import credentials from 'next-auth/providers/credentials';
+import { loginSchema } from '@/validation/account/account.validation';
+import { getUserByEmail } from '@/helpers/user.helper';
+import bcrypt from 'bcryptjs';
+import Google from 'next-auth/providers/google';
+import Facebook from 'next-auth/providers/facebook';
 
 export default {
   trustHost: true,
-  useSecureCookies: process.env.NODE_ENV === "production",
+  useSecureCookies: process.env.NODE_ENV === 'production',
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,

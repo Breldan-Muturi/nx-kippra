@@ -1,7 +1,7 @@
 'use client';
 import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import React, { useMemo, useTransition } from 'react';
-import handleTableColumns from '../../components/table/handle-table-columns';
+import handleTableColumns from '../../../../../components/table/handle-table-columns';
 import { SinglePaymentDetail } from '@/actions/payments/filter.payment.actions';
 import payeeColumn from './columns/payment-column-payee';
 import paymentDateColumn from './columns/payment-column-date';
@@ -9,9 +9,9 @@ import paymentProgramColumn from './columns/payment-column-program';
 import paymentMethodColumn from './columns/payment-column-method';
 import {
   FilterPaymentFormType,
-  filterPaymentFormSchema,
-} from '@/validation/payment.validation';
-import TableViews from '../../components/table/table-views';
+  filterpaymentFormSchema,
+} from '@/validation/payment/payment.validation';
+import TableViews from '../../../../../components/table/table-views';
 import { usePathname } from 'next/navigation';
 import {
   PaymentTableProps,
@@ -20,19 +20,19 @@ import {
 import { SubmitHandler } from 'react-hook-form';
 import PaymentTableFilters from './filters/payment-filters-form';
 import { filterPaymentsForm } from './filters/payment-filters-fields';
-import TablesPagination from '../../components/table/table-pagination';
+import TablesPagination from '../../../../../components/table/table-pagination';
 import paymentAmountColumn from './columns/payment-column-amount';
 import paymentActionsColumn from './columns/payment-column-actions';
 import paymentInvoiceColumn from './columns/payment-column-invoice';
 import paymentColumnCurrency from './columns/payment-column-currency';
-import ReusableTable from '../../components/table/reusable-table';
+import ReusableTable from '../../../../../components/table/reusable-table';
 
 const PaymentsTable = ({
   paymentsInfo: { payments, count, paymentFilters },
   tableParams,
 }: PaymentTableProps) => {
   const { hiddenColumns, page, pageSize } = tableParams;
-  const filterValues = filterPaymentFormSchema.parse(tableParams);
+  const filterValues = filterpaymentFormSchema.parse(tableParams);
   const path = usePathname();
   const pathParams = { path, ...tableParams };
   const [isPending, startTransition] = useTransition();
@@ -118,6 +118,7 @@ const PaymentsTable = ({
     columns: visibleColumns,
     getCoreRowModel: getCoreRowModel(),
   });
+
   return (
     <div className="flex flex-col space-y-4 w-max">
       <PaymentTableFilters

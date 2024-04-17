@@ -1,24 +1,24 @@
 import { SinglePaymentDetail } from '@/actions/payments/filter.payment.actions';
 import { ColumnDef } from '@tanstack/react-table';
-import ApplicantCell from '../../../components/table/applicant-cell';
+import TableUserCell from '../../../../../../components/table/table-user-cell';
 
 const payeeColumn: ColumnDef<SinglePaymentDetail> = {
   id: 'payee',
   header: 'Payee',
   cell: ({ row }) => {
-    let applicationOrganization: string | null = null;
+    let userTableOrganization: string | null = null;
     const {
       owner: { image, name },
       organization,
     } = row.original.application;
     if (organization) {
-      applicationOrganization = organization.name;
+      userTableOrganization = organization.name;
     }
     return (
-      <ApplicantCell
-        applicantName={name}
-        applicantImage={image || undefined}
-        applicationOrganization={applicationOrganization}
+      <TableUserCell
+        userName={name}
+        userImage={image || undefined}
+        userTableOrganization={userTableOrganization}
       />
     );
   },

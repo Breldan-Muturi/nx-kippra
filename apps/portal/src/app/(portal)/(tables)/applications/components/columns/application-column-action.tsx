@@ -5,7 +5,7 @@ import {
 import { ColumnDef } from '@tanstack/react-table';
 import TableAction, {
   TableActionProps,
-} from '../../../components/table/table-action';
+} from '../../../../../../components/table/table-action';
 import { ApplicationStatus, UserRole } from '@prisma/client';
 import {
   Banknote,

@@ -4,7 +4,7 @@ import {
   NewApplicationForm,
   ValidatedApplicationForm,
   newApplicationSchema,
-} from '@/validation/application.validation';
+} from '@/validation/applications/user.application.validation';
 import { SponsorType } from '@prisma/client';
 import { validateNewOrganization } from '../organization/validate.organization.actions';
 import { currentUserId } from '@/lib/auth';
@@ -58,10 +58,10 @@ export const validateApplication = async (
   if (!isExistingOrganization && sponsorType === SponsorType.ORGANIZATION) {
     if (newOrganization) {
       const validOrganization = await validateNewOrganization(newOrganization);
-      if (validOrganization.validatedData) {
-        validNewOrganization = validOrganization.validatedData;
-      } else if (validOrganization.error) {
+      if ('error' in validOrganization) {
         return { error: validOrganization.error };
+      } else {
+        validNewOrganization = validOrganization.validNewOrganization;
       }
     } else {
       return { error: 'New organization fields are invalid' };

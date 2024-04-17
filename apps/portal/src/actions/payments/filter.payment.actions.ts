@@ -8,7 +8,7 @@ import {
   FilterPaymentsType,
   filterPaymentsRedirectSchema,
   filterPaymentsSchema,
-} from '@/validation/payment.validation';
+} from '@/validation/payment/payment.validation';
 import { Prisma, UserRole } from '@prisma/client';
 import filterRedirect from '../redirect.actions';
 import { processSearchString } from '@/helpers/filter.helpers';

@@ -1,18 +1,16 @@
-import { getProgramPrerequisiteOptions } from "@/helpers/program.helpers";
-import React from "react";
-import AddProgramForm from "../components/add-program-form";
-import { getOnlineCourseOptions } from "@/actions/moodle/moodle-courses.actions";
+import { getProgramPrerequisiteOptions } from '@/helpers/program.helpers';
+import React from 'react';
+import ProgramForm from '@/app/(portal)/components/common/program-form/program-form';
+import { getOnlineCourseOptions } from '@/actions/moodle/moodle-courses.actions';
 
 const NewProgramPage = async () => {
-  const programOptionsPromise = getProgramPrerequisiteOptions();
-  const moodleCoursesPromise = getOnlineCourseOptions();
-
   const [programOptions, moodleCourses] = await Promise.all([
-    programOptionsPromise,
-    moodleCoursesPromise,
+    getProgramPrerequisiteOptions(),
+    getOnlineCourseOptions(),
   ]);
+
   return (
-    <AddProgramForm
+    <ProgramForm
       programOptions={programOptions}
       moodleCourseOptions={moodleCourses}
     />

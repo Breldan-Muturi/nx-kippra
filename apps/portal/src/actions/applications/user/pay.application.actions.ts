@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 
-import { ApplicationPaymentDetails } from '@/validation/payment.validation';
+import { ApplicationPaymentDetails } from '@/validation/payment/payment.validation';
 import { Delivery, InvoiceStatus } from '@prisma/client';
 import { format } from 'date-fns';
 

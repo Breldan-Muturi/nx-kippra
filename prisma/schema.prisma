@@ -132,6 +132,7 @@ model Program {
   summary        String?
   title          String   @unique
   serviceId      Int?
+  serviceIdUsd   Int?
   moodleCourseId Int?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt()
@@ -164,18 +165,27 @@ enum Venue {
 }
 
 model TrainingSession {
-  id                         String   @id @default(cuid())
-  startDate                  DateTime
-  endDate                    DateTime
-  venue                      Venue?   @default(NAIROBI)
-  mode                       Delivery @default(ON_PREMISE)
-  // Handle fees
+  id        String   @id @default(cuid())
+  startDate DateTime
+  endDate   DateTime
+  venue     Venue?   @default(NAIROBI)
+  mode      Delivery @default(ON_PREMISE)
+
+  // Ksh fees
   citizenFee                 Int?
   citizenOnlineFee           Int?
   eastAfricaFee              Int?
   eastAfricaOnlineFee        Int?
   globalParticipantFee       Int?
   globalParticipantOnlineFee Int?
+
+  // Usd fees
+  usdCitizenFee                 Int?
+  usdCitizenOnlineFee           Int?
+  usdEastAfricaFee              Int?
+  usdEastAfricaOnlineFee        Int?
+  usdGlobalParticipantFee       Int?
+  usdGlobalParticipantOnlineFee Int?
 
   // Handle Slots
   onlineSlots         Int?

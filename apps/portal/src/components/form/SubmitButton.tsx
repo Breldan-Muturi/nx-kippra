@@ -1,9 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
-import React from "react";
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
+import React from 'react';
 
-type SubmitButtonProps = React.HTMLAttributes<HTMLButtonElement> & {
+type SubmitButtonProps = React.ComponentPropsWithoutRef<'button'> & {
   isSubmitting?: boolean;
   label: string;
   form?: string;
@@ -20,7 +20,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
     <Button
       variant="default"
       type="submit"
-      className={cn("col-span-2 bg-green-600", className)}
+      className={cn('col-span-2 bg-green-600', className)}
       disabled={isSubmitting}
       form={form}
       {...props}

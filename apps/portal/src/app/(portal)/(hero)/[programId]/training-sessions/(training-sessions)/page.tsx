@@ -1,18 +1,17 @@
-"use server";
+'use server';
 
-import TrainingSessionCard from "@/app/(portal)/components/training-session";
-import ResponsiveGrid from "@/components/layouts/responsive-grid";
-import { buttonVariants } from "@/components/ui/button";
-import { currentRole } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { cn } from "@/lib/utils";
-import { UserRole } from "@prisma/client";
-import Link from "next/link";
-import React from "react";
-import AddSession from "./components/add-session";
-import UpdateSession from "./components/update-session";
-import DeleteSession from "./components/delete-session";
-import { Pencil, Trash2 } from "lucide-react";
+import TrainingSessionCard from '@/app/(portal)/(home)/components/training-session';
+import ResponsiveGrid from '@/components/layouts/responsive-grid';
+import { buttonVariants } from '@/components/ui/button';
+import { currentRole } from '@/lib/auth';
+import { db } from '@/lib/db';
+import { cn } from '@/lib/utils';
+import { UserRole } from '@prisma/client';
+import Link from 'next/link';
+import React from 'react';
+import SessionModal from './components/session-modal';
+import DeleteSession from './components/delete-session';
+import { Pencil, Trash2 } from 'lucide-react';
 
 const page = async ({
   params: { programId },
@@ -25,30 +24,25 @@ const page = async ({
     newSession: boolean;
   };
 }) => {
-  const userRolePromise = currentRole();
-
-  const programTitlePromise = db.program.findUnique({
-    where: { id: programId },
-    select: {
-      title: true,
-    },
-  });
-
-  const programTrainingSessionsPromise = db.trainingSession.findMany({
-    where: { programId },
-    orderBy: { startDate: "asc" },
-  });
-
   const [programTitle, programTrainingSessions, role] = await Promise.all([
-    programTitlePromise,
-    programTrainingSessionsPromise,
-    userRolePromise,
+    db.program.findUnique({
+      where: { id: programId },
+      select: {
+        title: true,
+      },
+    }),
+    db.trainingSession.findMany({
+      where: { programId },
+      orderBy: { startDate: 'asc' },
+    }),
+    currentRole(),
   ]);
 
   const isAdmin = role === UserRole.ADMIN;
   const updateThisSession = programTrainingSessions.find(
     ({ id }) => id === updateSession,
   );
+
   const deleteThisSession = programTrainingSessions.find(
     ({ id }) => id === deleteSession,
   );
@@ -64,8 +58,8 @@ const page = async ({
                 query: { newSession: true },
               }}
               className={cn(
-                buttonVariants({ variant: "link" }),
-                "text-center text-xl font-bold",
+                buttonVariants({ variant: 'link' }),
+                'text-center text-xl font-bold',
               )}
             >
               📅 Add a new Training Session
@@ -78,7 +72,7 @@ const page = async ({
             className="col-span-1 flex flex-col space-y-2"
           >
             <TrainingSessionCard
-              title={programTitle?.title ?? "Unnamed program"}
+              title={programTitle?.title ?? 'Unnamed program'}
               trainingSession={trainingSession}
               className="flex-grow"
             />
@@ -91,10 +85,10 @@ const page = async ({
                   }}
                   className={cn(
                     buttonVariants({
-                      variant: "ghost",
-                      size: "icon",
+                      variant: 'ghost',
+                      size: 'icon',
                     }),
-                    "h-6 w-6 rounded-full bg-green-600/80 hover:bg-green-600",
+                    'h-6 w-6 rounded-full bg-green-600/80 hover:bg-green-600',
                   )}
                 >
                   <Pencil className="h-4 w-4" color="white" />
@@ -106,10 +100,10 @@ const page = async ({
                   }}
                   className={cn(
                     buttonVariants({
-                      variant: "destructive",
-                      size: "icon",
+                      variant: 'destructive',
+                      size: 'icon',
                     }),
-                    "h-6 w-6 rounded-full",
+                    'h-6 w-6 rounded-full',
                   )}
                 >
                   <Trash2 className="h-4 w-4" color="white" />
@@ -119,8 +113,10 @@ const page = async ({
           </div>
         ))}
       </ResponsiveGrid>
-      {isAdmin && newSession && <AddSession programId={programId} />}
-      {isAdmin && updateThisSession && <UpdateSession />}
+      {isAdmin && newSession && <SessionModal programId={programId} />}
+      {isAdmin && updateThisSession && (
+        <SessionModal trainingSession={updateThisSession} />
+      )}
       {isAdmin && deleteThisSession && (
         <DeleteSession trainingSession={deleteThisSession} />
       )}

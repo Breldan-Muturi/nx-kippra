@@ -1,15 +1,16 @@
-import { SwitchFieldType } from "@/types/form-field.types";
-import React from "react";
-import { FieldValues, useFormContext } from "react-hook-form";
+import { SwitchFieldType } from '@/types/form-field.types';
+import React from 'react';
+import { FieldValues, useFormContext } from 'react-hook-form';
 import {
   FormControl,
   FormDescription,
   FormField,
   FormItem,
   FormLabel,
-} from "../ui/form";
-import { cn } from "@/lib/utils";
-import { Switch } from "../ui/switch";
+  FormMessage,
+} from '../ui/form';
+import { cn } from '@/lib/utils';
+import { Switch } from '../ui/switch';
 
 interface SwitchFieldProps<T extends FieldValues> extends SwitchFieldType<T> {}
 
@@ -25,13 +26,14 @@ const SwitchField = <T extends FieldValues>({
       render={({ field: { value, onChange } }) => (
         <FormItem
           className={cn(
-            "flex flex-row items-center justify-between rounded-lg border p-4",
+            'flex flex-row items-center justify-between rounded-lg border p-4',
             className,
           )}
         >
           <div className="space-y-0.5">
             <FormLabel className="text-base">{label}</FormLabel>
             <FormDescription>{description}</FormDescription>
+            <FormMessage />
           </div>
           <FormControl>
             <Switch checked={value} onCheckedChange={onChange} />

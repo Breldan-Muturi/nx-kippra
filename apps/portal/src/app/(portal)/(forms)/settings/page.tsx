@@ -1,8 +1,8 @@
-"use server";
-import { getUserById } from "@/helpers/user.helper";
-import { currentUserId } from "@/lib/auth";
-import React from "react";
-import ProfileForm from "../components/profile-form";
+'use server';
+import { getUserById } from '@/helpers/user.helper';
+import { currentUserId } from '@/lib/auth';
+import React from 'react';
+import ProfileForm from './components/profile-form';
 
 const Settings = async () => {
   const userId = await currentUserId();

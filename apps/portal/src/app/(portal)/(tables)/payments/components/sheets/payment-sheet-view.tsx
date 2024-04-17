@@ -13,7 +13,7 @@ import {
 import { usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { SinglePaymentReturnType } from '@/actions/payments/single.payment.actions';
-import { ViewPaymentsRedirectType } from '@/validation/payment.validation';
+import { ViewPaymentsRedirectType } from '@/validation/payment/payment.validation';
 import { filterPayments } from '@/actions/payments/filter.payment.actions';
 
 const PaymentSheetView = ({

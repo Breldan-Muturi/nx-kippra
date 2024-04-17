@@ -1,6 +1,9 @@
 'use server';
 
-import { LoginForm, loginSchema } from '@/validation/account.validation';
+import {
+  LoginForm,
+  loginSchema,
+} from '@/validation/account/account.validation';
 import { signIn } from '@/auth';
 import { DEFAULT_LOGIN_REDIRECT } from '@/routes';
 import { AuthError } from 'next-auth';

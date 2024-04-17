@@ -6,7 +6,7 @@ import {
   ViewPaymentsRedirectType,
   filterPaymentsSchema,
   viewPaymentsRedirectSchema,
-} from '@/validation/payment.validation';
+} from '@/validation/payment/payment.validation';
 import { redirect } from 'next/navigation';
 import React from 'react';
 import PaymentsTable from './components/payments-table';
@@ -20,7 +20,7 @@ const Payments = async ({
 }) => {
   const userId = await currentUserId();
   if (!userId) {
-    return redirect('/account');
+    return redirect('/');
   }
   const filterPaymentsParams: FilterPaymentsType = filterPaymentsSchema.parse({
     userId,
@@ -42,6 +42,7 @@ const Payments = async ({
     'error' in paymentsPromise.value
   ) {
     return (
+      // Return an error component in this case
       <div>{`There was an error fetching payments ${paymentsPromise.status === 'fulfilled' ? paymentsPromise.value : ''}`}</div>
     );
   }

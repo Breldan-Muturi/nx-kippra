@@ -1,37 +1,37 @@
-"use client";
-import { updateTopic } from "@/actions/topics/topics.actions";
-import FormHeader from "@/components/form/FormHeader";
-import ReusableForm from "@/components/form/ReusableForm";
-import SubmitButton from "@/components/form/SubmitButton";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
-import { cn } from "@/lib/utils";
-import { FormFieldType } from "@/types/form-field.types";
+'use client';
+import { updateTopic } from '@/actions/topics/topics.actions';
+import FormHeader from '@/components/form/FormHeader';
+import ReusableForm from '@/components/form/ReusableForm';
+import SubmitButton from '@/components/form/SubmitButton';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Form } from '@/components/ui/form';
+import { cn } from '@/lib/utils';
+import { FormFieldType } from '@/types/form-field.types';
 import {
   UpdateTopicForm,
   updateTopicsSchema,
-} from "@/validation/topics.validation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Topic } from "@prisma/client";
-import { useRouter } from "next/navigation";
-import React, { useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+} from '@/validation/topics/topics.validation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Topic } from '@prisma/client';
+import { useRouter } from 'next/navigation';
+import React, { useTransition } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 const updateTopicFields: FormFieldType<UpdateTopicForm>[] = [
   {
-    name: "title",
-    label: "Topic Title",
-    placeholder: "Enter topic title",
-    className: "w-full",
-    type: "text",
+    name: 'title',
+    label: 'Topic Title',
+    placeholder: 'Enter topic title',
+    className: 'w-full',
+    type: 'text',
   },
   {
-    name: "summary",
-    label: "Topic Summary",
-    placeholder: "Enter topic summary",
-    className: "w-full",
-    type: "textarea",
+    name: 'summary',
+    label: 'Topic Summary',
+    placeholder: 'Enter topic summary',
+    className: 'w-full',
+    type: 'textarea',
   },
 ];
 
@@ -48,7 +48,7 @@ const UpdateTopic = ({
   const [isPending, startTransition] = useTransition();
   const form = useForm<UpdateTopicForm>({
     resolver: zodResolver(updateTopicsSchema),
-    mode: "onChange",
+    mode: 'onChange',
     defaultValues: {
       id,
       title,
@@ -76,7 +76,7 @@ const UpdateTopic = ({
 
   return (
     <Dialog open onOpenChange={dismissModal}>
-      <DialogContent className={cn("w-full", className)} {...props}>
+      <DialogContent className={cn('w-full', className)} {...props}>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             <FormHeader label="Update this topic" />

@@ -2,7 +2,7 @@
 
 import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import React, { useMemo, useTransition } from 'react';
-import { FilterPaginateAppliationType } from '@/validation/application.validation';
+import { FilterPaginateAppliationType } from '@/validation/applications/user.application.validation';
 import { usePathname } from 'next/navigation';
 import {
   FilterApplicationTableType,
@@ -11,22 +11,22 @@ import {
   filterUserApplications,
 } from '@/actions/applications/filter.applications.actions';
 import { SubmitHandler } from 'react-hook-form';
-import TablesPagination from '../../components/table/table-pagination';
+import TablesPagination from '../../../../../components/table/table-pagination';
 import ApplicationsFilter from './filters/applications-filter-form';
 import { filterApplicationsForm } from './filters/application-filter-fields';
 import applicationActionsColumn from './columns/application-column-action';
 import applicationProgramColumn from './columns/application-column-program';
 import applicationTrainingSessionColumn from './columns/application-column-training-session';
 import applicationStatusColumn from './columns/application-column-status';
-import tableSelectColumn from '../../components/table/table-select-column';
+import tableSelectColumn from '../../../../../components/table/table-select-column';
 import applicantColumn from './columns/application-column-applicant';
 import applicationTypeColumn from './columns/application-column-type';
 import applicationFeeColumn from './columns/application-column-fee';
-import handleTableColumns from '../../components/table/handle-table-columns';
-import { TableActionProps } from '../../components/table/table-action';
+import handleTableColumns from '../../../../../components/table/handle-table-columns';
+import { TableActionProps } from '../../../../../components/table/table-action';
 import { FileCheck2, Send, ShieldX } from 'lucide-react';
-import TableViews from '../../components/table/table-views';
-import ReusableTable from '../../components/table/reusable-table';
+import TableViews from '../../../../../components/table/table-views';
+import ReusableTable from '../../../../../components/table/reusable-table';
 
 const ApplicationsTable = ({
   existingUser,

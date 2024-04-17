@@ -5,8 +5,8 @@ import { cn } from '@/lib/utils';
 import { FormFieldType } from '@/types/form-field.types';
 import {
   FilterPaymentFormType,
-  filterPaymentFormSchema,
-} from '@/validation/payment.validation';
+  filterpaymentFormSchema,
+} from '@/validation/payment/payment.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CheckCircle2, Loader2, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -36,7 +36,7 @@ const PaymentTableFilters = ({
 }: PaymentTableFiltersProps) => {
   const router = useRouter();
   const form = useForm<FilterPaymentFormType>({
-    resolver: zodResolver(filterPaymentFormSchema),
+    resolver: zodResolver(filterpaymentFormSchema),
     defaultValues: filterValues,
     mode: 'onChange',
   });

@@ -1,18 +1,21 @@
-"use server";
+'use server';
 
-import { z } from "zod";
-import bcrypt from "bcryptjs";
-import { RegisterForm, registerSchema } from "@/validation/account.validation";
-import { db } from "@/lib/db";
-import { getUserByEmail } from "@/helpers/user.helper";
-import { generateVerificationToken } from "@/lib/tokens";
-import { sendVerificationEmail } from "@/mail/account.mail";
+import { z } from 'zod';
+import bcrypt from 'bcryptjs';
+import {
+  RegisterForm,
+  registerSchema,
+} from '@/validation/account/account.validation';
+import { db } from '@/lib/db';
+import { getUserByEmail } from '@/helpers/user.helper';
+import { generateVerificationToken } from '@/lib/tokens';
+import { sendVerificationEmail } from '@/mail/account.mail';
 
 export const register = async (values: RegisterForm) => {
   const validatedFields = registerSchema.safeParse(values);
 
   if (!validatedFields.success) {
-    return { error: "Invalid fields" };
+    return { error: 'Invalid fields' };
   }
 
   const { email, firstName, lastName, password } = validatedFields.data;
@@ -21,7 +24,7 @@ export const register = async (values: RegisterForm) => {
   const existingUser = await getUserByEmail(email);
 
   if (existingUser) {
-    return { error: "Email already in use" };
+    return { error: 'Email already in use' };
   }
 
   await db.user.create({
@@ -36,5 +39,5 @@ export const register = async (values: RegisterForm) => {
   const verificationToken = await generateVerificationToken(email);
   await sendVerificationEmail(verificationToken.email, verificationToken.token);
 
-  return { success: "Account created successfully" };
+  return { success: 'Account created successfully' };
 };

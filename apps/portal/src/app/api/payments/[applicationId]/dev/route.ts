@@ -7,7 +7,7 @@ import {
   ipnReferenceArraySchema,
   ipnSchema,
   paymentApiResponseSchema,
-} from '@/validation/payment.validation';
+} from '@/validation/payment/payment.validation';
 import { ApplicationStatus, InvoiceStatus, Prisma } from '@prisma/client';
 
 type Props = {

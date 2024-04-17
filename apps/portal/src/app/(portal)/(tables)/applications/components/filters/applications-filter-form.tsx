@@ -8,7 +8,7 @@ import {
   FilterApplicationType,
   FilterPaginateAppliationType,
   filterPaginateApplicationSchema,
-} from '@/validation/application.validation';
+} from '@/validation/applications/user.application.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CheckCircle2, Loader2, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -53,7 +53,7 @@ const ApplicationsFilter = ({
     reset({
       status: undefined,
       type: undefined,
-      applicantName: '',
+      userName: '',
       organizationName: '',
       programTitle: '',
     });

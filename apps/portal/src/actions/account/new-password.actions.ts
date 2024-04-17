@@ -1,40 +1,40 @@
-"use server";
-import bcrypt from "bcryptjs";
+'use server';
+import bcrypt from 'bcryptjs';
 import {
   NewPasswordForm,
   newPasswordSchema,
-} from "../../validation/account.validation";
-import { getPasswordResetTokenByToken } from "../../helpers/reset-token.helper";
-import { getUserByEmail } from "../../helpers/user.helper";
-import { db } from "../../lib/db";
+} from '../../validation/account/account.validation';
+import { getPasswordResetTokenByToken } from '../../helpers/reset-token.helper';
+import { getUserByEmail } from '../../helpers/user.helper';
+import { db } from '../../lib/db';
 
 export const newPassword = async (
   values: NewPasswordForm,
   token?: string | null,
 ) => {
   if (!token) {
-    return { error: "Missing token!" };
+    return { error: 'Missing token!' };
   }
 
   const validateFields = newPasswordSchema.safeParse(values);
 
-  if (!validateFields.success) return { error: "Invalid fields!" };
+  if (!validateFields.success) return { error: 'Invalid fields!' };
 
   const { password } = validateFields.data;
 
   const existingToken = await getPasswordResetTokenByToken(token);
 
   if (!existingToken) {
-    return { error: "Invalid token!" };
+    return { error: 'Invalid token!' };
   }
 
   const hasExpired = new Date(existingToken.expires) < new Date();
 
-  if (hasExpired) return { error: "Token is expired!" };
+  if (hasExpired) return { error: 'Token is expired!' };
 
   const existingUser = await getUserByEmail(existingToken.email);
 
-  if (!existingUser) return { error: "Email does not exist" };
+  if (!existingUser) return { error: 'Email does not exist' };
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -47,5 +47,5 @@ export const newPassword = async (
     where: { id: existingToken.id },
   });
 
-  return { success: "Password updated successfully" };
+  return { success: 'Password updated successfully' };
 };
