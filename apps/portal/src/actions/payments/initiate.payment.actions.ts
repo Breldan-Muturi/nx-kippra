@@ -104,7 +104,7 @@ export const initiatePayment = async (
     .digest();
   const secureHash = ConversionUtils.stringToBase64(signed.toString('hex'));
 
-  const pesaflowData: PesaFlowCheckoutApiType = {
+  const validApiData = pesaflowCheckoutApiSchema.safeParse({
     secureHash,
     apiClientID: pesaflowCheckout.apiClient,
     serviceID: pesaflowCheckout.serviceId,
@@ -117,25 +117,16 @@ export const initiatePayment = async (
     currency: pesaflowCheckout.currency,
     amountExpected: pesaflowCheckout.amountExpected,
     billDesc: pesaflowCheckout.billDesc,
-    clientMSISDN: pesaflowCheckout.clientMSISD,
+    clientMSISDN: String(pesaflowCheckout.clientMSISD),
     clientIDNumber: pesaflowCheckout.clientIDNumber,
     clientEmail: pesaflowCheckout.clientEmail,
     clientName: pesaflowCheckout.clientName,
-  };
-
-  const validApiData = pesaflowCheckoutApiSchema.safeParse(pesaflowData);
+  });
 
   if (!validApiData.success) {
     console.log('Payment error: ', validApiData.error);
     return { error: 'Invalid payment data, please try again' };
   }
-
-  const { clientMSISDN, ...pesaflowPayment } = validApiData.data;
-  const formatedMSISDN = String(clientMSISDN);
-  const payPesaflow = {
-    clientMSISDN: formatedMSISDN,
-    ...pesaflowPayment,
-  };
 
   try {
     // Axios POST request
@@ -145,7 +136,7 @@ export const initiatePayment = async (
       headers: {
         'Content-Type': 'application/json',
       },
-      data: payPesaflow,
+      data: validApiData.data,
     });
 
     console.log('Axios response data:', axiosResponse.data);

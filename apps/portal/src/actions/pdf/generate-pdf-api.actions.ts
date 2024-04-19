@@ -1,6 +1,6 @@
 'use server';
 
-type PDFResponse =
+export type PDFResponse =
   | { success: true; generatedPDF: Buffer }
   | { success: false; error: string };
 
@@ -31,5 +31,6 @@ export const generatePDFFromApi = async ({
   ) {
     return { success: true, generatedPDF: Buffer.from(data.generatedPDF.data) };
   }
+  console.error('Inspecting return error: ', data);
   return { success: false, error: 'Unknown error generating PDF' };
 };

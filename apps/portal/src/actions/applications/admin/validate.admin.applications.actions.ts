@@ -1,6 +1,4 @@
 'use server';
-
-import { validateNewOrganization } from '@/actions/organization/validate.organization.actions';
 import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
 import {
@@ -77,6 +75,7 @@ export const validateAdminApplication = async (
           name: true,
           application: { select: { status: true } },
         },
+        distinct: ['email'],
       }),
       newOrganization
         ? db.organization.findFirst({

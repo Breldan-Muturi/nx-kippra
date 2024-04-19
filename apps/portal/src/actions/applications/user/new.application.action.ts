@@ -38,7 +38,6 @@ export const userNewApplication = async (
     where: { id: userId },
     select: { id: true },
   });
-  console.log('User id: ', existingUserId?.id);
 
   if (!existingUserId || !existingUserId.id) {
     return { error: 'This user does not exist.' };

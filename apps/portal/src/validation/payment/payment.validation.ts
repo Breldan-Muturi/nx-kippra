@@ -79,10 +79,11 @@ export const pesaflowCheckoutApiSchema = z.object({
       : z.number().positive(),
   billDesc: validString('Enter a bill description'),
   clientMSISDN: z
-    .number()
-    .int()
-    .gte(254000000000, 'Enter a valid phone number')
-    .lte(254999999999, 'Enter a valid phone number'),
+    .string()
+    .regex(
+      /^254[17]\d{8}$/,
+      'Enter a valid Kenyan phone number starting with 2541 or 2547',
+    ),
   clientIDNumber: characterCount(5, 12, 'Enter a valid ID Number'),
   clientEmail: email,
   clientName: z.string(),

@@ -87,7 +87,7 @@ export const getPaymentApplicationPromise = async ({
         program: { title },
       },
     } = existingApplication;
-    const billDesc = `Payment for ${title} from ${format(startDate, 'PPP')}, to ${format(endDate, 'PPP')} ${delivery === Delivery.ON_PREMISE && venue ? `to be held at ${venue}` : ''}`;
+    const billDesc = `Invoice for ${title} from ${format(startDate, 'PPP')}, to ${format(endDate, 'PPP')} ${delivery === Delivery.ON_PREMISE && venue ? `to be held at ${venue}` : ''}`;
 
     return {
       paymentDetails: {

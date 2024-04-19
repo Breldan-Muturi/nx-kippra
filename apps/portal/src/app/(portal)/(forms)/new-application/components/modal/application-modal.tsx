@@ -17,6 +17,8 @@ import applicationModalSteps from './application-modal-steps';
 import { cn } from '@/lib/utils';
 import { Citizenship } from '@prisma/client';
 import { ApplicationModalPayeeProps } from './application-modal-payee';
+import { submitAdminApplication } from '@/actions/applications/admin/submit.admin.applications.actions';
+import { toast } from 'sonner';
 
 type ApplicationModalProps = {
   open: boolean;
@@ -39,6 +41,7 @@ const ApplicationModal = ({
     applicationTrainingSession,
     participantWarnings,
     organizationError,
+    organizationSuccess,
   } = validAdminApplication;
   const {
     startDate,
@@ -100,6 +103,7 @@ const ApplicationModal = ({
     organizationId: ValidAdminApplication['data']['organizationId'];
     payee: ApplicationModalPayeeProps['payee'];
     hasWarning: boolean;
+    hasError: boolean;
   }>({
     formStep: 0,
     applicationFee: undefined,
@@ -109,6 +113,7 @@ const ApplicationModal = ({
     formSlots: submissionSlots,
     organizationId,
     hasWarning: !!participantWarnings || !!organizationError,
+    hasError: !!organizationError,
   });
 
   const handleStep = (step: number) =>
@@ -196,12 +201,25 @@ const ApplicationModal = ({
   const [isPending, startTransition] = useTransition();
 
   const handleSubmit = () => {
-    const confirmedApplication = {
-      participants: formParticipants,
-      payee,
-      applicationFee,
-    };
-    startTransition(() => {});
+    startTransition(() => {
+      submitAdminApplication({
+        applicationFee: applicationConfirmation.applicationFee!,
+        applicationForm: { ...data },
+        payee: applicationConfirmation.payee!,
+        usingUsd: applicationConfirmation.usingUsd || false,
+        organizationId:
+          data.organizationId || applicationConfirmation.organizationId,
+        participants: applicationConfirmation.formParticipants,
+        slots: applicationConfirmation.formSlots,
+        validOrganization: organizationSuccess,
+      }).then((data) => {
+        if ('error' in data) {
+          toast.error(data.error);
+        } else {
+          toast.success(data.success);
+        }
+      });
+    });
   };
 
   const steps = applicationModalSteps({

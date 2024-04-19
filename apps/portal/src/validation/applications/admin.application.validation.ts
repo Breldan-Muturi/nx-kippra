@@ -2,7 +2,6 @@ import { Delivery, SponsorType } from '@prisma/client';
 import { z } from 'zod';
 import { newOrganizationSchema } from '../organization/organization.validation';
 import { applicationParticipantSchema } from './participants.application.validation';
-import { trainingSessionFeesSchema } from '../training-session/training-session.validation';
 
 export const adminApplicationDetails = z.object({
   programId: z.string(),
