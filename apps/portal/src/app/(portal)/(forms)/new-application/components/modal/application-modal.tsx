@@ -145,10 +145,11 @@ const ApplicationModal = ({
         formSlots: { slotsCitizen, slotsEastAfrican, slotsGlobal },
         formParticipants,
       } = prev;
+
       const removedParticipant = formParticipants?.find(
-        ({ email: formParticipantEmail }) =>
-          formParticipantEmail === participantEmail,
+        ({ email }) => email === participantEmail,
       );
+
       const updatedFormParticipants = formParticipants?.filter(
         ({ email }) => email !== participantEmail,
       );
@@ -180,13 +181,14 @@ const ApplicationModal = ({
             );
             break;
         }
-        return {
-          ...prev,
-          formParticipants: updatedFormParticipants,
-          formSlots: updatedFormSlots,
-          applicationFee: undefined,
-        };
       }
+
+      return {
+        ...prev,
+        formParticipants: updatedFormParticipants,
+        formSlots: updatedFormSlots,
+        applicationFee: undefined,
+      };
     });
 
   const {

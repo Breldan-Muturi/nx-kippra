@@ -243,6 +243,7 @@ model Application {
   ownerId           String
   owner             User                        @relation(fields: [ownerId], references: [id])
   applicationFee    Int
+  currency          String?                     @default("KES")
   status            ApplicationStatus           @default(PENDING)
   proformaInvoice   ApplicationProformaInvoice?
   offerLetter       ApplicationOfferLetter?

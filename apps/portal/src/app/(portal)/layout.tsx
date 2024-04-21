@@ -9,7 +9,7 @@ import { MdPayment } from 'react-icons/md';
 import { MdTask } from 'react-icons/md';
 import { ImUsers } from 'react-icons/im';
 import { BiSolidReport } from 'react-icons/bi';
-import { FilePlus2, LandPlot } from 'lucide-react';
+import { FilePlus2, FolderPlus, LandPlot } from 'lucide-react';
 import ContentArea from './components/content';
 import SideBarArea from './components/sidebar/side-bar';
 import { SidebarLink } from '@/types/nav-links.types';
@@ -82,13 +82,13 @@ const navLinks: SidebarLink[] = [
   },
   {
     href: '/new-organization',
-    label: 'Organizations',
-    icon: <CgOrganisation size="18" className="mr-1" />,
+    label: 'New Organization',
+    icon: <FolderPlus size="18" className="mr-1" />,
     role: UserRole.USER,
   },
   {
     href: '/completed-programs',
-    label: 'Completed courses',
+    label: 'Completed programs',
     icon: <MdTask size="18" className="mr-1" />,
     role: UserRole.USER,
   },

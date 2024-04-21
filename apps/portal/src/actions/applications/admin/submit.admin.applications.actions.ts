@@ -196,7 +196,7 @@ export const submitAdminApplication = async (
         'Failed to verify account information due to a server error. Please try again later',
     };
   }
-  if (!existingUser || !existingUser.id)
+  if (!existingUser || !existingUser.id || !existingUser.email)
     return { error: 'User account not found, please try again later' };
   if (!existingUser.role || existingUser.role !== UserRole.ADMIN)
     return { error: 'You are not authorized to submit this application' };
@@ -397,14 +397,16 @@ export const submitAdminApplication = async (
               filePath: pdfOfferUrl.success!,
             },
           }),
-          prisma.invoice.create({
-            data: {
-              application: { connect: { id: newApplication.id } },
-              invoiceEmail: applicationOwner?.email || existingUser.email,
-              invoiceLink,
-              invoiceNumber,
-            },
-          }),
+          existingUser && existingUser.email
+            ? prisma.invoice.create({
+                data: {
+                  application: { connect: { id: newApplication.id } },
+                  invoiceEmail: applicationOwner?.email || existingUser.email,
+                  invoiceLink,
+                  invoiceNumber,
+                },
+              })
+            : Promise.resolve(undefined),
         ]);
 
         await prisma.application.update({
@@ -467,7 +469,7 @@ export const submitAdminApplication = async (
     startDate,
     endDate,
     venue: venue ? venue : undefined,
-    applicantEmail: applicationOwner?.email || existingUser.email,
+    applicantEmail: applicationOwner?.email || existingUser!.email,
     proformaInvoice: {
       filename: proforma.fileName,
       path: proforma.filePath,

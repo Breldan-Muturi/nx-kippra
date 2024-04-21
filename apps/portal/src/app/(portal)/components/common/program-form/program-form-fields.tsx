@@ -1,13 +1,13 @@
 import ComboboxOption from '@/components/form/combobox/combobox-options';
 import { programServices } from '@/constants/program.constants';
 import { FormFieldType, SelectOptions } from '@/types/form-field.types';
-import { NewProgramFields } from '@/validation/programs/program.validation';
+import { NewProgramImageFileType } from '@/validation/programs/program.validation';
 
 const programFields = (
   programOptions?: SelectOptions[],
   moodleCourseOptions?: SelectOptions[],
-): FormFieldType<NewProgramFields>[] => {
-  let programFields: FormFieldType<NewProgramFields>[] = [
+): FormFieldType<NewProgramImageFileType>[] => {
+  let programFields: FormFieldType<NewProgramImageFileType>[] = [
     {
       name: 'image',
       label: 'Course Image (Click to update)',

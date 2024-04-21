@@ -6,61 +6,97 @@ import { NewOrganizationForm } from '@/validation/organization/organization.vali
 import { Organization, OrganizationRole } from '@prisma/client';
 import { validateNewOrganization } from './validate.organization.actions';
 
-export const userNewOrganization = async (data: {
-  organization: NewOrganizationForm;
-  userId?: string;
-}): Promise<{
-  success?: string;
-  error?: string;
-  organization?: Organization;
-}> => {
-  const { organization, userId: userIdProp } = data;
-  let userId: string = '';
+const getExistingUser = async (userId: string) =>
+  await db.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
+type NewOrganizationExistingUser = Awaited<ReturnType<typeof getExistingUser>>;
 
-  if (userIdProp) {
-    userId = userIdProp;
-  } else {
-    userId = (await currentUserId()) || '';
-    if (userId === '') {
-      return { error: 'You are not authorized' };
-    }
+const getExistingOrganizations = async (organzation: NewOrganizationForm) =>
+  await db.organization.findMany({
+    where: {
+      OR: [
+        { name: organzation.name },
+        { email: organzation.organizationEmail },
+        { phone: organzation.organizationPhone },
+      ],
+    },
+    select: { email: true, name: true, phone: true },
+  });
+type NewOrgValidateOrg = Awaited<ReturnType<typeof getExistingOrganizations>>;
+
+type UserOrganizationReturn =
+  | { error: string }
+  | { success: string; organizationId: string };
+
+export const userNewOrganization = async (
+  organization: NewOrganizationForm,
+): Promise<UserOrganizationReturn> => {
+  const userId = await currentUserId();
+  if (!userId)
+    return { error: 'You need to be logged in to add an organization' };
+
+  let existingUser: NewOrganizationExistingUser,
+    existingOrganizations: NewOrgValidateOrg;
+  try {
+    [existingUser, existingOrganizations] = await Promise.all([
+      getExistingUser(userId),
+      getExistingOrganizations(organization),
+    ]);
+  } catch (error) {
+    console.error('Could not validate details: ', error);
+    return {
+      error:
+        'Failed to validate form details due to a server error. Please try again later',
+    };
+  }
+  if (!existingUser || !existingUser.id)
+    return { error: 'User account not found. Please try again later' };
+
+  const matchingEmail = !!existingOrganizations.find(
+    ({ email }) => email === organization.organizationEmail,
+  );
+  const matchingName = !!existingOrganizations.find(
+    ({ name }) => name === organization.name,
+  );
+  const matchingPhone = !!existingOrganizations.find(
+    ({ phone }) => phone === organization.organizationPhone,
+  );
+
+  const matches = [];
+  if (matchingEmail) matches.push('email');
+  if (matchingName) matches.push('name');
+  if (matchingPhone) matches.push('phone number');
+
+  if (matches.length > 0) {
+    const matchList = matches.join(', ').replace(/, ([^,]*)$/, ', and $1');
+    return {
+      error: `An organization with the same ${matchList} already exists. Please update this information and try again.`,
+    };
   }
 
-  const validatedResponse = await validateNewOrganization(organization);
-  if (validatedResponse.error) return { error: validatedResponse.error };
-  if (!validatedResponse.validatedData)
-    return { error: 'Could not validate new organization' };
-  const {
-    organizationAddress,
-    organizationEmail,
-    organizationPhone,
-    ...organizationFields
-  } = validatedResponse.validatedData;
   try {
-    const newOrganization = await db.$transaction(async (prisma) => {
-      const createOrganization = await prisma.organization.create({
-        data: {
-          address: organizationAddress,
-          email: organizationEmail,
-          phone: organizationPhone,
-          ...organizationFields,
+    const newOrganization = await db.organization.create({
+      data: {
+        address: organization.organizationAddress,
+        email: organization.organizationEmail,
+        phone: organization.organizationPhone,
+        users: {
+          create: {
+            role: OrganizationRole.OWNER,
+            user: { connect: { id: existingUser.id } },
+          },
         },
-      });
-
-      await prisma.userOrganization.create({
-        data: {
-          userId,
-          organizationId: createOrganization.id,
-          role: OrganizationRole.OWNER,
-        },
-      });
-
-      return createOrganization;
+        contactPersonEmail: organization.contactPersonEmail,
+        contactPersonName: organization.contactPersonName,
+        county: organization.county,
+        name: organization.name,
+      },
     });
-
     return {
       success: 'New organization created successfully',
-      organization: newOrganization,
+      organizationId: newOrganization.id,
     };
   } catch {
     return { error: 'Something went wrong creating the organization' };

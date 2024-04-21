@@ -12,3 +12,10 @@ export type SidebarLink = React.ComponentPropsWithoutRef<'a'> & {
 export type SidebarProps = React.ComponentPropsWithoutRef<'aside'> & {
   links: SidebarLink[];
 };
+
+export type NavBarLinks = {
+  label: string;
+  href: string;
+};
+
+export type DropDownLink = SidebarLink;

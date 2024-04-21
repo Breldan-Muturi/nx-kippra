@@ -41,7 +41,7 @@ export const filterApplicationsForm = ({
       disabled,
     },
     {
-      name: 'userName',
+      name: 'applicantName',
       type: 'search',
       label: 'Applicant Name',
       placeholder: 'Search applicant',

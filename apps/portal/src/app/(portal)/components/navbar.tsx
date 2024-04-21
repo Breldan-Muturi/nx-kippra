@@ -1,14 +1,12 @@
 'use client';
 
-import { SITE_TITLE } from '@/lib/constants';
-import { Button, buttonVariants } from '../../../components/ui/button';
-import { AlignJustify, X } from 'lucide-react';
+import { buttonVariants } from '../../../components/ui/button';
+import { LogOut, UserCog } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import React from 'react';
 import { cn } from '@/lib/utils';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { logout } from '@/actions/account/logout.actions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -17,10 +15,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MdAssessment } from 'react-icons/md';
-import { GiPadlock } from 'react-icons/gi';
-import { FaUserCircle } from 'react-icons/fa';
-import { MdLibraryBooks } from 'react-icons/md';
+import { DropDownLink } from '@/types/nav-links.types';
+import { avatarFallbackName } from '@/helpers/user.helper';
+import { signOut } from 'next-auth/react';
 
 const navLinks = [
   {
@@ -41,6 +38,14 @@ const navLinks = [
   },
 ];
 
+const dropDownLinks: DropDownLink[] = [
+  {
+    label: 'My account',
+    href: '/settings',
+    icon: <UserCog size="18" color="green" className="mr-2" />,
+  },
+];
+
 const kippraLogo = (
   <Link href="/" title="Navigate to home" className="w-1/5">
     <Image
@@ -53,132 +58,72 @@ const kippraLogo = (
   </Link>
 );
 
-interface NavBarProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface NavBarProps extends React.ComponentPropsWithRef<'div'> {}
 
 const Navbar = ({ className, ...props }: NavBarProps) => {
-  const [isOpen, setIsOpen] = useState(false);
   const user = useCurrentUser();
-
-  function getInitials(name: any) {
-    const names = name.split(' ');
-    const initials = names.map((n: string) => n[0].toUpperCase());
-    return initials.join('');
-  }
-
-  const handleSignout = () => {
-    logout();
-  };
-  const navLinkComponents = (
-    <>
-      {navLinks.map(({ href, label }, i) => (
-        <Link
-          key={`${i}-${href}`}
-          href={href}
-          title={`Visit the ${label} page`}
-        >
-          {label}
-        </Link>
-      ))}
-      {user ? (
-        <>
-          <Link href="">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Avatar>
-                  <AvatarImage src={`${user.image}`} alt="profile avatar" />
-                  <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                </Avatar>
-              </DropdownMenuTrigger>
-              {user.role === 'ADMIN' ? (
-                <DropdownMenuContent>
-                  <Link href="/dashboard">
-                    <DropdownMenuItem>
-                      <MdAssessment size="18" color="green" className="mr-2" />
-                      Admin Dashboard
-                    </DropdownMenuItem>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    onClick={handleSignout}
-                    className="w-full"
-                  >
-                    <DropdownMenuItem>
-                      <GiPadlock size="18" color="red" className="mr-2" />
-                      logout
-                    </DropdownMenuItem>
-                  </Button>
-                </DropdownMenuContent>
-              ) : (
-                <DropdownMenuContent>
-                  <Link href="/profile">
-                    <DropdownMenuItem>
-                      <FaUserCircle size="18" color="green" className="mr-2" />
-                      Profile
-                    </DropdownMenuItem>
-                  </Link>
-                  <DropdownMenuSeparator />
-                  <Link href="/profile/applications">
-                    <DropdownMenuItem>
-                      <MdLibraryBooks
-                        size="18"
-                        color="green"
-                        className="mr-2"
-                      />
-                      Applications
-                    </DropdownMenuItem>
-                  </Link>
-                </DropdownMenuContent>
-              )}
-            </DropdownMenu>
-          </Link>
-          <p className="text-xs">Hi {user.name}</p>
-        </>
-      ) : (
-        <Link
-          href="/account"
-          title="Sign up or login"
-          className={buttonVariants({ variant: 'custom' })}
-        >
-          SIGNUP OR LOGIN
-        </Link>
-      )}
-    </>
-  );
 
   return (
     <div
       className={cn('sticky top-0 w-full bg-white z-30', className)}
       {...props}
     >
-      <div className="hidden w-full flex-row items-center justify-between border border-b-gray-300 px-4 py-2 md:flex">
+      <div className="flex w-full flex-row items-center justify-between border border-b-gray-300 px-4 py-2">
         <div className="flex items-center justify-around md:w-[25%] lg:w-2/5">
           {kippraLogo}
-          <h1 className="font-semibold text-green-600 md:text-base lg:text-base xl:text-2xl">
-            {SITE_TITLE}
-          </h1>
+          <nav className="flex  items-center md:space-x-2 lg:space-x-4">
+            {navLinks.map(({ href, label }, i) => (
+              <Link
+                key={`${i}-${href}`}
+                href={href}
+                title={`Visit the ${label} page`}
+                className="text-muted-foreground font-semibold text-base"
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
         </div>
-        <nav className="flex  items-center font-semibold md:space-x-2 lg:space-x-4">
-          {navLinkComponents}
-        </nav>
-      </div>
-      <div className="relative w-full flex-col border border-b-gray-300 bg-white px-2 md:hidden">
-        <div className="border-b-grey-300 flex w-full flex-row items-center  justify-between bg-white py-2 ">
-          {kippraLogo}
-          <Button onClick={() => setIsOpen(!isOpen)} variant="custom">
-            {isOpen ? (
-              <X size="24" color="white" />
-            ) : (
-              <AlignJustify size="24" color="white" />
-            )}
-          </Button>
-        </div>
-        {isOpen && (
-          <div className="flex max-h-screen w-full flex-col space-y-5 border border-b-gray-300 p-10 font-semibold">
-            <h1 className="text-center text-lg font-semibold text-green-600 ">
-              {SITE_TITLE}
-            </h1>
-            {navLinkComponents}
-          </div>
+        {user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex space-x-2 items-center">
+              <Avatar>
+                <AvatarImage
+                  src={`${user.image}`}
+                  alt={`${user.name} profile image`}
+                />
+                <AvatarFallback>{avatarFallbackName(user.name)}</AvatarFallback>
+              </Avatar>
+              <p className="text-sm text-muted-foreground font-semibold">
+                {user.name}
+              </p>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {dropDownLinks.map(({ href, icon, label }) => (
+                <React.Fragment key={`${href}${label}`}>
+                  <Link href={href}>
+                    <DropdownMenuItem>
+                      {icon}
+                      {label}
+                    </DropdownMenuItem>
+                  </Link>
+                  <DropdownMenuSeparator />
+                </React.Fragment>
+              ))}
+              <DropdownMenuItem onClick={() => signOut()}>
+                <LogOut size="18" color="red" className="mr-2" />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Link
+            href="/account"
+            title="Sign up or login"
+            className={buttonVariants({ variant: 'custom' })}
+          >
+            SIGNUP OR LOGIN
+          </Link>
         )}
       </div>
     </div>

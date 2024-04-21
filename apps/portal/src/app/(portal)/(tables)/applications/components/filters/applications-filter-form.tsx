@@ -53,7 +53,7 @@ const ApplicationsFilter = ({
     reset({
       status: undefined,
       type: undefined,
-      userName: '',
+      applicantName: '',
       organizationName: '',
       programTitle: '',
     });
