@@ -4,46 +4,148 @@ import { formatSponsorType, formatStatus } from '@/helpers/enum.helpers';
 import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { SelectOptions } from '@/types/form-field.types';
-import {
-  DefaultApplicationParams,
-  FilterAdminApplicationType,
-  FilterUserApplicationType,
-  filterAdminApplicationSchema,
-  filterUserApplicationSchema,
-} from '@/validation/applications/user.application.validation';
 import { Prisma, UserRole } from '@prisma/client';
-import { ColumnDef } from '@tanstack/react-table';
 import filterRedirect from '../redirect.actions';
 import { processSearchString } from '@/helpers/filter.helpers';
+import {
+  FetchApplicationType,
+  PathApplicationType,
+  pathApplicationSchema,
+} from '@/validation/applications/table.application.validation';
 
-export const filterUserApplications = async (
-  values: FilterUserApplicationType,
-) => {
-  await filterRedirect(values, filterUserApplicationSchema, values.path);
+export const filterApplications = async (values: PathApplicationType) => {
+  await filterRedirect(values, pathApplicationSchema, values.path);
 };
 
-export const filterAdminApplications = async (
-  values: FilterAdminApplicationType,
-) => {
-  await filterRedirect(values, filterAdminApplicationSchema, values.path);
-};
-
-async function cleanUpSelectObject(selectObject: any) {
-  Object.keys(selectObject).forEach((key) => {
-    if (selectObject[key] === false) {
-      delete selectObject[key];
-    } else if (
-      typeof selectObject[key] === 'object' &&
-      selectObject[key] !== null
-    ) {
-      cleanUpSelectObject(selectObject[key]);
-    }
+const userPromise = async (id: string) =>
+  await db.user.findUnique({
+    where: { id },
+    select: { id: true, name: true, email: true, role: true },
   });
-}
+type UserPromiseReturn = Awaited<ReturnType<typeof userPromise>>;
+export type AppTableUser = NonNullable<UserPromiseReturn>;
+
+const applicationsPromise = async ({
+  where,
+  page,
+  pageSize,
+  hiddenColumnsArray,
+}: {
+  where: Prisma.ApplicationWhereInput;
+  page: string;
+  pageSize: string;
+  hiddenColumnsArray: string[];
+}) => {
+  const showSponsor = hiddenColumnsArray.includes('sponsor Type')
+    ? undefined
+    : true;
+  const showTrainingSession = hiddenColumnsArray.includes('training Session')
+    ? undefined
+    : true;
+  const showTrainingSessionModel =
+    !hiddenColumnsArray.includes('program') ||
+    !hiddenColumnsArray.includes('training Session');
+
+  return await db.application.findMany({
+    where,
+    skip: (parseInt(page) - 1) * parseInt(pageSize),
+    take: parseInt(pageSize),
+    select: {
+      id: true,
+      owner: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+        },
+      },
+      organization: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      status: true,
+      trainingSession: showTrainingSessionModel
+        ? {
+            select: {
+              program: !hiddenColumnsArray.includes('program')
+                ? {
+                    select: {
+                      id: true,
+                      title: true,
+                      code: true,
+                    },
+                  }
+                : undefined,
+              startDate: showTrainingSession,
+              endDate: showTrainingSession,
+              venue: true,
+            },
+          }
+        : undefined,
+      sponsorType: showSponsor,
+      slotsCitizen: showSponsor,
+      slotsEastAfrican: showSponsor,
+      slotsGlobal: showSponsor,
+      _count: showSponsor
+        ? {
+            select: {
+              participants: true,
+            },
+          }
+        : undefined,
+      delivery: hiddenColumnsArray.includes('delivery') ? undefined : true,
+      applicationFee: hiddenColumnsArray.includes('fee') ? undefined : true,
+      participants: {
+        select: {
+          email: true,
+          name: true,
+        },
+      },
+    },
+  });
+};
+type ApplicationsTable = Awaited<ReturnType<typeof applicationsPromise>>;
+export type SingleTableApplication = ApplicationsTable[number];
+
+const applicationsCountPromise = async (
+  where: Prisma.ApplicationWhereInput,
+): Promise<number> => await db.application.count({ where });
+
+const applicationsStatusPromise = async () =>
+  await db.application.findMany({
+    select: { status: true },
+    distinct: ['status'],
+  });
+type ApplicationsStatusPromise = Awaited<
+  ReturnType<typeof applicationsStatusPromise>
+>;
+
+const applicationsSponsorPromise = async () =>
+  await db.application.findMany({
+    select: { sponsorType: true },
+    distinct: ['sponsorType'],
+  });
+type ApplicationsSponsorPromise = Awaited<
+  ReturnType<typeof applicationsSponsorPromise>
+>;
+export type FilterApplicationTableType = {
+  existingUser: AppTableUser;
+  applications: SingleTableApplication[];
+  count: number;
+  fetchParams: FetchApplicationType;
+  filterStatus: SelectOptions[];
+  filterSponsorType: SelectOptions[];
+};
+export type FilterApplicationReturnType =
+  | { error: string }
+  | FilterApplicationTableType;
 
 export const filterApplicationsTable = async (
-  tableParams: DefaultApplicationParams,
-) => {
+  fetchParams: FetchApplicationType,
+  organizationId?: string,
+): Promise<FilterApplicationReturnType> => {
   const {
     page,
     pageSize,
@@ -53,23 +155,33 @@ export const filterApplicationsTable = async (
     programTitle,
     status,
     type,
-  } = tableParams;
+  } = fetchParams;
   // Get the user details to determine which applications to show
   const userId = await currentUserId();
   if (!userId) {
-    return null;
+    return { error: 'You must be logged in to view applications' };
   }
 
-  const existingUser = await db.user.findUnique({
-    where: { id: userId },
-    select: { id: true, name: true, email: true, role: true },
-  });
+  let existingUser: UserPromiseReturn;
+  try {
+    existingUser = await userPromise(userId);
+  } catch (error) {
+    console.error('Failed to authorize request: ', error);
+    return {
+      error:
+        'Failed to authorize request due to a server error. Please try again later.',
+    };
+  }
 
-  if (!existingUser) {
-    return null;
+  if (!existingUser || !existingUser.id) {
+    return {
+      error: 'Failed to authenticate your account. Please try again later',
+    };
   }
   //Where Condition for the Application
   let where: Prisma.ApplicationWhereInput = {};
+
+  if (organizationId) where.organizationId = organizationId;
 
   if (status) where.status = status;
   if (type) where.sponsorType = type;
@@ -89,11 +201,15 @@ export const filterApplicationsTable = async (
       ...where,
       trainingSession: { program: { title: { search: searchProgramTitle } } },
     };
+
   if (searchOrganizationName)
     where = {
       ...where,
-      organization: { name: { search: searchOrganizationName } },
+      organization: organizationId
+        ? undefined
+        : { name: { search: searchOrganizationName } },
     };
+
   if (searchApplicantName)
     where = { ...where, owner: { name: { search: searchApplicantName } } };
 
@@ -111,94 +227,28 @@ export const filterApplicationsTable = async (
 
   // Select Object for the Query
   const hiddenColumnsArray = hiddenColumns ? hiddenColumns?.split(',') : [];
-  let select = {
-    id: true,
-    owner: {
-      select: {
-        id: true,
-        name: true,
-        image: true,
-      },
-    },
-    organization: {
-      select: {
-        id: true,
-        name: true,
-      },
-    },
-    status: true,
-    trainingSession:
-      !hiddenColumnsArray.includes('program') ||
-      !hiddenColumnsArray.includes('training Session')
-        ? {
-            select: {
-              program: !hiddenColumnsArray.includes('program')
-                ? {
-                    select: {
-                      id: true,
-                      title: true,
-                      code: true,
-                    },
-                  }
-                : false,
-              startDate: !hiddenColumnsArray.includes('training Session'),
-              endDate: !hiddenColumnsArray.includes('training Session'),
-              venue: true,
-            },
-          }
-        : false,
-    sponsorType: !hiddenColumnsArray.includes('sponsor Type'),
-    slotsCitizen: !hiddenColumnsArray.includes('sponsor Type'),
-    slotsEastAfrican: !hiddenColumnsArray.includes('sponsor Type'),
-    slotsGlobal: !hiddenColumnsArray.includes('sponsor Type'),
-    _count: !hiddenColumnsArray.includes('sponsor Type')
-      ? {
-          select: {
-            participants: true,
-          },
-        }
-      : undefined,
-    delivery: !hiddenColumnsArray.includes('delivery'),
-    applicationFee: !hiddenColumnsArray.includes('fee'),
-    participants: {
-      select: {
-        email: true,
-        name: true,
-      },
-    },
-  };
 
-  await cleanUpSelectObject(select);
-
-  // Returns applications as per filters and views
-  const applicationsPromise = db.application.findMany({
-    where,
-    skip: (parseInt(page) - 1) * parseInt(pageSize),
-    take: parseInt(pageSize),
-    select,
-  });
-
-  // Returns the count of the applications based on the filters
-  const applicationsCount = db.application.count({ where });
-
-  // Returns the options for the status
-  const statusPromise = db.application.findMany({
-    select: { status: true },
-    distinct: ['status'],
-  });
-
-  // Returns options for the sponsor type
-  const sponsorTypePromise = db.application.findMany({
-    select: { sponsorType: true },
-    distinct: ['sponsorType'],
-  });
-
-  const [applications, count, statuses, sponsorTypes] = await Promise.all([
-    applicationsPromise,
-    applicationsCount,
-    statusPromise,
-    sponsorTypePromise,
-  ]);
+  let applications: ApplicationsTable,
+    count: number,
+    statuses: ApplicationsStatusPromise,
+    sponsorTypes: ApplicationsSponsorPromise;
+  try {
+    [applications, count, statuses, sponsorTypes] = await Promise.all([
+      applicationsPromise({ where, page, pageSize, hiddenColumnsArray }),
+      applicationsCountPromise(where),
+      applicationsStatusPromise(),
+      applicationsSponsorPromise(),
+    ]);
+  } catch (error) {
+    console.error(
+      'Failed to fetch applications due to a server error: ',
+      error,
+    );
+    return {
+      error:
+        'Failed to fetch applications due to a server error. Please try again later',
+    };
+  }
 
   const filterStatus: SelectOptions[] = statuses.map(({ status }) => ({
     value: status,
@@ -213,23 +263,10 @@ export const filterApplicationsTable = async (
 
   return {
     existingUser,
-    applications: applications,
-    count: count,
-    tableParams,
-    filters: {
-      filterStatus: filterStatus,
-      filterSponsorType: filterSponsorType,
-    },
+    applications,
+    count,
+    fetchParams,
+    filterStatus,
+    filterSponsorType,
   };
 };
-
-export type FilterApplicationTableType = NonNullable<
-  Awaited<ReturnType<typeof filterApplicationsTable>>
->;
-export type ApplicationFilterType = FilterApplicationTableType['filters'] & {
-  disabled?: boolean;
-};
-export type SingleTableApplication =
-  FilterApplicationTableType['applications'][number];
-export type ApplicationColumnType = ColumnDef<SingleTableApplication>[];
-export type ApplicationTableUser = FilterApplicationTableType['existingUser'];

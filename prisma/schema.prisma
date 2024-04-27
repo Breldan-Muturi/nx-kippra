@@ -204,6 +204,7 @@ model Organization {
   name               String                   @unique
   phone              String                   @unique
   email              String                   @unique
+  image              String?
   county             String
   address            String
   invites            String[]

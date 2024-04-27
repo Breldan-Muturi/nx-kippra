@@ -1,3 +1,5 @@
+'use server';
+import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
 
 import { ApplicationPaymentDetails } from '@/validation/payment/payment.validation';
@@ -16,13 +18,12 @@ export type PayApplicationReturnType =
       }[];
     };
 
-export const getPaymentApplicationPromise = async ({
-  id,
-  userId,
-}: {
-  id: string;
-  userId: string;
-}): Promise<PayApplicationReturnType> => {
+export const getPaymentApplicationPromise = async (
+  id: string,
+): Promise<PayApplicationReturnType> => {
+  const userId = await currentUserId();
+  if (!userId)
+    return { error: 'You need to be logged in to submit this application' };
   const existingApplication = await db.application.findUnique({
     where: { id },
     select: {

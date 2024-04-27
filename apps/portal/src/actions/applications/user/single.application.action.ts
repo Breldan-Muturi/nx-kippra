@@ -1,3 +1,5 @@
+'use server';
+import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { UserRole } from '@prisma/client';
 
@@ -123,13 +125,12 @@ export type ViewApplicationReturnType =
     }
   | { isApplicationAdmin: true; applicationAdmin: ApplicationAdminReturn };
 
-export const getApplicationByIdPromise = async ({
-  id,
-  userId,
-}: {
-  id: string;
-  userId: string;
-}): Promise<ViewApplicationReturnType> => {
+export const getApplicationByIdPromise = async (
+  id: string,
+): Promise<ViewApplicationReturnType> => {
+  const userId = await currentUserId();
+  if (!userId) return { error: 'You must be logged in to view applications' };
+
   const user = await db.user.findUnique({
     where: { id: userId },
     select: {
@@ -140,6 +141,7 @@ export const getApplicationByIdPromise = async ({
       ownedApplications: { select: { id: true } },
     },
   });
+
   if (!user || !user.id) {
     return { error: 'Only registered users can view applications' };
   }

@@ -1,8 +1,7 @@
-import React from "react";
-import DescriptionTabs from "../components/DescriptionTabs";
-import { db } from "@/lib/db";
-import { NextResponse } from "next/server";
-// import { env } from "@/validation/env.validation";
+import React from 'react';
+import DescriptionTabs from './components/DescriptionTabs';
+import { db } from '@/lib/db';
+import { NextResponse } from 'next/server';
 
 interface ProgramLayoutProps {
   children: React.ReactNode;
@@ -23,7 +22,7 @@ const ProgramLayout = async ({
 
   if (!program)
     return NextResponse.rewrite(
-      new URL("/account/error", process.env.NEXT_PUBLIC_APP_URL),
+      new URL('/account/error', process.env.NEXT_PUBLIC_APP_URL),
     );
 
   return (

@@ -4,6 +4,7 @@ import {
   Citizenship,
   Delivery,
   Identification,
+  OrganizationRole,
   SponsorType,
   UserRole,
   Venue,
@@ -122,3 +123,17 @@ export const formatRoles = (role: UserRole) => {
 export const roleOptions: SelectOptions[] = Object.values(UserRole).map(
   (value) => ({ value, optionLabel: formatRoles(value) }),
 );
+
+export const formatOrganizationRoles = (role: OrganizationRole) => {
+  switch (role) {
+    case OrganizationRole.MEMBER:
+      return 'Member';
+    case OrganizationRole.OWNER:
+      return 'Owner';
+    default:
+      return role;
+  }
+};
+export const organizationRoleOptions: SelectOptions[] = Object.values(
+  OrganizationRole,
+).map((value) => ({ value, optionLabel: formatOrganizationRoles(value) }));

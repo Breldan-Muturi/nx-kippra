@@ -1,6 +1,6 @@
 import { getProgramPrerequisiteOptions } from '@/helpers/program.helpers';
 import React from 'react';
-import ProgramForm from '@/app/(portal)/components/common/program-form/program-form';
+import ProgramForm from '@/app/(portal)/components/common/forms/program-form/program-form';
 import { getOnlineCourseOptions } from '@/actions/moodle/moodle-courses.actions';
 
 const NewProgramPage = async () => {

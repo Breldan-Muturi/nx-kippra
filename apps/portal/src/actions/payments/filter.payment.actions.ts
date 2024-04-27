@@ -1,38 +1,28 @@
 'use server';
-
-import { processAmountRange } from '@/helpers/payment.helpers';
 import { db } from '@/lib/db';
 import { SelectOptions } from '@/types/form-field.types';
 import {
-  FilterPaymentsRedirectType,
-  FilterPaymentsType,
-  filterPaymentsRedirectSchema,
-  filterPaymentsSchema,
+  FetchPaymentsType,
+  PathPaymentsType,
+  fetchPaymentsSchema,
+  pathPaymentsSchema,
 } from '@/validation/payment/payment.validation';
 import { Prisma, UserRole } from '@prisma/client';
 import filterRedirect from '../redirect.actions';
 import { processSearchString } from '@/helpers/filter.helpers';
+import { currentUserId } from '@/lib/auth';
 
-export type FilterPaymentFieldsType = {
-  channelFilter: SelectOptions[];
-  statusFilter: SelectOptions[];
-  highestAmount: number;
-  lowestAmount: number;
-  disabled: boolean;
-};
-
-export type FilterPaymentFieldsActionType = Omit<
-  FilterPaymentFieldsType,
-  'disabled'
->;
+const userPromise = async (id: string) =>
+  await db.user.findUnique({ where: { id }, select: { id: true, role: true } });
+type UserPromise = Awaited<ReturnType<typeof userPromise>>;
 
 const selectPaymentsPromise = async (
   hiddenColumnsArray: string[],
   where: Prisma.PaymentWhereInput,
   page: string,
   pageSize: string,
-) => {
-  return await db.payment.findMany({
+) =>
+  await db.payment.findMany({
     where,
     skip: (parseInt(page) - 1) * parseInt(pageSize),
     take: parseInt(pageSize),
@@ -67,38 +57,63 @@ const selectPaymentsPromise = async (
       payment_channel: hiddenColumnsArray.includes('Method') ? undefined : true,
     },
   });
-};
 export type FilteredPaymentsDetails = Awaited<
   ReturnType<typeof selectPaymentsPromise>
 >;
 export type SinglePaymentDetail = FilteredPaymentsDetails[number];
 
-export type FilterPaymentsReturnType =
+const countPromise = async (where: Prisma.PaymentWhereInput): Promise<number> =>
+  await db.payment.count({ where });
+
+const statusPromise = async (where: Prisma.PaymentWhereInput) =>
+  await db.payment.findMany({
+    where,
+    select: {
+      status: true,
+    },
+    distinct: ['status'],
+  });
+type StatusPromise = Awaited<ReturnType<typeof statusPromise>>;
+
+const channelsPromise = async (where: Prisma.PaymentWhereInput) =>
+  await db.payment.findMany({
+    where,
+    select: {
+      payment_channel: true,
+    },
+    distinct: ['payment_channel'],
+  });
+type ChannelsPromise = Awaited<ReturnType<typeof channelsPromise>>;
+
+export type FetchPaymentsReturn =
   | { error: string }
   | {
+      fetchParams: FetchPaymentsType;
       payments: FilteredPaymentsDetails;
-      paymentFilters: FilterPaymentFieldsActionType;
+      filterChannels: SelectOptions[];
+      filterStatuses: SelectOptions[];
       count: number;
     };
 
-export type PaymentTableProps = {
-  paymentsInfo: Exclude<FilterPaymentsReturnType, { error: string }>;
-  tableParams: FilterPaymentsType;
-};
+export type PaymentTableProps = Exclude<FetchPaymentsReturn, { error: string }>;
 
-export const filterPaymentsTable = async (
-  params: FilterPaymentsType,
-): Promise<FilterPaymentsReturnType> => {
-  const validParams = filterPaymentsSchema.safeParse(params);
+export const fetchPaymentsTable = async (
+  fetchParams: FetchPaymentsType,
+  organizationId?: string,
+): Promise<FetchPaymentsReturn> => {
+  const userId = await currentUserId();
+  if (!userId) return { error: 'You must be logged in to view payments' };
+
+  const validParams = fetchPaymentsSchema.safeParse(fetchParams);
   if (!validParams.success) {
     console.log(
       'Filter payments validation error: ',
-      filterPaymentsSchema.parse(validParams),
+      fetchPaymentsSchema.parse(validParams),
     );
     return { error: 'Invalid request for payments' };
   }
+
   const {
-    userId,
     page,
     pageSize,
     hiddenColumns,
@@ -109,17 +124,22 @@ export const filterPaymentsTable = async (
     programTitle,
   } = validParams.data;
 
-  const existingUser = await db.user.findUnique({
-    where: { id: userId },
-    select: { id: true, role: true },
-  });
-
-  if (!existingUser || !existingUser.id) {
-    return { error: 'Could not find a user with matching id' };
+  let existingUser: UserPromise;
+  try {
+    existingUser = await userPromise(userId);
+  } catch (error) {
+    console.error('Failed to authenticate user request: ', error);
+    return {
+      error:
+        'Failed to authenticate user request due to a server error. Please try again later',
+    };
   }
 
-  if (!existingUser.role) {
-    return { error: "Could not determine this user's role" };
+  if (!existingUser || !existingUser.id || !existingUser.role) {
+    return {
+      error:
+        'Failed to authenticate this request due to a server error. Please try again later',
+    };
   }
 
   let userWhereCondition: Prisma.PaymentWhereInput = {};
@@ -139,10 +159,8 @@ export const filterPaymentsTable = async (
     : undefined;
 
   if (searchInvoiceNumber)
-    filterCondition = {
-      ...filterCondition,
-      invoice_number: { search: searchInvoiceNumber },
-    };
+    filterCondition.invoice_number = { search: searchInvoiceNumber };
+
   if (searchPayeeName)
     filterCondition = {
       ...filterCondition,
@@ -155,6 +173,12 @@ export const filterPaymentsTable = async (
         trainingSession: { program: { title: { search: searchProgramTitle } } },
       },
     };
+  if (organizationId) {
+    filterCondition = {
+      ...filterCondition,
+      application: { organizationId },
+    };
+  }
 
   const hiddenColumnsArray = hiddenColumns ? hiddenColumns.split(',') : [];
 
@@ -162,77 +186,45 @@ export const filterPaymentsTable = async (
     userWhereCondition = { application: { ownerId: userId } };
   }
 
-  const countPromise = db.payment.count({ where: userWhereCondition });
-
-  const statusFiltersPromise = db.payment.findMany({
-    where: userWhereCondition,
-    select: {
-      status: true,
-    },
-    distinct: ['status'],
-  });
-
-  const channelFiltersPromise = db.payment.findMany({
-    where: userWhereCondition,
-    select: {
-      payment_channel: true,
-    },
-    distinct: ['payment_channel'],
-  });
-
-  const highestAmountPromise = db.payment.aggregate({
-    where: userWhereCondition,
-    _max: {
-      amount_paid: true,
-    },
-  });
-
-  const lowestAmountPromise = db.payment.aggregate({
-    where: userWhereCondition,
-    _min: {
-      amount_paid: true,
-    },
-  });
-
-  const [
-    payments,
-    count,
-    channelFilter,
-    statusFilter,
-    highestAmountResult,
-    lowestAmountResult,
-  ] = await Promise.all([
-    selectPaymentsPromise(
-      hiddenColumnsArray,
-      { ...userWhereCondition, ...filterCondition },
-      page,
-      pageSize,
-    ),
-    countPromise,
-    channelFiltersPromise,
-    statusFiltersPromise,
-    highestAmountPromise,
-    lowestAmountPromise,
-  ]);
+  let payments: SinglePaymentDetail[],
+    count: number,
+    statusFilter: StatusPromise,
+    channelFilter: ChannelsPromise;
+  try {
+    [payments, count, statusFilter, channelFilter] = await Promise.all([
+      selectPaymentsPromise(
+        hiddenColumnsArray,
+        { ...userWhereCondition, ...filterCondition },
+        page,
+        pageSize,
+      ),
+      countPromise(userWhereCondition),
+      statusPromise(userWhereCondition),
+      channelsPromise(userWhereCondition),
+    ]);
+  } catch (error) {
+    console.error('Failed to fetch payments due to a server error: ', error);
+    return {
+      error:
+        'Failed to fetch payments due to a server error. Please try again later',
+    };
+  }
 
   return {
+    fetchParams,
     payments,
-    paymentFilters: {
-      channelFilter: channelFilter.map((filter) => ({
-        value: filter.payment_channel,
-        optionLabel: filter.payment_channel,
-      })),
-      statusFilter: statusFilter.map((filter) => ({
-        value: filter.status,
-        optionLabel: filter.status,
-      })),
-      highestAmount: processAmountRange(highestAmountResult._max?.amount_paid),
-      lowestAmount: processAmountRange(lowestAmountResult._min?.amount_paid),
-    },
+    filterChannels: channelFilter.map(({ payment_channel }) => ({
+      value: payment_channel,
+      optionLabel: payment_channel,
+    })),
+    filterStatuses: statusFilter.map(({ status }) => ({
+      value: status,
+      optionLabel: status,
+    })),
     count,
   };
 };
 
-export const filterPayments = async (values: FilterPaymentsRedirectType) => {
-  await filterRedirect(values, filterPaymentsRedirectSchema, values.path);
+export const filterPayments = async (values: PathPaymentsType) => {
+  await filterRedirect(values, pathPaymentsSchema, values.path);
 };

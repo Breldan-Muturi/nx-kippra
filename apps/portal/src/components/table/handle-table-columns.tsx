@@ -1,4 +1,4 @@
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef } from '@tanstack/react-table';
 
 interface HandleTableColumnProps<T extends object> {
   hiddenColumnsArray?: string[];

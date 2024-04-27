@@ -3,8 +3,9 @@
 import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { NewOrganizationForm } from '@/validation/organization/organization.validation';
-import { Organization, OrganizationRole } from '@prisma/client';
-import { validateNewOrganization } from './validate.organization.actions';
+import { OrganizationRole } from '@prisma/client';
+import { UploadImageReturn, uploadImage } from '../firebase/storage.actions';
+import {ActionReturnIdType} from '@/types/actions.types';
 
 const getExistingUser = async (userId: string) =>
   await db.user.findUnique({
@@ -26,24 +27,35 @@ const getExistingOrganizations = async (organzation: NewOrganizationForm) =>
   });
 type NewOrgValidateOrg = Awaited<ReturnType<typeof getExistingOrganizations>>;
 
-type UserOrganizationReturn =
-  | { error: string }
-  | { success: string; organizationId: string };
+export type UserNewOrganizationParams = {
+  organization: NewOrganizationForm;
+  formData: FormData;
+};
 
-export const userNewOrganization = async (
-  organization: NewOrganizationForm,
-): Promise<UserOrganizationReturn> => {
+export const userNewOrganization = async ({
+  organization,
+  formData,
+}: UserNewOrganizationParams): Promise<ActionReturnIdType> => {
   const userId = await currentUserId();
   if (!userId)
     return { error: 'You need to be logged in to add an organization' };
 
+  const image = formData.get('image') as File;
+
   let existingUser: NewOrganizationExistingUser,
-    existingOrganizations: NewOrgValidateOrg;
+    existingOrganizations: NewOrgValidateOrg,
+    uploadImageReturn: UploadImageReturn;
   try {
-    [existingUser, existingOrganizations] = await Promise.all([
-      getExistingUser(userId),
-      getExistingOrganizations(organization),
-    ]);
+    [existingUser, existingOrganizations, uploadImageReturn] =
+      await Promise.all([
+        getExistingUser(userId),
+        getExistingOrganizations(organization),
+        uploadImage({
+          buffer: Buffer.from(await image.arrayBuffer()),
+          contentType: image.type,
+          fileName: image.name,
+        }),
+      ]);
   } catch (error) {
     console.error('Could not validate details: ', error);
     return {
@@ -51,8 +63,15 @@ export const userNewOrganization = async (
         'Failed to validate form details due to a server error. Please try again later',
     };
   }
+
   if (!existingUser || !existingUser.id)
     return { error: 'User account not found. Please try again later' };
+
+  if ('error' in uploadImageReturn)
+    return {
+      error:
+        'Failed to upload the image due to a server error. Please try again later',
+    };
 
   const matchingEmail = !!existingOrganizations.find(
     ({ email }) => email === organization.organizationEmail,
@@ -79,6 +98,7 @@ export const userNewOrganization = async (
   try {
     const newOrganization = await db.organization.create({
       data: {
+        image: uploadImageReturn.fileUrl,
         address: organization.organizationAddress,
         email: organization.organizationEmail,
         phone: organization.organizationPhone,
@@ -96,9 +116,10 @@ export const userNewOrganization = async (
     });
     return {
       success: 'New organization created successfully',
-      organizationId: newOrganization.id,
+      recordId: newOrganization.id,
     };
-  } catch {
+  } catch (error) {
+    console.error('There was an error creating this organization: ', error);
     return { error: 'Something went wrong creating the organization' };
   }
 };

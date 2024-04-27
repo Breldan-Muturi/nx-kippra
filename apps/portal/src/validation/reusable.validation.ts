@@ -72,3 +72,15 @@ export const validImageUpload = (optional: boolean = false) => {
     },
   );
 };
+
+export const withIdSchema = <T extends z.ZodObject<any>>(
+  schema: T,
+  hasId: boolean,
+) => {
+  if (hasId) {
+    return schema.extend({
+      id: validString('An item id is required', 1),
+    });
+  }
+  return schema;
+};

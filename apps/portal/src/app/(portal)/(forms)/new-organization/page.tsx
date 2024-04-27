@@ -1,7 +1,8 @@
-import React from "react";
+import React from 'react';
+import OrganizationForm from '../../components/common/forms/organization-form/organization-form';
 
 const NewOrganization = () => {
-  return <div>NewOrganization</div>;
+  return <OrganizationForm />;
 };
 
 export default NewOrganization;

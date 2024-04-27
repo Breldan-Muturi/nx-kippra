@@ -26,7 +26,7 @@ const ReusableTable = <T,>({
   return (
     <ScrollArea
       className={cn(
-        'whitespace-nowrap rounded-md border md:w-[1150px] lg:w-[1150px]',
+        'whitespace-nowrap rounded-md border md:w-[1150px]',
         className,
       )}
     >

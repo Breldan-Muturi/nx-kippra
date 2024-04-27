@@ -1,12 +1,8 @@
 'use server';
 
+import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { UserRole } from '@prisma/client';
-
-export type SinglePaymentQueryType = {
-  paymentId: string;
-  userId: string;
-};
 
 const getPaymentDetails = async (paymentId: string) => {
   return await db.payment.findUnique({
@@ -27,10 +23,13 @@ export type SinglePaymentReturnType =
   | { error: string }
   | { paymentDetails: PaymentDetailsType };
 
-export const getSinglePayment = async ({
-  paymentId,
-  userId,
-}: SinglePaymentQueryType): Promise<SinglePaymentReturnType> => {
+export const getSinglePayment = async (
+  paymentId: string,
+): Promise<SinglePaymentReturnType> => {
+  const userId = await currentUserId();
+  if (!userId)
+    return { error: 'You must be logged in to view payment information.' };
+
   const user = await db.user.findUnique({
     where: { id: userId },
     select: {

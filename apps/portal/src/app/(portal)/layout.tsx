@@ -51,10 +51,26 @@ const navLinks: SidebarLink[] = [
     role: UserRole.ADMIN,
   },
   {
-    href: '/organizations/admin',
+    href: '/new-inhouse-training',
+    label: 'In house training',
+    icon: <LandPlot size="18" className="mr-1" />,
+    role: UserRole.USER,
+  },
+  {
+    href: '/organizations',
     label: 'Organizations',
     icon: <CgOrganisation size="18" className="mr-1" />,
-    role: UserRole.ADMIN,
+  },
+  {
+    href: '/new-organization',
+    label: 'New Organization',
+    icon: <FolderPlus size="18" className="mr-1" />,
+  },
+  {
+    href: '/completed-programs',
+    label: 'Completed programs',
+    icon: <MdTask size="18" className="mr-1" />,
+    role: UserRole.USER,
   },
   {
     href: '/new-program',
@@ -67,30 +83,6 @@ const navLinks: SidebarLink[] = [
     label: 'Reports',
     icon: <BiSolidReport size="18" className="mr-1" />,
     role: UserRole.ADMIN,
-  },
-  {
-    href: '/new-inhouse-training',
-    label: 'In house training',
-    icon: <LandPlot size="18" className="mr-1" />,
-    role: UserRole.USER,
-  },
-  {
-    href: '/organizations',
-    label: 'Organizations',
-    icon: <CgOrganisation size="18" className="mr-1" />,
-    role: UserRole.USER,
-  },
-  {
-    href: '/new-organization',
-    label: 'New Organization',
-    icon: <FolderPlus size="18" className="mr-1" />,
-    role: UserRole.USER,
-  },
-  {
-    href: '/completed-programs',
-    label: 'Completed programs',
-    icon: <MdTask size="18" className="mr-1" />,
-    role: UserRole.USER,
   },
 ];
 

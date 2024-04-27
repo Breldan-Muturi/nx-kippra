@@ -1,71 +1,25 @@
-import { filterPaymentsTable } from '@/actions/payments/filter.payment.actions';
-import { currentUserId } from '@/lib/auth';
+import { fetchPaymentsTable } from '@/actions/payments/filter.payment.actions';
 import {
-  FilterPaymentsType,
-  PaymentsSearchParamsType,
-  ViewPaymentsRedirectType,
-  filterPaymentsSchema,
-  viewPaymentsRedirectSchema,
+  FetchPaymentsType,
+  fetchPaymentsSchema,
 } from '@/validation/payment/payment.validation';
-import { redirect } from 'next/navigation';
 import React from 'react';
-import PaymentsTable from './components/payments-table';
-import { getSinglePayment } from '@/actions/payments/single.payment.actions';
-import PaymentSheetView from './components/sheets/payment-sheet-view';
+import PaymentsTable from '../../components/common/tables/payments-table/payments-table';
 
 const Payments = async ({
   searchParams,
 }: {
-  searchParams: PaymentsSearchParamsType;
+  searchParams: FetchPaymentsType;
 }) => {
-  const userId = await currentUserId();
-  if (!userId) {
-    return redirect('/');
-  }
-  const filterPaymentsParams: FilterPaymentsType = filterPaymentsSchema.parse({
-    userId,
-    ...searchParams,
-  });
+  const validSearch = fetchPaymentsSchema.parse(searchParams);
 
-  const viewParams: ViewPaymentsRedirectType =
-    viewPaymentsRedirectSchema.parse(searchParams);
-
-  const paymentId = filterPaymentsParams.viewPayment;
-
-  const [paymentsPromise, singlePaymentPromise] = await Promise.allSettled([
-    filterPaymentsTable(filterPaymentsParams),
-    paymentId ? getSinglePayment({ userId, paymentId }) : Promise.resolve(null),
-  ]);
-
-  if (
-    paymentsPromise.status !== 'fulfilled' ||
-    'error' in paymentsPromise.value
-  ) {
+  const paymentsInfo = await fetchPaymentsTable(validSearch);
+  if ('error' in paymentsInfo)
     return (
-      // Return an error component in this case
-      <div>{`There was an error fetching payments ${paymentsPromise.status === 'fulfilled' ? paymentsPromise.value : ''}`}</div>
+      <div>{`Failed to fetch payment details due to a server error: ${paymentsInfo.error}`}</div>
     );
-  }
 
-  const paymentDetailsInfo =
-    singlePaymentPromise.status === 'fulfilled'
-      ? singlePaymentPromise.value
-      : null;
-
-  return (
-    <>
-      <PaymentsTable
-        paymentsInfo={paymentsPromise.value}
-        tableParams={filterPaymentsParams}
-      />
-      {paymentDetailsInfo && (
-        <PaymentSheetView
-          payment={paymentDetailsInfo}
-          viewParams={viewParams}
-        />
-      )}
-    </>
-  );
+  return <PaymentsTable {...paymentsInfo} />;
 };
 
 export default Payments;

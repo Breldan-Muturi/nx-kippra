@@ -7,7 +7,7 @@ import {
 } from '@/validation/participants/participants.validation';
 import { redirect } from 'next/navigation';
 import React from 'react';
-import ParticipantsTable from './components/participants-table';
+import ParticipantsTable from '../../components/common/tables/participants-table/participants-table';
 
 const Participants = async ({
   searchParams,

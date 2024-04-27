@@ -27,7 +27,7 @@ type UploadImageType = {
   buffer: Buffer;
   fileName: string;
 };
-type UploadImageReturn = { error: string } | { fileUrl: string };
+export type UploadImageReturn = { error: string } | { fileUrl: string };
 
 export const uploadImage = async ({
   contentType,
