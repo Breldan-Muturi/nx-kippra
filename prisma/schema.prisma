@@ -360,3 +360,15 @@ model PaymentReceipt {
   paymentId String   @unique
   payment   Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 }
+
+model CompletedPrograms {
+  id String  @id @default(cuid())
+  completionDate  DateTime @default(now())
+  completionEvidence String[]
+  program Program @relation(fields: [UserId], references: [id])
+  participant User @relation(fields: [UserId], references: [id])
+  status String
+  creator User @relation(fields: [creatorId], references: [id])
+  modifiedDate DateTime
+  created DateTime
+}
