@@ -68,6 +68,7 @@ model User {
   organizations         UserOrganization[]
   applications          ApplicationParticipant[]
   ownedApplications     Application[]
+  completedPrograms CompletedPrograms[]
 }
 
 model Account {
@@ -143,6 +144,7 @@ model Program {
 
   trainingSessions TrainingSession[]
   topics           Topic[]
+  completedPrograms CompletedPrograms[]
 }
 
 model Topic {
@@ -365,10 +367,13 @@ model CompletedPrograms {
   id String  @id @default(cuid())
   completionDate  DateTime @default(now())
   completionEvidence String[]
-  program Program @relation(fields: [UserId], references: [id])
-  participant User @relation(fields: [UserId], references: [id])
+  programId String
+  program   Program  @relation(fields: [programId], references: [id])
+  participantId  String
+  participant String
   status String
+  creatorId String
   creator User @relation(fields: [creatorId], references: [id])
   modifiedDate DateTime
-  created DateTime
+  createdAt DateTime @default(now())
 }
