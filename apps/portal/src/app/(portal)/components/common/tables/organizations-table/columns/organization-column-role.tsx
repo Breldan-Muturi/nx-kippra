@@ -19,8 +19,13 @@ const organizationColumnRole = ({
       ({ user: { id } }) => id === userId,
     )?.role;
     const isOrgEmail = row.original.email === email;
-    const isInvite = row.original.invites.includes(email);
+
+    const isInvite = row.original.invites
+      .map(({ email }) => email)
+      .includes(email);
+
     const isContactEmail = row.original.contactPersonEmail === email;
+
     const noRole = [
       !isOrgEmail,
       !isInvite,

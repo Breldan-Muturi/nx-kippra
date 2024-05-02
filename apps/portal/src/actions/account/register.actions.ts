@@ -78,12 +78,14 @@ export const register = async (values: RegisterForm) => {
               organizations: {
                 create: {
                   role: OrganizationRole.MEMBER,
-                  organizationId: invite.organizationId,
+                  organizationId: invite?.organizationId as string,
                 },
               },
             },
           });
-          await prisma.inviteOrganization.delete({ where: { id: invite.id } });
+          await prisma.inviteOrganization.delete({
+            where: { id: invite?.id as string },
+          });
         },
         { maxWait: 20000, timeout: 20000 },
       );

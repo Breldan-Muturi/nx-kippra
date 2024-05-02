@@ -84,18 +84,20 @@ export const respondInvite = async ({
       async (prisma) => {
         if (accepted) {
           await prisma.user.update({
-            where: { id: user.id },
+            where: { id: user?.id as string },
             data: {
               organizations: {
                 create: {
                   role: OrganizationRole.MEMBER,
-                  organizationId: invite.organizationId,
+                  organizationId: invite?.organizationId as string,
                 },
               },
             },
           });
         }
-        await prisma.inviteOrganization.delete({ where: { id: invite.id } });
+        await prisma.inviteOrganization.delete({
+          where: { id: invite?.id as string },
+        });
       },
       { maxWait: 20000, timeout: 20000 },
     );
