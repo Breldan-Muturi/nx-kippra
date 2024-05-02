@@ -12,7 +12,7 @@ import participantFields from './application-participant-fields';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Loader2, X } from 'lucide-react';
-import ParticipantButton from '@/app/(portal)/(hero)/[programId]/training-sessions/[trainingsessionid]/components/participant-button';
+import TooltipIconButton from '@/components/buttons/tooltip-icon-button';
 
 type ApplicationParticipantFormProps =
   React.ComponentPropsWithoutRef<'section'> & {
@@ -47,7 +47,7 @@ const ApplicationParticipantForm = ({
     <section className={cn('flex flex-col space-y-1', className)} {...props}>
       <Form {...form}>
         <div className="flex space-x-4 items-center mb-4">
-          <ParticipantButton
+          <TooltipIconButton
             icon={<X className="size-4" />}
             tooltipLabel="Dismiss form"
             className="bg-red-600/80 hover:bg-red-600 size-6"

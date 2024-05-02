@@ -8,13 +8,13 @@ import {
 import handleTableColumns from '@/components/table/handle-table-columns';
 import tableSelectColumn from '@/components/table/table-select-column';
 import {
-  FetchParticipantsRedirectType,
   FilterParticipantsType,
-  fetchParticipantsRedirectSchema,
+  PathParticipantsType,
   filterParticipantsSchema,
+  pathParticipantsSchema,
 } from '@/validation/participants/participants.validation';
 import { usePathname } from 'next/navigation';
-import { useMemo, useTransition } from 'react';
+import React, { useMemo, useState, useTransition } from 'react';
 import participantColumnApplication from './columns/participant-column-application';
 import participantColumnOrganization from './columns/participant-column-organization';
 import participantColumnEmail from './columns/participant-column-email';
@@ -28,30 +28,32 @@ import TablesPagination from '@/components/table/table-pagination';
 import ParticipantsFilterForm from './filters/participants-filter-form';
 import { SubmitHandler } from 'react-hook-form';
 import filterParticipantsFields from './filters/participants-filter-fields';
+import { cn } from '@/lib/utils';
+
+type TableParticipantsProps = React.ComponentPropsWithoutRef<'div'> &
+  ParticipantsTableProps;
 
 const ParticipantsTable = ({
-  participantsInfo: { participants, count },
-  tableParams,
-}: ParticipantsTableProps) => {
+  participants,
+  count,
+  fetchParams,
+  className,
+  ...props
+}: TableParticipantsProps) => {
   const path = usePathname();
   const [isPending, startTransition] = useTransition();
-  const pathParams: FetchParticipantsRedirectType =
-    fetchParticipantsRedirectSchema.parse({
-      ...tableParams,
-      path,
-    });
+  const [modal, setModal] = useState();
+  const pathParams: PathParticipantsType = pathParticipantsSchema.parse({
+    ...fetchParams,
+    path,
+  });
 
   const { hiddenColumns, page, pageSize } = pathParams;
   const filterValues: FilterParticipantsType =
     filterParticipantsSchema.parse(pathParams);
 
   const viewParticipant = (participantId: string) => {
-    startTransition(() => {
-      filterParticipants({
-        ...pathParams,
-        viewParticipant: participantId,
-      });
-    });
+    startTransition(() => {});
   };
 
   const changePage = (pageInt: number) => {
@@ -127,7 +129,7 @@ const ParticipantsTable = ({
   });
 
   return (
-    <div className="flex flex-col space-y-4">
+    <div className={cn('flex flex-col space-y-4', className)} {...props}>
       <ParticipantsFilterForm
         isPending={isPending}
         clearFilters={clearFilters}

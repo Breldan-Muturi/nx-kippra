@@ -1,26 +1,26 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
-import React from "react";
+} from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+import React from 'react';
 
-export interface ParticipantButtonProps
-  extends React.ComponentPropsWithoutRef<"button"> {
+export interface TooltipIconButtonProps
+  extends React.ComponentPropsWithoutRef<'button'> {
   isVisible?: boolean;
   icon: React.ReactNode;
   tooltipLabel: string;
 }
 
-const ParticipantButton = ({
+const TooltipIconButton = ({
   isVisible = true,
   icon,
   tooltipLabel,
   className,
   ...btnProps
-}: ParticipantButtonProps) => {
+}: TooltipIconButtonProps) => {
   if (!isVisible) {
     return null;
   } else
@@ -30,7 +30,7 @@ const ParticipantButton = ({
           <Button
             variant="destructive"
             size="icon"
-            className={cn("rounded-full", className)}
+            className={cn('rounded-full', className)}
             {...btnProps}
           >
             {icon}
@@ -41,4 +41,4 @@ const ParticipantButton = ({
     );
 };
 
-export default ParticipantButton;
+export default TooltipIconButton;

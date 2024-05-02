@@ -1,12 +1,18 @@
 import { fetchOrganizationsTable } from '@/actions/organization/filter.organization.actions';
-import { OrganizationTableSchema } from '@/validation/organization/organization.validation';
+import {
+  OrganizationTableSchema,
+  organizationPathSchema,
+} from '@/validation/organization/organization.validation';
 import React from 'react';
 import OrganizationsTable from '../../components/common/tables/organizations-table/organizations-table';
 
+export type OrganizationSearchParams = OrganizationTableSchema & {
+  token?: string;
+};
 const Organizations = async ({
   searchParams,
 }: {
-  searchParams: OrganizationTableSchema;
+  searchParams: OrganizationSearchParams;
 }) => {
   const fetchOrganizationReturn = await fetchOrganizationsTable(searchParams);
 

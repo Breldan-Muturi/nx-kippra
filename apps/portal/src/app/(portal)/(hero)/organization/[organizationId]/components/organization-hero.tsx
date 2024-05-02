@@ -38,10 +38,6 @@ const OrganizationHero = async ({ id }: { id: string }) => {
       href: `/organization/${id}/invites`,
       label: 'Invites',
     },
-    {
-      href: `organization/${id}/join-requests`,
-      label: 'Join requests',
-    },
   ];
 
   return (

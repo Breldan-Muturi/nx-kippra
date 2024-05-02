@@ -1,5 +1,5 @@
 'use client';
-import ParticipantButton from '@/app/(portal)/(hero)/[programId]/training-sessions/[trainingsessionid]/components/participant-button';
+import TooltipIconButton from '@/components/buttons/tooltip-icon-button';
 import ReusableTable from '@/components/table/reusable-table';
 import { ParticipantSubmitOption } from '@/validation/applications/participants.application.validation';
 import {
@@ -32,7 +32,7 @@ const ParticipantApplicationsTable = ({
     <>
       <div className="flex space-x-2 items-center">
         {!!selectedParticipantsEmails.length && (
-          <ParticipantButton
+          <TooltipIconButton
             icon={<ClipboardX className="size-4" />}
             tooltipLabel="Remove selected participants"
             className="bg-red-600/80 hover:bg-red-600 size-6"

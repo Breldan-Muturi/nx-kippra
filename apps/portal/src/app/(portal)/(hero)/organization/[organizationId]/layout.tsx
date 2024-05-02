@@ -13,7 +13,6 @@ const OrganizationLayout = async ({
   children,
   params: { organizationId },
 }: OrganizationLayoutProps) => {
-  console.log('Organization id: ', organizationId);
   const id = await currentUserId();
   const [user, organization] = await Promise.all([
     db.user.findUnique({

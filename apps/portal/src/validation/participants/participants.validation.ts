@@ -12,27 +12,14 @@ export const filterParticipantsSchema = z.object({
 });
 export type FilterParticipantsType = z.infer<typeof filterParticipantsSchema>;
 
-export const participantsSearchParamsSchema = z
-  .object({
+export const fetchParticipantsSchema = filterParticipantsSchema
+  .merge(paginationSchema)
+  .extend({
     hiddenColumns: z.string().optional(),
-    viewParticipant: z.string().optional(),
-    updateRole: z.string().optional(),
-  })
-  .merge(filterParticipantsSchema)
-  .merge(paginationSchema);
-export type ParticipantsSearchParamsType = z.infer<
-  typeof participantsSearchParamsSchema
->;
-
-export const fetchParticipantsSchema = participantsSearchParamsSchema.extend({
-  userId: z.string(),
-});
+  });
 export type FetchParticipantsType = z.infer<typeof fetchParticipantsSchema>;
 
-export const fetchParticipantsRedirectSchema =
-  participantsSearchParamsSchema.extend({
-    path: validString('Pass a redirect path', 1),
-  });
-export type FetchParticipantsRedirectType = z.infer<
-  typeof fetchParticipantsRedirectSchema
->;
+export const pathParticipantsSchema = fetchParticipantsSchema.extend({
+  path: validString('Pass a redirect path', 1),
+});
+export type PathParticipantsType = z.infer<typeof pathParticipantsSchema>;

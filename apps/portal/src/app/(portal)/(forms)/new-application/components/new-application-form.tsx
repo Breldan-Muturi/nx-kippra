@@ -26,7 +26,7 @@ import {
   fetchOrganizationParticipants,
 } from '@/actions/participants/application.participants.actions';
 import ApplicationParticipantsOrganization from './participants/participants-dropdown/application-participants-organization';
-import ParticipantButton from '@/app/(portal)/(hero)/[programId]/training-sessions/[trainingsessionid]/components/participant-button';
+import TooltipIconButton from '@/components/buttons/tooltip-icon-button';
 import { PlusIcon } from 'lucide-react';
 import {
   AdminApplicationParticipant,
@@ -383,7 +383,7 @@ const NewApplicationForm = ({
           )}
           <p className="text-black text-sm font-medium">Add participant info</p>
           <div className="flex col-span-2 space-x-2 mb-8">
-            <ParticipantButton
+            <TooltipIconButton
               icon={<PlusIcon />}
               type="button"
               tooltipLabel="Add new participant"

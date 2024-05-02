@@ -36,7 +36,6 @@ import SendEmail from './modals/application-modal-email';
 import DeleteApplication from './modals/application-modal-delete';
 import RemoveApplication from './modals/application-modal-remove';
 import PayApplication from './modals/application-modal-pay';
-import { currentRole } from '@/lib/auth';
 import { UserRole } from '@prisma/client';
 import {
   FilterApplicationTableType,

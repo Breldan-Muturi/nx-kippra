@@ -47,7 +47,7 @@ const dropDownLinks: DropDownLink[] = [
 ];
 
 const kippraLogo = (
-  <Link href="/" title="Navigate to home" className="w-1/5">
+  <Link href="/" title="Navigate to home" className="flex w-1/12">
     <Image
       width={200}
       height={100}
@@ -69,21 +69,19 @@ const Navbar = ({ className, ...props }: NavBarProps) => {
       {...props}
     >
       <div className="flex w-full flex-row items-center justify-between border border-b-gray-300 px-4 py-2">
-        <div className="flex items-center justify-around md:w-[25%] lg:w-2/5">
-          {kippraLogo}
-          <nav className="flex  items-center md:space-x-2 lg:space-x-4">
-            {navLinks.map(({ href, label }, i) => (
-              <Link
-                key={`${i}-${href}`}
-                href={href}
-                title={`Visit the ${label} page`}
-                className="text-muted-foreground font-semibold text-base"
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
-        </div>
+        {kippraLogo}
+        <nav className="flex items-center md:space-x-2 lg:space-x-4">
+          {navLinks.map(({ href, label }, i) => (
+            <Link
+              key={`${i}-${href}`}
+              href={href}
+              title={`Visit the ${label} page`}
+              className="text-muted-foreground font-semibold text-base"
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger className="flex space-x-2 items-center">

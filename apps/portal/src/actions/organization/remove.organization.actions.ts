@@ -101,11 +101,6 @@ export const removeOrganization = async ({
         'Failed to delete the organization due to a server error, please try again later',
     };
 
-  // Remove any invites the user has
-  const invites = existingOrganization.invites.filter(
-    (invites) => invites !== existingUser?.email,
-  );
-
   // If the user is the owner and a new owner is passed update the organization owner
   try {
     await db.$transaction(
@@ -124,6 +119,12 @@ export const removeOrganization = async ({
               organizationId: existingOrganization?.id,
             },
           }),
+          prisma.inviteOrganization.deleteMany({
+            where: {
+              email: existingUser?.email,
+              organizationId: existingOrganization?.id,
+            },
+          }),
           newOwner
             ? prisma.userOrganization.updateMany({
                 where: {
@@ -137,7 +138,6 @@ export const removeOrganization = async ({
         await db.organization.update({
           where: { id: existingOrganization?.id },
           data: {
-            invites,
             contactPersonEmail: newEmail,
             contactPersonName: newName,
           },

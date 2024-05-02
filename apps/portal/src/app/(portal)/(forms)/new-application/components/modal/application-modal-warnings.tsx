@@ -1,4 +1,4 @@
-import ParticipantButton from '@/app/(portal)/(hero)/[programId]/training-sessions/[trainingsessionid]/components/participant-button';
+import TooltipIconButton from '@/components/buttons/tooltip-icon-button';
 import {
   Card,
   CardContent,
@@ -81,7 +81,7 @@ const ApplicationWarnings = ({
                         <TableCell>{name}</TableCell>
                         <TableCell>{email}</TableCell>
                         <TableCell>
-                          <ParticipantButton
+                          <TooltipIconButton
                             icon={<Trash2 className="size-4" />}
                             tooltipLabel={`Remove ${email}`}
                             className="bg-red-600/80 hover:bg-red-600 size-6"

@@ -24,6 +24,7 @@ export const registerSchema = matchingPasswords(
     termsConditons: requiredCheck(
       'You may not proceed before accepting the terms and conditions',
     ),
+    orgInviteToken: z.string().optional(),
   }),
   'password',
   'confirmPassword',

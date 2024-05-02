@@ -207,7 +207,7 @@ model Organization {
   image              String?
   county             String
   address            String
-  invites            String[]
+  invites            InviteOrganization[]
   contactPersonName  String                   @default("Breldan Muturi")
   contactPersonEmail String                   @default("breldan@sohnandsol.com")
   users              UserOrganization[]
@@ -224,6 +224,19 @@ model UserOrganization {
   organization Organization @relation(fields: [organizationId], references: [id])
 
   @@id([userId, organizationId])
+}
+
+model InviteOrganization {
+  id             String   @id @default(cuid())
+  organizationId String
+  email          String
+  token          String   @unique
+  createdAt      DateTime @default(now())
+  expires        DateTime
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([email, token])
 }
 
 enum ApplicationStatus {

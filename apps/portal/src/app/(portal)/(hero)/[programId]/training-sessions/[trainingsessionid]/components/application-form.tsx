@@ -30,9 +30,9 @@ import { validateApplication } from '@/actions/applications/validate.application
 import { formatDeliveryMode } from '@/helpers/enum.helpers';
 import AddParticipant from './add-participant';
 import { PlusIcon, TrashIcon } from 'lucide-react';
-import ParticipantButton, {
-  ParticipantButtonProps,
-} from './participant-button';
+import TooltipIconButton, {
+  TooltipIconButtonProps,
+} from '../../../../../../../components/buttons/tooltip-icon-button';
 import ExistingUsers from './existing-users';
 import { cn } from '@/lib/utils';
 import { userNewApplication } from '@/actions/applications/user/new.application.action';
@@ -318,7 +318,7 @@ const ApplicationForm = ({
                 className="flex-grow"
               />
             )}
-            <ParticipantButton
+            <TooltipIconButton
               icon={<PlusIcon />}
               tooltipLabel="Add new participant"
               onClick={appendFunction}
@@ -329,7 +329,7 @@ const ApplicationForm = ({
             {fields.map((field, i) => {
               const isLast = fields.length - 1 === i;
               const badgeText = `Participant ${i + 1} of ${fields.length}`;
-              const actionButtons: ParticipantButtonProps[] = [
+              const actionButtons: TooltipIconButtonProps[] = [
                 {
                   icon: <TrashIcon />,
                   tooltipLabel: 'Remove participant',
@@ -357,7 +357,7 @@ const ApplicationForm = ({
                   <div className="flex flex-col items-center justify-end space-y-2">
                     {actionButtons.map((actionButton, i) => {
                       const key = `${i}${actionButton.tooltipLabel}`;
-                      return <ParticipantButton key={key} {...actionButton} />;
+                      return <TooltipIconButton key={key} {...actionButton} />;
                     })}
                   </div>
                 </div>
