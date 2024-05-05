@@ -131,7 +131,7 @@ const OrganizationForm = ({
             !!organization ? 'Update organization' : 'Add New Organization'
           }
           isSubmitting={isPending}
-          className="my-8 w-full"
+          className="w-full my-8"
         />
       </form>
     </Form>

@@ -1,15 +1,16 @@
 'use server';
 
-import bcrypt from 'bcryptjs';
+import { getUserByEmail } from '@/helpers/user.helper';
+import { db } from '@/lib/db';
+import { generateVerificationToken } from '@/lib/tokens';
+import { sendVerificationEmail } from '@/mail/account.mail';
+import { inviteResponseEmail } from '@/mail/organization.mail';
 import {
   RegisterForm,
   registerSchema,
 } from '@/validation/account/account.validation';
-import { db } from '@/lib/db';
-import { getUserByEmail } from '@/helpers/user.helper';
-import { generateVerificationToken } from '@/lib/tokens';
-import { sendVerificationEmail } from '@/mail/account.mail';
 import { OrganizationRole, User } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const invitePromise = async ({
   email,
@@ -20,7 +21,21 @@ const invitePromise = async ({
 }) =>
   await db.inviteOrganization.findFirst({
     where: { AND: [{ email }, { token }] },
-    select: { id: true, expires: true, organizationId: true },
+    select: {
+      id: true,
+      expires: true,
+      organizationId: true,
+      organization: {
+        select: {
+          name: true,
+          users: {
+            where: { role: OrganizationRole.OWNER },
+            select: { user: { select: { email: true } } },
+            take: 1,
+          },
+        },
+      },
+    },
   });
 type InvitePromise = Awaited<ReturnType<typeof invitePromise>>;
 
@@ -68,6 +83,7 @@ export const register = async (values: RegisterForm) => {
       return {
         error: 'This invite is expired, please refresh the page, and try again',
       };
+
     try {
       await db.$transaction(
         async (prisma) => {
@@ -89,10 +105,6 @@ export const register = async (values: RegisterForm) => {
         },
         { maxWait: 20000, timeout: 20000 },
       );
-      // To Do: Add an email notification to the person that invited this user.
-      return {
-        success: `Account created successfully and added to the organization`,
-      };
     } catch (error) {
       console.error(
         'Failed to complete invite workflow due to a server error: ',
@@ -101,6 +113,27 @@ export const register = async (values: RegisterForm) => {
       return {
         error:
           'Failed to complete invite workflow due to a server error. Please try again later',
+      };
+    }
+
+    try {
+      await inviteResponseEmail({
+        to: invite.organization.users[0].user.email,
+        inviteeName: user.name,
+        organizationName: invite.organization.name,
+        organizationId: invite.organizationId,
+        accepted: true,
+      });
+      return {
+        success: `Account created successfully and added to the organization`,
+      };
+    } catch (error) {
+      console.error(
+        'Failed to notify the organization admin due to a server error: ',
+        error,
+      );
+      return {
+        error: 'Failed to notify the organization admin due to a server error.',
       };
     }
   } else {

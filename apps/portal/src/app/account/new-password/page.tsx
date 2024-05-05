@@ -69,7 +69,7 @@ const NewPassword = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex w-full flex-col space-y-4 md:w-1/2"
+        className="flex flex-col w-full space-y-4 md:w-1/2"
       >
         <FormHeader
           label="Reset your password"

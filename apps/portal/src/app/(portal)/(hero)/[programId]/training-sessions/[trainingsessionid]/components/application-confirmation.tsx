@@ -37,7 +37,7 @@ const ApplicationConfirmation: React.FC<ValidatedApplicationForm> = ({
     ({ value }) => value !== null,
   );
   return (
-    <div className="flex h-full w-full flex-col space-y-4">
+    <div className="flex flex-col w-full h-full space-y-4">
       <ol>
         {filteredDetails.map(({ key, value }, i) => (
           <li key={`${i}-${key}`}>
@@ -47,7 +47,7 @@ const ApplicationConfirmation: React.FC<ValidatedApplicationForm> = ({
       </ol>
       {newOrganization && (
         <Card className="rounded-sm shadow-none">
-          <CardHeader className="flex-row justify-start space-x-2 p-2">
+          <CardHeader className="flex-row justify-start p-2 space-x-2">
             <MessageSquareWarning
               color="red"
               fill="red"

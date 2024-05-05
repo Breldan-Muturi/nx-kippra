@@ -49,7 +49,7 @@ const ApplicationParticipantInfo = ({
       >
         <Avatar>
           {image && <AvatarImage src={image} alt={`${name}'s profile image`} />}
-          <AvatarFallback className="flex size-full items-center justify-center">
+          <AvatarFallback className="flex items-center justify-center size-full">
             {avatarFallbackName(name)}
           </AvatarFallback>
         </Avatar>

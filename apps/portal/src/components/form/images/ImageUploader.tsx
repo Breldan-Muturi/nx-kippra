@@ -55,8 +55,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   return (
     <div className={cn(className)} {...props}>
       {preview ? (
-        <div className="relative w-1/3 rounded-md overflow-hidden">
-          <div className="border-2 border-gray-300 hover:border-green-600 transition-colors duration-300 rounded-md overflow-hidden">
+        <div className="relative w-1/3 overflow-hidden rounded-md">
+          <div className="overflow-hidden border-2 border-gray-300 hover:border-green-600 transition-colors duration-300 rounded-md">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link href={preview} target="_blank" rel="noopener noreferrer">
@@ -74,10 +74,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           </div>
           <button
             onClick={handleClear}
-            className="absolute top-1 left-1 rounded-full bg-rose-500 p-1 text-white shadow-sm"
+            className="absolute p-1 text-white rounded-full top-1 left-1 bg-rose-500 shadow-sm"
             type="button"
           >
-            <X className="h-4 w-4" />
+            <X className="w-4 h-4" />
           </button>
         </div>
       ) : (

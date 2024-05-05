@@ -51,7 +51,7 @@ const page = async ({
     <>
       <ResponsiveGrid>
         {isAdmin && (
-          <div className="col-span-3 flex justify-center">
+          <div className="flex justify-center col-span-3">
             <Link
               href={{
                 pathname: `/${programId}/training-sessions/`,
@@ -69,7 +69,7 @@ const page = async ({
         {programTrainingSessions.map((trainingSession, i) => (
           <div
             key={`${i}-${trainingSession.id}`}
-            className="col-span-1 flex flex-col space-y-2"
+            className="flex flex-col col-span-1 space-y-2"
           >
             <TrainingSessionCard
               title={programTitle?.title ?? 'Unnamed program'}
@@ -91,7 +91,7 @@ const page = async ({
                     'h-6 w-6 rounded-full bg-green-600/80 hover:bg-green-600',
                   )}
                 >
-                  <Pencil className="h-4 w-4" color="white" />
+                  <Pencil className="w-4 h-4" color="white" />
                 </Link>
                 <Link
                   href={{
@@ -106,7 +106,7 @@ const page = async ({
                     'h-6 w-6 rounded-full',
                   )}
                 >
-                  <Trash2 className="h-4 w-4" color="white" />
+                  <Trash2 className="w-4 h-4" color="white" />
                 </Link>
               </div>
             )}

@@ -135,7 +135,7 @@ const FormRegister = ({
         )}
         <AccountForm accountFields={registerFields({ isPending, hasEmail })} />
         <SubmitButton label="Register a new account" isSubmitting={isPending} />
-        <p className="col-span-2 flex items-center justify-center">
+        <p className="flex items-center justify-center col-span-2">
           <ComposableDescription label="Already have an account?">
             <Link
               href="/account"

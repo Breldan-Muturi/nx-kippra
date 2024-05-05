@@ -2,6 +2,7 @@ import { SelectOptions } from '@/types/form-field.types';
 import {
   ApplicationStatus,
   Citizenship,
+  CompletionStatus,
   Delivery,
   Identification,
   OrganizationRole,
@@ -137,3 +138,17 @@ export const formatOrganizationRoles = (role: OrganizationRole) => {
 export const organizationRoleOptions: SelectOptions[] = Object.values(
   OrganizationRole,
 ).map((value) => ({ value, optionLabel: formatOrganizationRoles(value) }));
+
+export const formatCompletionStatus = (status: CompletionStatus) => {
+  switch (status) {
+    case ApplicationStatus.APPROVED:
+      return 'Approved';
+    case ApplicationStatus.PENDING:
+      return 'Pending';
+    default:
+      return status;
+  }
+};
+export const completedStatusOptions: SelectOptions[] = Object.values(
+  CompletionStatus,
+).map((value) => ({ value, optionLabel: formatCompletionStatus(value) }));

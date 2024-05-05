@@ -51,7 +51,7 @@ const ExistingUsers = ({
             : 'Add registered participant(s)'}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="popover-width-trigger p-0">
+      <PopoverContent align="start" className="p-0 popover-width-trigger">
         <Command>
           <CommandInput placeholder="Select existing users" />
           <CommandEmpty>Matching user not found</CommandEmpty>

@@ -71,7 +71,7 @@ const InvitesSearchAdd = ({
           icon={<X className="size-6" />}
           type="button"
           tooltipLabel="Clear email field"
-          className="bg-red-600/80 hover:bg-red-600 size-8 mt-1"
+          className="mt-1 bg-red-600/80 hover:bg-red-600 size-8"
           onClick={onClear}
         />
       </form>

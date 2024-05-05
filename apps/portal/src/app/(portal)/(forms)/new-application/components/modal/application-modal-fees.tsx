@@ -263,7 +263,7 @@ const ApplicationConfirmationFees = ({
 
   return (
     <Form {...form}>
-      <div className="grid grid-cols-2 w-full gap-x-2 gap-y-4">
+      <div className="w-full grid grid-cols-2 gap-x-2 gap-y-4">
         <ReusableForm
           formFields={feesFields({
             ...formSlots,
@@ -274,7 +274,7 @@ const ApplicationConfirmationFees = ({
         {!!formApplicationFees && (
           <div className="flex flex-col col-span-2 ">
             <Separator className="my-6" />
-            <div className="flex items-center justify-center gap-x-2 w-full">
+            <div className="flex items-center justify-center w-full gap-x-2">
               <p className="font-medium">Total Application Fee:</p>{' '}
               <p className="font-medium text-red-600">{`${watch('usingUsd') ? 'USD' : 'KES'} ${formApplicationFees.toLocaleString('en-US')}`}</p>
             </div>

@@ -68,6 +68,8 @@ model User {
   organizations         UserOrganization[]
   applications          ApplicationParticipant[]
   ownedApplications     Application[]
+  CreatedCompletions    CompletedProgram[]       @relation("CreatedCompletions")
+  CompletedPrograms     CompletedProgram[]       @relation("CompletedPrograms")
 }
 
 model Account {
@@ -125,6 +127,36 @@ model TwoFactorConfirmation {
   @@unique([userId])
 }
 
+enum CompletionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model CompletedProgram {
+  id        String  @id @default(cuid())
+  // Relation to the program
+  programId String
+  program   Program @relation(fields: [programId], references: [id])
+
+  completionEvidence String[]
+  completionDate     DateTime
+  status             CompletionStatus @default(PENDING)
+
+  // Relation to the user for this completed program
+  participantId String
+  participant   User   @relation("CompletedPrograms", fields: [participantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+
+  // Relation to the creator of this record
+  creatorId String
+  creator   User   @relation("CreatedCompletions", fields: [creatorId], references: [id])
+
+  @@unique([programId, participantId])
+}
+
 model Program {
   id             String   @id @default(cuid())
   imgUrl         String?
@@ -143,6 +175,7 @@ model Program {
 
   trainingSessions TrainingSession[]
   topics           Topic[]
+  CompletedProgram CompletedProgram[]
 }
 
 model Topic {

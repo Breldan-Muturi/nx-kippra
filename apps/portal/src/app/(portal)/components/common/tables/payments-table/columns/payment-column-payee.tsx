@@ -18,7 +18,7 @@ const payeeColumn: ColumnDef<SinglePaymentDetail> = {
       <TableUserCell
         userName={name}
         userImage={image || undefined}
-        userTableOrganization={userTableOrganization}
+        userTableInfo={userTableOrganization}
       />
     );
   },

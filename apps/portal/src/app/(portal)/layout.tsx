@@ -1,19 +1,17 @@
 import Navbar from '@/app/(portal)/components/navbar';
 import { currentRole } from '@/lib/auth';
-import React from 'react';
-import { UserRole } from '@prisma/client';
-import { IoMdHome } from 'react-icons/io';
-import { MdLibraryBooks } from 'react-icons/md';
-import { CgOrganisation } from 'react-icons/cg';
-import { MdPayment } from 'react-icons/md';
-import { MdTask } from 'react-icons/md';
-import { ImUsers } from 'react-icons/im';
-import { BiSolidReport } from 'react-icons/bi';
-import { FilePlus2, FolderPlus, LandPlot } from 'lucide-react';
-import ContentArea from './components/content';
-import SideBarArea from './components/sidebar/side-bar';
 import { SidebarLink } from '@/types/nav-links.types';
+import { UserRole } from '@prisma/client';
+import { FilePlus2, FolderPlus, LandPlot } from 'lucide-react';
+import React from 'react';
+import { BiSolidReport } from 'react-icons/bi';
+import { CgOrganisation } from 'react-icons/cg';
+import { ImUsers } from 'react-icons/im';
+import { IoMdHome } from 'react-icons/io';
+import { MdLibraryBooks, MdPayment, MdTask } from 'react-icons/md';
+import ContentArea from './components/content';
 import MobileNav from './components/sidebar/mobile-sidebar';
+import SideBarArea from './components/sidebar/side-bar';
 
 const navLinks: SidebarLink[] = [
   {
@@ -45,12 +43,6 @@ const navLinks: SidebarLink[] = [
     role: UserRole.ADMIN,
   },
   {
-    href: '/completed-programs/admin',
-    label: 'Completed courses',
-    icon: <MdTask size="18" className="mr-1" />,
-    role: UserRole.ADMIN,
-  },
-  {
     href: '/new-inhouse-training',
     label: 'In house training',
     icon: <LandPlot size="18" className="mr-1" />,
@@ -67,16 +59,15 @@ const navLinks: SidebarLink[] = [
     icon: <FolderPlus size="18" className="mr-1" />,
   },
   {
-    href: '/completed-programs',
-    label: 'Completed programs',
-    icon: <MdTask size="18" className="mr-1" />,
-    role: UserRole.USER,
-  },
-  {
     href: '/new-program',
     label: 'New program',
     icon: <MdLibraryBooks size="18" className="mr-1" />,
     role: UserRole.ADMIN,
+  },
+  {
+    href: '/completed-programs',
+    label: 'Completed programs',
+    icon: <MdTask size="18" className="mr-1" />,
   },
   {
     href: 'reports',
@@ -95,7 +86,7 @@ const PortalLayout = async ({ children }: { children: React.ReactNode }) => {
   const isLoggedIn = userRole !== undefined;
   const links = getLinksForRole(userRole);
   return (
-    <main className="flex h-screen flex-col">
+    <main className="flex flex-col h-screen">
       <Navbar />
       <section className="flex flex-1 h-full overflow-hidden">
         {isLoggedIn && (

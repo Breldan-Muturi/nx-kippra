@@ -5,31 +5,31 @@ import {
   SingleInviteDetail,
   filterInvites,
 } from '@/actions/invites/fetch.invites.actions';
+import { revokeInvite } from '@/actions/invites/revoke.invites.actions';
+import { sendInvite } from '@/actions/invites/send.invites.actions';
 import handleTableColumns from '@/components/table/handle-table-columns';
 import ReusableTable from '@/components/table/reusable-table';
+import TableAction, { TableActionProps } from '@/components/table/table-action';
 import TablesPagination from '@/components/table/table-pagination';
 import tableSelectColumn from '@/components/table/table-select-column';
+import { getOrganizationInvite } from '@/helpers/invites.helpers';
 import { cn } from '@/lib/utils';
 import {
   FilterInvitesSchema,
   pathInvitesSchema,
 } from '@/validation/organization/organization.invites.validation';
 import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { ClipboardX, RefreshCcw } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
-import React, { useState, useTransition } from 'react';
-import invitesColumnEmail from './columns/invites-column-email';
-import invitesColumnStatus from './columns/invites-column-status';
+import React, { useTransition } from 'react';
+import { SubmitHandler } from 'react-hook-form';
+import { toast } from 'sonner';
 import inviteColumnActions from './columns/invites-column-actions';
 import invitesColumnCreatedAt from './columns/invites-column-createdat';
+import invitesColumnEmail from './columns/invites-column-email';
 import invitesColumnExpiry from './columns/invites-column-expiry';
+import invitesColumnStatus from './columns/invites-column-status';
 import InvitesSearchAdd from './invites-search-add';
-import { SubmitHandler } from 'react-hook-form';
-import { getOrganizationInvite } from '@/helpers/invites.helpers';
-import { sendInvite } from '@/actions/invites/send.invites.actions';
-import { toast } from 'sonner';
-import { revokeInvite } from '@/actions/invites/revoke.invites.actions';
-import { ClipboardX, RefreshCcw } from 'lucide-react';
-import TableAction, { TableActionProps } from '@/components/table/table-action';
 
 type TableInvitesProps = React.ComponentPropsWithoutRef<'div'> &
   InvitesTableProps;
@@ -188,9 +188,9 @@ const InvitesTable = ({
         onSubmit={onSubmit}
         defaultValues={fetchParams}
       />
-      <div className="space-y-2 pb-4">
+      <div className="pb-4 space-y-2">
         {!!inviteActions && (
-          <div className="flex space-x-2 justify-start w-full">
+          <div className="flex justify-start w-full space-x-2">
             {inviteActions.map((action) => (
               <TableAction key={action.content} {...action} />
             ))}

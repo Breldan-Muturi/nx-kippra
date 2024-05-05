@@ -44,7 +44,7 @@ const ApplicationInfo = ({
   return (
     <ul className="space-y-2">
       <li>
-        <div className="flex gap-2 items-center">
+        <div className="flex items-center gap-2">
           <p>Mode of delivery:</p>
           <Badge variant="default" className="bg-green-600">
             {formatDeliveryMode(delivery)}
@@ -56,7 +56,7 @@ const ApplicationInfo = ({
       </li>
       <li>
         Application booked slots:{' '}
-        <span className="text-green-600 font-medium">{bookedSlots}</span>
+        <span className="font-medium text-green-600">{bookedSlots}</span>
         {'/'}
         <span className="font-medium">
           {delivery !== Delivery.ON_PREMISE

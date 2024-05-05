@@ -1,0 +1,47 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "register user",
+  "steps": [
+    {
+      "file": "apps/portal/src/actions/account/register.actions.ts",
+      "description": "Validate the form submission on the server",
+      "line": 43
+    },
+    {
+      "file": "apps/portal/src/actions/account/register.actions.ts",
+      "description": "Extract and hash the password",
+      "line": 49
+    },
+    {
+      "file": "apps/portal/src/actions/account/register.actions.ts",
+      "description": "Check whether the email already exists",
+      "line": 54
+    },
+    {
+      "file": "apps/portal/src/actions/account/register.actions.ts",
+      "description": "Create the user, and conditionally fetch the invite based on whether a token was passed",
+      "line": 58
+    },
+    {
+      "file": "apps/portal/src/actions/account/register.actions.ts",
+      "description": "Check whether invite is expired",
+      "line": 81
+    },
+    {
+      "file": "apps/portal/src/actions/account/register.actions.ts",
+      "description": "Trigger a transaction that updates the user, and deletes the invite. The user is updated by verifying their email, and adding the organization",
+      "line": 87
+    },
+    {
+      "file": "apps/portal/src/actions/account/register.actions.ts",
+      "description": "Send a notification to the owner of the organization that a new user has been added",
+      "line": 118
+    },
+    {
+      "file": "apps/portal/src/actions/account/register.actions.ts",
+      "description": "If there isn't an invite, then generate a verification token by passing the user email, and send it.",
+      "line": 139
+    }
+  ],
+  "ref": "c848d2566fa488401af6e011ff54b39bbddb3684"
+}

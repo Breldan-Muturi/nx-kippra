@@ -21,7 +21,7 @@ const Sliders: React.FC<SliderProps> = ({message, className}) => {
         width={400}
         height={200}
       />
-      <p className="text-white text-center font-bold">{message}</p>
+      <p className="font-bold text-center text-white">{message}</p>
     </div>
   );
 };

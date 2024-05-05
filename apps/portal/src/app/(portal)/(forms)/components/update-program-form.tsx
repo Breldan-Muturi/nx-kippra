@@ -73,9 +73,9 @@ const UpdateCourseForm = () => {
         }
     })
     return (
-        <div className='w-full flex justify-center'>
+        <div className='flex justify-center w-full'>
             <Form {...form}>
-                <form className='w-full flex flex-cols-4 flex-col px-8 md:px-24 space-y-3'>
+                <form className='flex flex-col w-full px-8 flex-cols-4 md:px-24 space-y-3'>
                     <FormHeader label="Update Course" />
                     <ReusableForm<AddCourseForm> formFields={courseFields} />
                     <SubmitButton label="Update This Course" className='w-full' />

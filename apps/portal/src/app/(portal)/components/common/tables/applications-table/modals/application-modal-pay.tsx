@@ -78,7 +78,7 @@ const PayApplication = ({
         <DialogFooter>
           <SubmitButton
             label="Initiate Payment"
-            className="mt-4 flex-grow"
+            className="flex-grow mt-4"
             isSubmitting={isPending}
           />
         </DialogFooter>
@@ -88,7 +88,7 @@ const PayApplication = ({
 
   const paymentTabs = (
     <Tabs defaultValue="existing" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
+      <TabsList className="w-full grid grid-cols-2">
         <TabsTrigger value="existing">Existing Invoice</TabsTrigger>
         <TabsTrigger value="new">Initiate Payment</TabsTrigger>
       </TabsList>
@@ -130,8 +130,8 @@ const PayApplication = ({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col flex-grow space-y-2">
-          <div className="flex flex-col flex-grow rounded-md border-2 border-green-200 px-4 py-2">
-            <p className="font text-3xl font-semibold text-green-600">
+          <div className="flex flex-col flex-grow px-4 py-2 border-2 border-green-200 rounded-md">
+            <p className="text-3xl font-semibold text-green-600 font">
               Ksh{' '}
               {paymentInfo.paymentDetails.amountExpected.toLocaleString(
                 'en-US',
@@ -140,7 +140,7 @@ const PayApplication = ({
           </div>
           <p className="text-xs">
             Inclusive of VAT, and eCitizen{' '}
-            <span className="text-red-600 font-semibold">Ksh 50</span>{' '}
+            <span className="font-semibold text-red-600">Ksh 50</span>{' '}
             convenience fee
           </p>
         </div>

@@ -61,7 +61,7 @@ export const userDeleteApplication = async (
   ];
 
   try {
-    // To Do: Handle withdrawal of slots for the training session
+    // TODO: Handle withdrawal of slots for the training session
     // when an application is deleted
     await deletedApplicationEmail({
       applicationEmails,

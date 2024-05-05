@@ -41,8 +41,8 @@ const RejectApplication = ({ id, handleDismiss }: ApplicationModalType) => {
             Make changes to your profile here. Click save when you are done.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
+        <div className="py-4 grid gap-4">
+          <div className="items-center grid grid-cols-4 gap-4">
             <Label htmlFor="name" className="text-right">
               Name
             </Label>
@@ -52,7 +52,7 @@ const RejectApplication = ({ id, handleDismiss }: ApplicationModalType) => {
               className="col-span-3"
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="items-center grid grid-cols-4 gap-4">
             <Label htmlFor="username" className="text-right">
               Username
             </Label>

@@ -48,7 +48,7 @@ const ApplicationModalPayee = ({
 
   return (
     <Form {...form}>
-      <div className="grid grid-cols-2 w-full gap-x-2 gap-y-4">
+      <div className="w-full grid grid-cols-2 gap-x-2 gap-y-4">
         <ReusableForm formFields={payApplicationFields} />
         <Button
           variant="default"
@@ -57,7 +57,7 @@ const ApplicationModalPayee = ({
           onClick={() => onSubmit(watch())}
         >
           {isPending && (
-            <Loader2 color="white" className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 color="white" className="w-4 h-4 mr-2 animate-spin" />
           )}
           Confirm Application Payee
         </Button>

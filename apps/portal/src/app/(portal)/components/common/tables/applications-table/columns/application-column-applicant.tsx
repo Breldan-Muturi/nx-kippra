@@ -6,19 +6,19 @@ const applicantColumn: ColumnDef<SingleTableApplication> = {
   id: 'applicant',
   header: 'Applicant',
   cell: ({ row }) => {
-    let userTableOrganization: string | null = null;
+    let userTableInfo: string | null = null;
     const {
       owner: { name, image },
       organization,
     } = row.original;
     if (organization) {
-      userTableOrganization = organization.name;
+      userTableInfo = organization.name;
     }
     return (
       <TableUserCell
         userName={name ?? 'Unnamed applicant'}
         userImage={image ?? undefined}
-        userTableOrganization={userTableOrganization}
+        userTableInfo={userTableInfo}
       />
     );
   },

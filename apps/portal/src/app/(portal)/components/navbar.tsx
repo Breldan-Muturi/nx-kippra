@@ -68,7 +68,7 @@ const Navbar = ({ className, ...props }: NavBarProps) => {
       className={cn('sticky top-0 w-full bg-white z-30', className)}
       {...props}
     >
-      <div className="flex w-full flex-row items-center justify-between border border-b-gray-300 px-4 py-2">
+      <div className="flex flex-row items-center justify-between w-full px-4 py-2 border border-b-gray-300">
         {kippraLogo}
         <nav className="flex items-center md:space-x-2 lg:space-x-4">
           {navLinks.map(({ href, label }, i) => (
@@ -76,7 +76,7 @@ const Navbar = ({ className, ...props }: NavBarProps) => {
               key={`${i}-${href}`}
               href={href}
               title={`Visit the ${label} page`}
-              className="text-muted-foreground font-semibold text-base"
+              className="text-base font-semibold text-muted-foreground"
             >
               {label}
             </Link>
@@ -84,7 +84,7 @@ const Navbar = ({ className, ...props }: NavBarProps) => {
         </nav>
         {user ? (
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex space-x-2 items-center">
+            <DropdownMenuTrigger className="flex items-center space-x-2">
               <Avatar>
                 <AvatarImage
                   src={`${user.image}`}
@@ -92,7 +92,7 @@ const Navbar = ({ className, ...props }: NavBarProps) => {
                 />
                 <AvatarFallback>{avatarFallbackName(user.name)}</AvatarFallback>
               </Avatar>
-              <p className="text-sm text-muted-foreground font-semibold">
+              <p className="text-sm font-semibold text-muted-foreground">
                 {user.name}
               </p>
             </DropdownMenuTrigger>

@@ -32,9 +32,9 @@ const MobileNav = ({ links, className, ...props }: SidebarProps) => {
                   'md:hidden flex flex-col justify-center text-green-600',
                 )}
               >
-                <section className="flex items-center flex-row my-2 ">
+                <section className="flex flex-row items-center my-2 ">
                   <div className="flex ml-8 mr-2">{icon}</div>
-                  <div className="w-1/2 font-semibold text-xl">{label}</div>
+                  <div className="w-1/2 text-xl font-semibold">{label}</div>
                 </section>
               </Link>
             ))}

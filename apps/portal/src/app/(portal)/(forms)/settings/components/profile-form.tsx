@@ -76,18 +76,18 @@ const ProfileForm = ({ user }: { user: User }) => {
     <Form {...form}>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid w-3/4 grid-cols-2 gap-2 space-y-3 self-center px-8 md:px-24"
+        className="self-center w-3/4 px-8 grid grid-cols-2 gap-2 space-y-3 md:px-24"
       >
         <FormHeader
           label="Update"
           description="Your profile information"
-          className="col-span-2 mb-2 mt-6"
+          className="mt-6 mb-2 col-span-2"
         />
         <ReusableForm formFields={profileFields} />
         <FormHeader
           label="Account and security"
           description="Securely update your access settings and credentials"
-          className="col-span-2 my-2"
+          className="my-2 col-span-2"
         />
         <ReusableForm formFields={accountFields(isOAuth || false)} />
         <SubmitButton label="Update your Profile" isSubmitting={isPending} />

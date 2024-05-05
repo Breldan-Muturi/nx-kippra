@@ -53,12 +53,12 @@ const DateField = <T extends FieldValues>({
                     !value && "text-muted-foreground",
                   )}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <CalendarIcon className="w-4 h-4 mr-2" />
                   {value ? format(value, "PPP") : <span>{placeholder}</span>}
                 </Button>
               </FormControl>
             </PopoverTrigger>
-            <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
+            <PopoverContent className="flex flex-col w-auto p-2 space-y-2">
               {datePresets && (
                 <Select
                   onValueChange={(value) =>
@@ -79,7 +79,7 @@ const DateField = <T extends FieldValues>({
                   </SelectContent>
                 </Select>
               )}
-              <div className="rounded-md border">
+              <div className="border rounded-md">
                 <Calendar
                   mode="single"
                   selected={value}

@@ -1,30 +1,30 @@
 'use client';
 
+import { newTrainingSession } from '@/actions/training-session/new.training-session.actions';
+import { updateTrainingSession } from '@/actions/training-session/update.training-session.actions';
+import ReusableForm from '@/components/form/ReusableForm';
+import SubmitButton from '@/components/form/SubmitButton';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-import ReusableForm from '@/components/form/ReusableForm';
-import SubmitButton from '@/components/form/SubmitButton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   NewTrainingSessionForm,
   UpdateTrainingSessionForm,
   trainingSessionSchema,
 } from '@/validation/training-session/training-session.validation';
-import { useRouter } from 'next/navigation';
-import { useEffect, useTransition } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Delivery, TrainingSession } from '@prisma/client';
+import { useRouter } from 'next/navigation';
+import { useEffect, useTransition } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { newTrainingSession } from '@/actions/training-session/new.training-session.actions';
 import { kshFeesFields, sessionFields, usdFeesFields } from './session-fields';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { updateTrainingSession } from '@/actions/training-session/update.training-session.actions';
 
 type SessionModalProps = React.ComponentPropsWithoutRef<'div'> &
   (

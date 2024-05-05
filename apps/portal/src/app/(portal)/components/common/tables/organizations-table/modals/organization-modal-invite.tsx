@@ -86,7 +86,7 @@ const InviteOrgModal = ({
             </AvatarFallback>
           </Avatar>
         )}
-        <div className="flex flex-grow pr-4 flex-col space-y-4">
+        <div className="flex flex-col flex-grow pr-4 space-y-4">
           <DialogHeader>
             <DialogTitle>{modalTitle}</DialogTitle>
             <DialogDescription>{modalDescription}</DialogDescription>
@@ -95,7 +95,7 @@ const InviteOrgModal = ({
           <DialogFooter>
             <Button
               variant="outline"
-              className="gap-2 text-red-600/80 border-red-600/80 hover:text-red-600 hover:border-red-600 w-full"
+              className="w-full gap-2 text-red-600/80 border-red-600/80 hover:text-red-600 hover:border-red-600"
               onClick={() => handleResponse(false)}
               disabled={isPending}
             >
@@ -103,7 +103,7 @@ const InviteOrgModal = ({
               Decline
             </Button>
             <Button
-              className="gap-2 bg-green-600 w-full"
+              className="w-full bg-green-600 gap-2"
               onClick={() => handleResponse(true)}
               disabled={isPending}
             >

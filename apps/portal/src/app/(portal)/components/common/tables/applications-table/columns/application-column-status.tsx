@@ -17,7 +17,7 @@ const applicationStatusColumn: ColumnDef<SingleTableApplication> = {
         return (
           <Badge
             variant="secondary"
-            className="border-green-600 text-green-600"
+            className="text-green-600 border-green-600"
           >
             {formattedStatus}
           </Badge>

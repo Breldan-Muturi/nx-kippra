@@ -37,7 +37,7 @@ const TopicPage = async ({
   const updateThisTopic = topics?.find(({ id }) => id === updateTopicId);
   return (
     <>
-      <div className="flex w-4/5 flex-col space-y-4">
+      <div className="flex flex-col w-4/5 space-y-4">
         {isAdmin && (
           <Link
             href={{
@@ -61,7 +61,7 @@ const TopicPage = async ({
                   <AccordionTrigger className="text-lg text-green-600">
                     {title}
                   </AccordionTrigger>
-                  <AccordionContent className="flex items-center justify-between pr-2 pt-2">
+                  <AccordionContent className="flex items-center justify-between pt-2 pr-2">
                     {summary}
                     {isAdmin && (
                       <div className="flex space-x-2">
@@ -78,7 +78,7 @@ const TopicPage = async ({
                             "h-6 w-6 rounded-full bg-green-600/80 hover:bg-green-600",
                           )}
                         >
-                          <Pencil className="h-4 w-4" color="white" />
+                          <Pencil className="w-4 h-4" color="white" />
                         </Link>
                         <Link
                           href={{
@@ -93,7 +93,7 @@ const TopicPage = async ({
                             "h-6 w-6 rounded-full",
                           )}
                         >
-                          <Trash2 className="h-4 w-4" color="white" />
+                          <Trash2 className="w-4 h-4" color="white" />
                         </Link>
                       </div>
                     )}

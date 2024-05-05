@@ -201,7 +201,7 @@ const OrganizationsTable = ({
           filterValues={filterValues}
           filterForm={organizationFilterFields(isPending)}
         />
-        <div className="space-y-2 pb-4">
+        <div className="pb-4 space-y-2">
           <TableViews
             columnIds={allColumnIds}
             hiddenColumnArray={hiddenColumnsArray}

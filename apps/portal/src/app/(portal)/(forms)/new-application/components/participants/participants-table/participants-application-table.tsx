@@ -30,7 +30,7 @@ const ParticipantApplicationsTable = ({
     .rows.map((row) => row.original.email);
   return (
     <>
-      <div className="flex space-x-2 items-center">
+      <div className="flex items-center space-x-2">
         {!!selectedParticipantsEmails.length && (
           <TooltipIconButton
             icon={<ClipboardX className="size-4" />}
@@ -39,11 +39,11 @@ const ParticipantApplicationsTable = ({
             onClick={() => removeManyParticipants(selectedParticipantsEmails)}
           />
         )}
-        <p className="text-black text-sm font-medium">
+        <p className="text-sm font-medium text-black">
           Selected participants table
         </p>
       </div>
-      <div className="flex col-span-2 mb-8">
+      <div className="flex mb-8 col-span-2">
         <ReusableTable
           table={table}
           className="flex col-span-2"

@@ -53,7 +53,7 @@ const DeleteSession = ({
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={handleDelete}>
             {isPending && (
-              <Loader2 color="white" className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 color="white" className="w-4 h-4 mr-2 animate-spin" />
             )}
             Continue
           </AlertDialogAction>

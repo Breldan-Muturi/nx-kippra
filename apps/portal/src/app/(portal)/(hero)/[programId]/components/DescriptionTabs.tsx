@@ -54,7 +54,7 @@ const DescriptionTabs = async ({ programId }: { programId: string }) => {
           {heroTitle}
         </p>
       </div>
-      <div className="shadom-md flex w-full items-center border-b-2 border-b-gray-200 bg-gray-200">
+      <div className="flex items-center w-full bg-gray-200 border-b-2 shadom-md border-b-gray-200">
         {programRoutes.map(({ href, label }, i) => (
           <Link
             key={`${i}-${href}`}

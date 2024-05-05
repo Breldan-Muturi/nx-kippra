@@ -64,13 +64,13 @@ const TablesPagination = ({
       <div className="flex flex-grow space-x-2">
         <p>Total count:</p> <p className="font-semibold">{count}</p>
       </div>
-      <div className="flex items-center justify-end space-x-2 px-4">
+      <div className="flex items-center justify-end px-4 space-x-2">
         <Select
           disabled={isPending}
           onValueChange={changePageSize}
           value={pageSize}
         >
-          <SelectTrigger className="mr-4 w-full">
+          <SelectTrigger className="w-full mr-4">
             <SelectValue placeholder="Select page options" />
           </SelectTrigger>
           <SelectContent>

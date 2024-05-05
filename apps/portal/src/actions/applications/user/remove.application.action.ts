@@ -130,10 +130,10 @@ export const userRemoveApplication = async (
             slotsEastAfrican: { increment: slotsEastAfricanAdjust },
             slotsGlobal: { increment: slotGlobalAdjust },
             applicationFee: { decrement: feeAdjustment },
-            // To Do: Will the application status be reverted?
-            // To Do: How will payments be handled?
-            // To Do: If payment is settled then maintain the slots
-            // To Do: How will receipts and offer letters be handled?
+            // TODO: Will the application status be reverted?
+            // TODO: How will payments be handled?
+            // TODO: If payment is settled then maintain the slots
+            // TODO: How will receipts and offer letters be handled?
           },
         });
       },

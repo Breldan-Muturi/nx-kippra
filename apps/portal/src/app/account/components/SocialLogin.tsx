@@ -46,7 +46,7 @@ const SocialLogin: React.FC<SocialDiv> = ({ className }) => {
   return (
     <div className={cn("flex flex-col space-y-4 py-4", className)}>
       <DividerWithText dividerText="OR" />
-      <div className="flex w-full flex-col items-center justify-center gap-y-2 md:flex-row md:gap-x-2">
+      <div className="flex flex-col items-center justify-center w-full gap-y-2 md:flex-row md:gap-x-2">
         {socialButtons.map(({ provider, icon, label }, i) => {
           return (
             <Button

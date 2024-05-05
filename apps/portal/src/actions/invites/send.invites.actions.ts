@@ -42,8 +42,24 @@ const invitePromise = async ({
 const registeredInvitePromise = async (email: string): Promise<number> =>
   await db.user.count({ where: { email } });
 
-const organizationPromise = async (id: string) =>
-  await db.organization.findUnique({ where: { id }, select: { name: true } });
+const organizationPromise = async ({
+  id,
+  email,
+}: {
+  id: string;
+  email: string;
+}) =>
+  await db.organization.findUnique({
+    where: { id },
+    select: {
+      name: true,
+      users: {
+        where: { user: { email } },
+        select: { user: { select: { email: true } } },
+        take: 1,
+      },
+    },
+  });
 type OrganizationPromise = Awaited<ReturnType<typeof organizationPromise>>;
 
 type SendInvite = { email: string; organizationId: string };
@@ -64,7 +80,7 @@ export const sendInvite = async ({
         userPromise({ id: userId, organizationId }),
         invitePromise({ email, organizationId }),
         registeredInvitePromise(email),
-        organizationPromise(organizationId),
+        organizationPromise({ id: organizationId, email }),
       ]);
   } catch (error) {
     console.error('Failed to send invite due to a server error: ', error);
@@ -97,6 +113,11 @@ export const sendInvite = async ({
     return {
       error:
         'Failed because a matching organization was not found. Please try again later',
+    };
+
+  if (organization.users[0].user.email === email)
+    return {
+      error: `There is an existing member with email ${email}. Please use a different invite email`,
     };
 
   let newInvite: InviteOrganization;

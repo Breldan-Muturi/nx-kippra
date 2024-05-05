@@ -378,11 +378,11 @@ const NewApplicationForm = ({
               isSubmitting={isPending}
               customSubmit={participantSubmit}
               dismissForm={closeInfo}
-              className="col-span-2 mb-4"
+              className="mb-4 col-span-2"
             />
           )}
-          <p className="text-black text-sm font-medium">Add participant info</p>
-          <div className="flex col-span-2 space-x-2 mb-8">
+          <p className="text-sm font-medium text-black">Add participant info</p>
+          <div className="flex mb-8 col-span-2 space-x-2">
             <TooltipIconButton
               icon={<PlusIcon />}
               type="button"
@@ -398,13 +398,13 @@ const NewApplicationForm = ({
               className="flex flex-grow"
             />
           </div>
-          <div className="col-span-2 space-x-3 mb-8 flex w-full justify-between">
+          <div className="flex justify-between w-full mb-8 col-span-2 space-x-3">
             <ReusableForm formFields={slotsFields} />
           </div>
           <SubmitButton
             label="Submit application"
             isSubmitting={isPending}
-            className="my-4 w-full"
+            className="w-full my-4"
           />
         </form>
       </Form>

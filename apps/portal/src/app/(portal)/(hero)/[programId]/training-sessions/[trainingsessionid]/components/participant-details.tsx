@@ -32,7 +32,7 @@ const ParticipantDetail: React.FC<ParticipantDetailProps> = ({
         <Avatar>
           {image && <AvatarImage src={image} alt={`${name}'s profile photo`} />}
           {name && (
-            <AvatarFallback className="flex h-full w-full items-center justify-center">
+            <AvatarFallback className="flex items-center justify-center w-full h-full">
               {avatarFallbackName(name)}
             </AvatarFallback>
           )}

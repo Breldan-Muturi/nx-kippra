@@ -41,12 +41,12 @@ const organizationColumnRole = ({
         )}
         {isOrgEmail && <Badge>Organization email</Badge>}
         {isInvite && (
-          <Badge variant="outline" className="border-green-600 text-green-600">
+          <Badge variant="outline" className="text-green-600 border-green-600">
             Invite
           </Badge>
         )}
         {isContactEmail && (
-          <Badge variant="outline" className="border-green-600 text-green-600">
+          <Badge variant="outline" className="text-green-600 border-green-600">
             Contact person
           </Badge>
         )}

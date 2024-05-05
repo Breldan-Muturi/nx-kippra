@@ -22,7 +22,7 @@ export default auth((req) => {
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
   // Check for puppeteer access on specific routes
-  // To Do: Access puppeteer pages in development to design the templates.
+  // TODO: Access puppeteer pages in development to design the templates.
   if (isTemplateRoute) {
     const puppeteerToken = req.headers.get('x-puppeteer-secret');
     if (puppeteerToken === process.env.PUPPETEER_SECRET) {

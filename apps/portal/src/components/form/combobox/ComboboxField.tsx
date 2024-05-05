@@ -51,7 +51,7 @@ const ComboboxField = <T extends FieldValues>({
                   )}
                 >
                   {comboboxTrigger(value)}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <ChevronsUpDown className="w-4 h-4 ml-2 opacity-50 shrink-0" />
                 </Button>
               </FormControl>
             </PopoverTrigger>

@@ -36,7 +36,7 @@ export const {
       // Prevent sign in without email verification
       if (!existingUser?.emailVerified) return false;
 
-      // To Do: Add 2FA check
+      // TODO: Add 2FA check
       if (existingUser.isTwoFactorEnabled) {
         const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(
           existingUser.id,

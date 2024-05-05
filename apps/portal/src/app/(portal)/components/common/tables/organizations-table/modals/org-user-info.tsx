@@ -31,7 +31,7 @@ const OrgUser = ({
           {image && (
             <AvatarImage src={image} alt={`${optionLabel}'s profile image`} />
           )}
-          <AvatarFallback className="flex size-full items-center justify-center">
+          <AvatarFallback className="flex items-center justify-center size-full">
             {avatarFallbackName(optionLabel)}
           </AvatarFallback>
         </Avatar>

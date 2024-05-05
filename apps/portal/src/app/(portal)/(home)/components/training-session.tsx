@@ -62,7 +62,7 @@ const TrainingSessionCard = async ({
   };
   return (
     <Card className={cn("flex flex-col rounded-none", className)}>
-      <CardHeader className="h-18 font-semibold text-green-600 ">
+      <CardHeader className="font-semibold text-green-600 h-18 ">
         <h3>{date}</h3>
       </CardHeader>
       <hr />

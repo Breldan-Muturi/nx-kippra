@@ -58,11 +58,36 @@ export const validateDateRange = <T extends ZodRawShape>(
   );
 };
 
+export const AllowedFileTypes: Blob['type'][] = [
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+];
+export const validFileUpload = (optional: boolean = false) =>
+  z.any().refine(
+    (files: File[] | File | string[] | string) => {
+      if (optional && !files) return true;
+      if (typeof files === 'string') return true;
+      if (files instanceof File) return AllowedFileTypes.includes(files.type);
+      if (Array.isArray(files)) {
+        return files.every((file) => {
+          if (file instanceof File) return AllowedFileTypes.includes(file.type);
+          if (typeof file === 'string') return true;
+          return false;
+        });
+      }
+      return false;
+    },
+    {
+      message: `All files must be one of the following types: ${AllowedFileTypes.join(', ')}`,
+    },
+  );
+
 export const AllowedImageTypes: Blob['type'][] = ['image/png', 'image/jpeg'];
 
 export const validImageUpload = (optional: boolean = false) => {
   return z.any().refine(
-    (file: File | string) => {
+    (file: File[] | string) => {
       if (optional && !file) return true;
       if (typeof file === 'string') return true;
       return file instanceof File && AllowedImageTypes.includes(file.type);

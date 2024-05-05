@@ -22,7 +22,7 @@ const registerFields = ({
     placeholder: 'eg. Wanjiku',
     disabled,
   },
-  // To Do: Add a utility for common fields.
+  // TODO: Add a utility for common fields.
   {
     name: 'email',
     label: 'Email',

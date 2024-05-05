@@ -100,7 +100,7 @@ export const fetchOrganizationInvites = async ({
   if (!existingUser || !existingUser.id || !existingUser.role)
     return {
       error:
-        'Failed to authenitcate request because this account does not exist. Please try again later',
+        'Failed to authenticate request because this account does not exist. Please try again later',
     };
 
   if (

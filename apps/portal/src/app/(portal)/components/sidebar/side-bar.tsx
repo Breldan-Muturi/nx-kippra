@@ -36,7 +36,7 @@ const SideBarArea = ({ links, className, ...props }: SidebarProps) => {
           {label}
         </Link>
       ))}
-      <div className="mt-auto mb-2 mx-4 space-y-3">
+      <div className="mx-4 mt-auto mb-2 space-y-3">
         <Link
           href="/settings"
           className={cn(
@@ -49,7 +49,7 @@ const SideBarArea = ({ links, className, ...props }: SidebarProps) => {
         </Link>
         <Button
           type="submit"
-          className="justify-start gap-x-2 w-full"
+          className="justify-start w-full gap-x-2"
           onClick={() => signOut()}
         >
           <LogOut />

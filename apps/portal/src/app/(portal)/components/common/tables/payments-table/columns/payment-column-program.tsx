@@ -9,7 +9,7 @@ const paymentProgramColumn: ColumnDef<SinglePaymentDetail> = {
     if (!trainingSession) return null;
     const { title, code } = trainingSession.program;
     return (
-      <div className="flex min-w-40 flex-grow flex-col">
+      <div className="flex flex-col flex-grow min-w-40">
         <p>{title}</p>
         <p className="font-semibold text-green-600">{code}</p>
       </div>
