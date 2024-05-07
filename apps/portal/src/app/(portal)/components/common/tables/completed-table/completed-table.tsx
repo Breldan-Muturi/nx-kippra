@@ -7,6 +7,11 @@ import {
   filterCompleted,
 } from '@/actions/completed-programs/fetch.completed.actions';
 import {
+  getCompletedEvidence,
+  getProgramOptions,
+  getUserOptions,
+} from '@/actions/completed-programs/options.completed.actions';
+import {
   ViewCompletedProgram,
   singleCompletedProgram,
 } from '@/actions/completed-programs/single.completed.actions';
@@ -18,17 +23,12 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
   FilterCompletedSchema,
+  filterCompletedSchema,
   pathCompletedSchema,
 } from '@/validation/completed-program/completed-program.validation';
 import { UserRole } from '@prisma/client';
 import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import {
-  BadgeCheck,
-  CheckCircle2,
-  FileX2,
-  Loader2,
-  Trash2,
-} from 'lucide-react';
+import { BadgeCheck, Check, FileX2, Loader2, Trash2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { SubmitHandler } from 'react-hook-form';
@@ -42,6 +42,10 @@ import completedColumnStatus from './columns/completed-column-status';
 import completedFilterFields from './filters/completed-filter-fields';
 import CompletedFilter from './filters/completed-filter-form';
 import CompletedModalApprove from './modals/completed-modal-approve';
+import CompletedModalDelete from './modals/completed-modal-delete';
+import CompletedModalForm, {
+  CompletedModalFormType,
+} from './modals/completed-modal-form';
 import CompletedModalReject from './modals/completed-modal-reject';
 import CompletedSheet from './sheets/completed-sheet-view';
 
@@ -51,9 +55,8 @@ type CompletedTableProps = React.ComponentPropsWithoutRef<'div'> &
   TableCompleted;
 
 const CompletedTable = ({
-  existingUser,
-  organizationId,
   fetchParams,
+  existingUser,
   completedPrograms: data,
   count,
   className,
@@ -62,10 +65,11 @@ const CompletedTable = ({
   const path = usePathname();
   const [isPending, startTransition] = useTransition();
   const [modal, setModal] = useState<
-    ViewCompletedProgram | ModalType | undefined
+    ViewCompletedProgram | ModalType | CompletedModalFormType | undefined
   >();
-  const { page, pageSize, ...filterParams } = fetchParams;
+  const filterParams = filterCompletedSchema.parse(fetchParams);
   const pathParams = pathCompletedSchema.parse({ ...fetchParams, path });
+  const { page, pageSize } = pathParams;
 
   const changePage = (pageInt: number) =>
     startTransition(() =>
@@ -96,8 +100,54 @@ const CompletedTable = ({
   const onSubmit: SubmitHandler<FilterCompletedSchema> = (values) =>
     startTransition(() => filterCompleted({ ...pathParams, ...values }));
 
-  const handleNew = () => setModal((prev) => ({ type: 'new' }));
-  const isNew = !!modal && 'type' in modal && modal.type === 'new';
+  const handleNew = () =>
+    startTransition(() => {
+      Promise.all([getUserOptions(), getProgramOptions()]).then((results) => {
+        const [userOptions, programsOptions] = results;
+        if ('error' in userOptions) {
+          toast.error(userOptions.error);
+        } else if ('error' in programsOptions) {
+          toast.error(programsOptions.error);
+        } else {
+          setModal({
+            userOptions,
+            programsOptions,
+          });
+        }
+      });
+    });
+
+  const handleUpdate = (id: string) =>
+    startTransition(() => {
+      const completedProgram = data.find(({ id: compId }) => compId === id);
+      if (completedProgram)
+        Promise.all([
+          getProgramOptions(
+            completedProgram.participant.id,
+            completedProgram.program.id,
+          ),
+          getCompletedEvidence(id),
+        ]).then((results) => {
+          const [programsOptions, completed] = results;
+          if ('error' in programsOptions) {
+            toast.error(programsOptions.error);
+          } else if ('error' in completed) {
+            toast.error(completed.error);
+          } else {
+            setModal({
+              programsOptions,
+              currentCompleted: {
+                id: completed.id,
+                completionDate: completed.completionDate,
+                participantId: completed.participantId,
+                programId: completed.programId,
+                completionEvidence: completed.previews,
+              },
+            });
+          }
+        });
+    });
+  const isForm = !!modal && 'programsOptions' in modal;
 
   const handleView = ({ id, organizationIds }: SingleCompletedProgramArgs) =>
     startTransition(() =>
@@ -119,10 +169,6 @@ const CompletedTable = ({
     modal.type === 'approve' &&
     existingUser.role === UserRole.ADMIN;
 
-  const handleUpdate = (id: string) =>
-    setModal((prev) => ({ type: 'update', id }));
-  const isUpdate = !!modal && 'type' in modal && modal.type === 'update';
-
   const handleReject = (ids: string[]) =>
     setModal((prev) => ({ type: 'reject', ids }));
   const isReject =
@@ -136,8 +182,6 @@ const CompletedTable = ({
   const handleDelete = (ids: string[]) =>
     setModal((prev) => ({ type: 'delete', ids }));
   const isDelete = !!modal && 'type' in modal && modal.type === 'delete';
-
-  const handleDismiss = () => setModal((prev) => undefined);
 
   const table = useReactTable({
     data,
@@ -163,9 +207,9 @@ const CompletedTable = ({
 
   const selectedIds =
     data.length > 0
-      ? Object.keys(table.getState().rowSelection).map(
-          (i) => data[parseInt(i)].id,
-        )
+      ? Object.keys(table.getState().rowSelection)
+          .map((i) => data[parseInt(i)].id)
+          .filter((id): id is string => !!id)
       : [];
 
   const someSelected = selectedIds.length > 0;
@@ -199,6 +243,13 @@ const CompletedTable = ({
       ]
     : [];
 
+  const handleDismiss = () => {
+    if (someSelected) {
+      table.resetRowSelection();
+    }
+    setModal((prev) => undefined);
+  };
+
   return (
     <>
       <div className={cn('flex flex-col space-y-4', className)} {...props}>
@@ -220,16 +271,16 @@ const CompletedTable = ({
             )}
             <Button
               variant="outline"
-              className="text-green-600 border-green-600"
+              className="text-green-600 border-green-600 gap-x-2"
               disabled={isPending}
               onClick={handleNew}
             >
               {isPending ? (
-                <Loader2 color="white" className="mr-2 size-4 animate-spin" />
+                <Loader2 color="green" size={20} className="animate-spin" />
               ) : (
-                <CheckCircle2 color="green" />
+                <Check color="green" size={20} />
               )}
-              New application
+              New completed program
             </Button>
           </div>
           <ReusableTable
@@ -254,22 +305,21 @@ const CompletedTable = ({
           ids={modal.ids as string[]}
         />
       )}
-      {/* 
-        {isUpdate && (
-          <CompletedModalUpdate handleDismiss={handleDismiss} completed={modal} />
-        )}
-      */}
+      {isForm && (
+        <CompletedModalForm handleDismiss={handleDismiss} {...modal} />
+      )}
       {isReject && (
         <CompletedModalReject
           handleDismiss={handleDismiss}
           ids={modal.ids as string[]}
         />
       )}
-      {/* 
-        {isDelete && (
-          <CompletedModalUpdate handleDismiss={handleDismiss} completed={modal} />
-        )}
-      */}
+      {isDelete && (
+        <CompletedModalDelete
+          handleDismiss={handleDismiss}
+          ids={modal.ids as string[]}
+        />
+      )}
     </>
   );
 };

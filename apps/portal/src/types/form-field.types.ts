@@ -1,7 +1,5 @@
-import { OurFileRouterKeys } from '@/app/api/uploadthing/core';
 import { HTMLInputTypeAttribute } from 'react';
 import { FieldValues, Path, PathValue } from 'react-hook-form';
-import { FileDisplayProps, FileUploaderProps } from './file.types';
 import { CheckTypeProps } from './check.types';
 
 type BaseFormFieldType<T extends FieldValues> = {
@@ -40,6 +38,11 @@ export type ImageUploadFieldType<T extends FieldValues> =
     type: 'singleImage';
   };
 
+export type FileUploadFieldType<T extends FieldValues> =
+  BaseFormFieldType<T> & {
+    type: 'multiple-files';
+  };
+
 export type CheckFieldType<T extends FieldValues> = BaseFormFieldType<T> & {
   type: 'checkbox';
   checkComponent?: ({
@@ -74,14 +77,6 @@ export type DateFieldType<T extends FieldValues> = BaseFormFieldType<T> & {
   datePresets?: DatePresets[];
 };
 
-export type FileUploadFieldType<T extends FieldValues> =
-  BaseFormFieldType<T> & {
-    type: 'file';
-    endpoint: OurFileRouterKeys;
-    fileUploadComponent?: (props: FileUploaderProps) => React.ReactNode;
-    fileDisplayComponent?: (props: FileDisplayProps) => React.ReactNode;
-  };
-
 export type SwitchFieldType<T extends FieldValues> = BaseFormFieldType<T> & {
   type: 'switch';
   label: string;
@@ -101,6 +96,7 @@ export type TextFieldType<T extends FieldValues> = BaseFormFieldType<T> & {
     | 'file'
     | 'array'
     | 'singleImage'
+    | 'multiple-files'
   >;
   minValue?: number;
 };
@@ -110,9 +106,9 @@ export type FormFieldType<T extends FieldValues> =
   | SearchFieldType<T>
   | PasswordFieldType<T>
   | ImageUploadFieldType<T>
+  | FileUploadFieldType<T>
   | CheckFieldType<T>
   | SelectFieldType<T>
   | ComboBoxFieldType<T>
-  | FileUploadFieldType<T>
   | SwitchFieldType<T>
   | DateFieldType<T>;

@@ -1,14 +1,14 @@
 'use server';
 import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { UserRole } from '@prisma/client';
 import { ActionReturnIdType } from '@/types/actions.types';
 import {
   UpdateProgramImageFileType,
   UpdateProgramNoImageType,
   updateProgramNoImageSchema,
 } from '@/validation/programs/program.validation';
-import { uploadImage } from '../firebase/storage.actions';
+import { UserRole } from '@prisma/client';
+import { uploadFile } from '../firebase/storage.actions';
 
 export type UpdateProgramType =
   | {
@@ -57,7 +57,7 @@ export const updateProgram = async (
     formData = values.formData;
     const image = formData?.get('image') as File;
     if (image) {
-      const uploadReturn = await uploadImage({
+      const uploadReturn = await uploadFile({
         buffer: Buffer.from(await image.arrayBuffer()),
         contentType: image.type,
         fileName: image.name,

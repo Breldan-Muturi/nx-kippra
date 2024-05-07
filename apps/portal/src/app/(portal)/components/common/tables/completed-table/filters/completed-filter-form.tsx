@@ -38,6 +38,7 @@ const CompletedFilter = ({
   const isAnyFieldFilled = Object.values(watch()).some(
     (value) => !!value && value !== '',
   );
+
   const onClear = () => {
     reset();
     clearFilters();

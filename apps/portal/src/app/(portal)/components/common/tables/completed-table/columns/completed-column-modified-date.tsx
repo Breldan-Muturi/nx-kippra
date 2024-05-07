@@ -4,9 +4,9 @@ import { format } from 'date-fns';
 
 const completedColumnModifiedDate: ColumnDef<SingleCompletedProgram> = {
   id: 'completion-date',
-  header: 'Date Completed',
+  header: 'Last Modified',
   cell: ({ row }) => {
-    const date = format(row.original.createdAt, 'PPP');
+    const date = format(row.original.updatedAt, 'PPP');
     return <p>{date}</p>;
   },
   enableHiding: false,

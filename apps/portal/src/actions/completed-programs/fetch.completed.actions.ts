@@ -28,17 +28,17 @@ const userPromise = async ({
         where: { role: OrganizationRole.OWNER },
         select: { organizationId: true },
       },
-      _count: {
-        select: {
-          organizations: organizationId
-            ? {
+      _count: organizationId
+        ? {
+            select: {
+              organizations: {
                 where: {
                   AND: [{ organizationId }, { role: OrganizationRole.OWNER }],
                 },
-              }
-            : undefined,
-        },
-      },
+              },
+            },
+          }
+        : undefined,
     },
   });
 type UserPromise = Awaited<ReturnType<typeof userPromise>>;
@@ -61,8 +61,7 @@ const completedPromise = async ({
       id: true,
       status: true,
       completionDate: true,
-      completionEvidence: true,
-      createdAt: true,
+      updatedAt: true,
       participant: {
         select: {
           id: true,
@@ -72,18 +71,19 @@ const completedPromise = async ({
           organizations: { select: { organizationId: true } },
         },
       },
-      program: { select: { title: true, code: true } },
+      program: { select: { id: true, title: true, code: true } },
     },
   });
 type CompletedPromise = Awaited<ReturnType<typeof completedPromise>>;
 export type SingleCompletedProgram = CompletedPromise[number];
 
-export type FetchCompletedPrograms = {
-  organizationId?: string;
-  fetchParams: FetchCompletedSchema;
-};
+export type FetchCompletedPrograms =
+  | FetchCompletedSchema
+  | (FetchCompletedSchema & { organizationId: string })
+  | (FetchCompletedSchema & { programId: string });
 
-export type TableCompleted = FetchCompletedPrograms & {
+export type TableCompleted = {
+  fetchParams: FetchCompletedSchema;
   existingUser: CompletedProgramsUser;
   completedPrograms: CompletedPromise;
   count: number;
@@ -91,13 +91,16 @@ export type TableCompleted = FetchCompletedPrograms & {
 
 export type FetchCompletedReturn = { error: string } | TableCompleted;
 
-export const fetchCompletedPrograms = async ({
-  organizationId,
-  fetchParams,
-}: FetchCompletedPrograms): Promise<FetchCompletedReturn> => {
+export const fetchCompletedPrograms = async (
+  fetchParams: FetchCompletedPrograms,
+): Promise<FetchCompletedReturn> => {
   const userId = await currentUserId();
   if (!userId)
     return { error: 'Only logged in users can access completed programs' };
+  const organizationId =
+    'organizationId' in fetchParams ? fetchParams.organizationId : undefined;
+  const programId =
+    'programId' in fetchParams ? fetchParams.programId : undefined;
 
   const validParams = fetchCompletedSchema.safeParse(fetchParams);
   if (!validParams.success) {
@@ -117,9 +120,11 @@ export const fetchCompletedPrograms = async ({
     status,
   } = validParams.data;
 
-  let where: Prisma.CompletedProgramWhereInput = {};
-  if (organizationId)
-    where.participant = { organizations: { some: { organizationId } } };
+  let where: Prisma.CompletedProgramWhereInput = {
+    programId,
+    participant: { organizations: { some: { organizationId } } },
+  };
+
   if (status) where.status = status;
 
   const searchOrganizationName =
@@ -139,9 +144,8 @@ export const fetchCompletedPrograms = async ({
   if (searchParticipantName)
     where.participant = { name: { search: searchParticipantName } };
 
-  const searchProgramName = programName
-    ? processSearchString(programName)
-    : undefined;
+  const searchProgramName = programName;
+  !programId && programName ? processSearchString(programName) : undefined;
   if (searchProgramName)
     where.program = { title: { search: searchProgramName } };
 
@@ -183,9 +187,8 @@ export const fetchCompletedPrograms = async ({
     };
 
   return {
-    existingUser,
-    organizationId,
     fetchParams,
+    existingUser,
     completedPrograms,
     count,
   };

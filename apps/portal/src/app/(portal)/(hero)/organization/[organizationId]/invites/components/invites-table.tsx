@@ -7,7 +7,6 @@ import {
 } from '@/actions/invites/fetch.invites.actions';
 import { revokeInvite } from '@/actions/invites/revoke.invites.actions';
 import { sendInvite } from '@/actions/invites/send.invites.actions';
-import handleTableColumns from '@/components/table/handle-table-columns';
 import ReusableTable from '@/components/table/reusable-table';
 import TableAction, { TableActionProps } from '@/components/table/table-action';
 import TablesPagination from '@/components/table/table-pagination';
@@ -130,7 +129,8 @@ const InvitesTable = ({
 
   // const isAdd = !!modal && typeof modal === "boolean" &&  modal === true;
 
-  const { visibleColumns } = handleTableColumns<SingleInviteDetail>({
+  const table = useReactTable({
+    data: orgInvites,
     columns: [
       tableSelectColumn<SingleInviteDetail>(isPending),
       invitesColumnEmail,
@@ -143,11 +143,6 @@ const InvitesTable = ({
       invitesColumnCreatedAt,
       invitesColumnExpiry,
     ],
-  });
-
-  const table = useReactTable({
-    data: orgInvites,
-    columns: visibleColumns,
     getCoreRowModel: getCoreRowModel(),
   });
 

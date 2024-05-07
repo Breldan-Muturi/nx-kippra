@@ -9,7 +9,7 @@ import {
   updateOrganizationSchema,
 } from '@/validation/organization/organization.validation';
 import { OrganizationRole, UserRole } from '@prisma/client';
-import { uploadImage } from '../firebase/storage.actions';
+import { uploadFile } from '../firebase/storage.actions';
 
 const getExistingUser = async ({
   id,
@@ -81,7 +81,7 @@ export const updateOrganization = async (
     const formData = values.formData;
     const image = formData.get('image') as File;
     if (!!image) {
-      const uploadReturn = await uploadImage({
+      const uploadReturn = await uploadFile({
         buffer: Buffer.from(await image.arrayBuffer()),
         contentType: image.type,
         fileName: image.name,

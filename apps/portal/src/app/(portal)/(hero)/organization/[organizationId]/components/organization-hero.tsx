@@ -3,7 +3,7 @@ import { avatarFallbackName } from '@/helpers/user.helper';
 import { db } from '@/lib/db';
 import { NavBarLinks } from '@/types/nav-links.types';
 import Image from 'next/image';
-import { OrgLink } from './organization-nav-links';
+import { PageNavButton } from '../../../../../../components/buttons/page-nav-button';
 
 const OrganizationHero = async ({ id }: { id: string }) => {
   const heroInfo = await db.organization.findUnique({
@@ -31,7 +31,7 @@ const OrganizationHero = async ({ id }: { id: string }) => {
       label: 'Members',
     },
     {
-      href: `organization/${id}/completed-programs`,
+      href: `/organization/${id}/completed-programs`,
       label: 'Completed programs',
     },
     {
@@ -62,7 +62,7 @@ const OrganizationHero = async ({ id }: { id: string }) => {
       </div>
       <div className="flex items-center w-full bg-gray-200 border-b-2 shadow-md border-b-gray-200">
         {organizationRoutes.map(({ href, label }) => (
-          <OrgLink key={`${href}${label}`} {...{ href, label }} />
+          <PageNavButton key={`${href}${label}`} {...{ href, label }} />
         ))}
       </div>
     </div>

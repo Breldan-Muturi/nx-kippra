@@ -1,15 +1,16 @@
-import { cn } from '@/lib/utils';
-import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
-import { Input } from '../../ui/input';
-import { X } from 'lucide-react';
-import { AllowedImageTypes } from '@/validation/reusable.validation';
-import Link from 'next/link';
+'use client';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+import { AllowedImageTypes } from '@/validation/reusable.validation';
+import { X } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
+import { Input } from '../../ui/input';
 
 type ImageUploaderProps = React.ComponentPropsWithRef<'div'> & {
   value?: File | string | null;
@@ -56,7 +57,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     <div className={cn(className)} {...props}>
       {preview ? (
         <div className="relative w-1/3 overflow-hidden rounded-md">
-          <div className="overflow-hidden border-2 border-gray-300 hover:border-green-600 transition-colors duration-300 rounded-md">
+          <div className="overflow-hidden transition-colors duration-300 border-2 border-gray-300 rounded-md hover:border-green-600">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link href={preview} target="_blank" rel="noopener noreferrer">
@@ -65,7 +66,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                     alt="Preview"
                     width={400}
                     height={400}
-                    className="object-cover transition-all rounded-md duration-300 hover:scale-105"
+                    className="object-cover transition-all duration-300 rounded-md hover:scale-105"
                   />
                 </Link>
               </TooltipTrigger>
@@ -74,7 +75,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           </div>
           <button
             onClick={handleClear}
-            className="absolute p-1 text-white rounded-full top-1 left-1 bg-rose-500 shadow-sm"
+            className="absolute p-1 text-white rounded-full shadow-sm top-1 left-1 bg-rose-500"
             type="button"
           >
             <X className="w-4 h-4" />

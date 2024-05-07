@@ -5,13 +5,13 @@ import { getUserByEmail, getUserById } from '@/helpers/user.helper';
 import { db } from '@/lib/db';
 import { generateVerificationToken } from '@/lib/tokens';
 import { sendVerificationEmail } from '@/mail/account.mail';
-import { User } from '@prisma/client';
-import bcrypt from 'bcryptjs';
-import { uploadImage } from '../firebase/storage.actions';
 import {
   ProfileSubmitForm,
   ProfileUpdateForm,
 } from '@/validation/profile/update.profile.validation';
+import { User } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+import { uploadFile } from '../firebase/storage.actions';
 
 export type ProfileActionParams =
   | {
@@ -77,7 +77,7 @@ export const updateProfile = async (
 
   if (formData) {
     const image = formData.get('image') as File;
-    const uploadReturn = await uploadImage({
+    const uploadReturn = await uploadFile({
       buffer: Buffer.from(await image.arrayBuffer()),
       contentType: image.type,
       fileName: image.name,

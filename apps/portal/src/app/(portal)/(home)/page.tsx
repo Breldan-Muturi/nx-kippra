@@ -1,17 +1,17 @@
 'use server';
 
 import { Hero } from '@/components/layouts/hero';
-import { db } from '@/lib/db';
-import SectionWrapper from '../../../components/layouts/section-wrapper';
 import ResponsiveGrid from '@/components/layouts/responsive-grid';
-import ProgramCard from './components/program-card';
-import { DatePresets, FormFieldType } from '@/types/form-field.types';
-import { FilterTrainingSessionSchemaType } from '@/validation/training-session/training-session.validation';
-import TrainingCalendarFilter from './components/training-calendar-filter';
-import { Delivery, Prisma, Venue } from '@prisma/client';
-import TrainingSessionCard from './components/training-session';
 import { formatDeliveryMode, formatVenues } from '@/helpers/enum.helpers';
 import { processSearchString } from '@/helpers/filter.helpers';
+import { db } from '@/lib/db';
+import { DatePresets, FormFieldType } from '@/types/form-field.types';
+import { FilterTrainingSessionSchemaType } from '@/validation/training-session/training-session.validation';
+import { Delivery, Prisma, Venue } from '@prisma/client';
+import SectionWrapper from '../../../components/layouts/section-wrapper';
+import ProgramCard from './components/program-card';
+import TrainingCalendarFilter from './components/training-calendar-filter';
+import TrainingSessionCard from './components/training-session';
 
 interface PageProps {
   searchParams: {

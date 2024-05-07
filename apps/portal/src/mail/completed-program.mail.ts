@@ -25,3 +25,56 @@ export const completedResponseEmail = async ({
     html: `<p>This is to notify you that the completed program submitted on ${format(createdAt, 'PPP')} for ${name} for ${title} was ${accepted ? 'accepted' : 'rejected'}.${message ? `For the reasons below: </br> ${message}` : ''}</p>`,
   });
 };
+
+export const completedDeletedEmail = async ({
+  name,
+  bcc,
+  message,
+  reply_to,
+}: {
+  name: string;
+  bcc: string[];
+  reply_to: string[];
+  message?: string;
+}) =>
+  await resend.emails.send({
+    from,
+    to: 'portal@kippra.or.ke',
+    reply_to: [...reply_to, 'portal@kippra.or.ke'],
+    bcc,
+    subject: `KIPPRA Portal: Updates on your completed program`,
+    // TODO: Add a link to navigate to completed programs.
+    html: `Your completed program to submission to the online registration portal has been deleted by ${name}${message ? ` for the following reasons:<br/> ${message}` : '.'}`,
+  });
+
+export const newCompletedEmail = async ({
+  participantName,
+  programTitle,
+  to,
+}: {
+  participantName: string;
+  programTitle: string;
+  to: string[];
+}) =>
+  await resend.emails.send({
+    from,
+    to,
+    reply_to: 'portal@kippra.or.ke',
+    subject: `KIPPRA Portal: New program completion for ${programTitle} for ${participantName}`,
+    html: `A new program completion has been submitted for ${participantName} for ${programTitle}. The Admin has also been prompted to approve this submission. You will receive a follow up email once a response is made by the Admin.`,
+  });
+
+export const updateCompletedEmail = async ({
+  participantName,
+  to,
+}: {
+  participantName: string;
+  to: string[];
+}) =>
+  await resend.emails.send({
+    from,
+    to,
+    reply_to: 'portal@kippra.or.ke',
+    subject: `KIPPRA Portal: Updates on your program completion for ${participantName}`,
+    html: `A program completion for ${participantName} has been updated. The Admin has also been prompted to approve this submission. You will receive a follow up email once a response is made by the Admin.`,
+  });

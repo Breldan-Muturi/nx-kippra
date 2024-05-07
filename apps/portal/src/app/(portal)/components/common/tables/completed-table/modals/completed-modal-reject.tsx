@@ -14,8 +14,8 @@ import {
 import { Form } from '@/components/ui/form';
 import { FormFieldType } from '@/types/form-field.types';
 import {
-  RejectCompletedSchema,
-  rejectCompletedSchema,
+  ActionCompletedSchema,
+  actionCompletedSchema,
 } from '@/validation/completed-program/completed-program.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -23,7 +23,7 @@ import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-const rejectCompletionFields: FormFieldType<RejectCompletedSchema>[] = [
+const rejectCompletionFields: FormFieldType<ActionCompletedSchema>[] = [
   {
     name: 'message',
     label: 'Enter reject message',
@@ -44,14 +44,14 @@ const CompletedModalReject = ({
 }) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const form = useForm<RejectCompletedSchema>({
-    resolver: zodResolver(rejectCompletedSchema),
+  const form = useForm<ActionCompletedSchema>({
+    resolver: zodResolver(actionCompletedSchema),
     mode: 'onChange',
   });
 
   const { handleSubmit } = form;
 
-  const onSubmit = (values: RejectCompletedSchema) =>
+  const onSubmit = (values: ActionCompletedSchema) =>
     startTransition(() => {
       respondCompleted({ ids, approved: false, message: values.message })
         .then((data) => {
@@ -92,7 +92,7 @@ const CompletedModalReject = ({
                 Cancel
               </Button>
               <SubmitButton
-                className="my-4"
+                // className="my-4"
                 label="Reject"
                 isSubmitting={isPending}
               />

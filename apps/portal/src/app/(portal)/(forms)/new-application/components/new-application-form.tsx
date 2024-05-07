@@ -1,60 +1,60 @@
 'use client';
 import {
+  ValidAdminApplication,
+  validateAdminApplication,
+} from '@/actions/applications/admin/validate.admin.applications.actions';
+import {
+  DynamicParticipantOption,
+  fetchOrganizationParticipants,
+} from '@/actions/participants/application.participants.actions';
+import {
+  SingleApplicationParticipant,
+  getSingleParticipant,
+} from '@/actions/participants/single.participant.actions';
+import {
   DynamicTrainingOption,
   fetchProgramTrainingSessions,
 } from '@/actions/training-session/application.training-session.actions';
+import TooltipIconButton from '@/components/buttons/tooltip-icon-button';
 import FormHeader from '@/components/form/FormHeader';
 import ReusableForm from '@/components/form/ReusableForm';
+import SubmitButton from '@/components/form/SubmitButton';
+import tableSelectColumn from '@/components/table/table-select-column';
 import { Form } from '@/components/ui/form';
+import { cn } from '@/lib/utils';
 import { SelectOptions } from '@/types/form-field.types';
 import {
   AdminApplicationForm,
   adminApplicationSchema,
 } from '@/validation/applications/admin.application.validation';
-import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useEffect, useState, useTransition } from 'react';
-import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import applicationDetailsFields from './fields/application-details-fields';
-import { format } from 'date-fns';
-import { Delivery, SponsorType } from '@prisma/client';
-import { cn } from '@/lib/utils';
-import applicationOrganizationFields from './fields/application-organization-fields';
-import slotsFields from './fields/application-slots-fields';
-import {
-  DynamicParticipantOption,
-  fetchOrganizationParticipants,
-} from '@/actions/participants/application.participants.actions';
-import ApplicationParticipantsOrganization from './participants/participants-dropdown/application-participants-organization';
-import TooltipIconButton from '@/components/buttons/tooltip-icon-button';
-import { PlusIcon } from 'lucide-react';
 import {
   AdminApplicationParticipant,
   ParticipantSubmitOption,
   applicationParticipantSchema,
 } from '@/validation/applications/participants.application.validation';
-import ApplicationParticipantForm from './participants/participants-form/application-participant-form';
-import ParticipantApplicationsTable from './participants/participants-table/participants-application-table';
-import tableSelectColumn from '@/components/table/table-select-column';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Delivery, SponsorType } from '@prisma/client';
 import { ColumnDef } from '@tanstack/react-table';
-import participantApplicationColumnUser from './participants/participants-table/participant-application-user';
-import participantApplicationActions from './participants/participants-table/participant-application-actions';
-import participantApplicationEmail from './participants/participants-table/participant-application-email';
-import participantApplicationCitizenship from './participants/participants-table/participant-application-citizenship';
-import participantApplicationOwnerColumn from './participants/participants-table/participant-application-ower';
-import participantApplicationNationalId from './participants/participants-table/participant-application-nationalid';
-import participantApplicationRegistration from './participants/participants-table/participant-application-registration';
-import ParticipantApplicationSheet from './participants/participants-sheet/participant-application-sheet';
-import {
-  SingleApplicationParticipant,
-  getSingleParticipant,
-} from '@/actions/participants/single.participant.actions';
-import SubmitButton from '@/components/form/SubmitButton';
-import {
-  ValidAdminApplication,
-  validateAdminApplication,
-} from '@/actions/applications/admin/validate.admin.applications.actions';
+import { format } from 'date-fns';
+import { PlusIcon } from 'lucide-react';
+import React, { useEffect, useState, useTransition } from 'react';
+import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import applicationDetailsFields from './fields/application-details-fields';
+import applicationOrganizationFields from './fields/application-organization-fields';
+import slotsFields from './fields/application-slots-fields';
 import ApplicationModal from './modal/application-modal';
+import ApplicationParticipantsOrganization from './participants/participants-dropdown/application-participants-organization';
+import ApplicationParticipantForm from './participants/participants-form/application-participant-form';
+import ParticipantApplicationSheet from './participants/participants-sheet/participant-application-sheet';
+import participantApplicationActions from './participants/participants-table/participant-application-actions';
+import participantApplicationCitizenship from './participants/participants-table/participant-application-citizenship';
+import participantApplicationEmail from './participants/participants-table/participant-application-email';
+import participantApplicationNationalId from './participants/participants-table/participant-application-nationalid';
+import participantApplicationOwnerColumn from './participants/participants-table/participant-application-ower';
+import participantApplicationRegistration from './participants/participants-table/participant-application-registration';
+import participantApplicationColumnUser from './participants/participants-table/participant-application-user';
+import ParticipantApplicationsTable from './participants/participants-table/participants-application-table';
 
 type NewApplicationFormProps = React.ComponentPropsWithoutRef<'form'> & {
   programOptions: SelectOptions[];
@@ -378,11 +378,11 @@ const NewApplicationForm = ({
               isSubmitting={isPending}
               customSubmit={participantSubmit}
               dismissForm={closeInfo}
-              className="mb-4 col-span-2"
+              className="col-span-2 mb-4"
             />
           )}
           <p className="text-sm font-medium text-black">Add participant info</p>
-          <div className="flex mb-8 col-span-2 space-x-2">
+          <div className="flex col-span-2 mb-8 space-x-2">
             <TooltipIconButton
               icon={<PlusIcon />}
               type="button"
@@ -398,7 +398,7 @@ const NewApplicationForm = ({
               className="flex flex-grow"
             />
           </div>
-          <div className="flex justify-between w-full mb-8 col-span-2 space-x-3">
+          <div className="flex justify-between w-full col-span-2 mb-8 space-x-3">
             <ReusableForm formFields={slotsFields} />
           </div>
           <SubmitButton

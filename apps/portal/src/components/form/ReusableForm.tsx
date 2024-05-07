@@ -1,7 +1,3 @@
-import React from 'react';
-import TextField from './TextField';
-import CheckField from './CheckField';
-import PasswordField from './PasswordField';
 import {
   CheckFieldType,
   ComboBoxFieldType,
@@ -16,12 +12,15 @@ import {
   TextFieldType,
 } from '@/types/form-field.types';
 import { FieldValues } from 'react-hook-form';
+import CheckField from './CheckField';
 import DateField from './DateField';
-import SelectField from './SelectField';
+import PasswordField from './PasswordField';
 import SearchField from './SearchField';
-import ComboboxField from './combobox/ComboboxField';
-import FileUploadField from './FileUploadField';
+import SelectField from './SelectField';
 import SwitchField from './SwitchField';
+import TextField from './TextField';
+import ComboboxField from './combobox/ComboboxField';
+import FileUploadField from './files/file-upload-field';
 import ImageUploadField from './images/ImageUploadField';
 
 interface ReusableFormProps<T extends FieldValues> {
@@ -58,7 +57,7 @@ const ReusableForm = <T extends FieldValues>({
           case 'combobox':
             const comboboxField = field as ComboBoxFieldType<T>;
             return <ComboboxField key={key} {...comboboxField} />;
-          case 'file':
+          case 'multiple-files':
             const fileUploadField = field as FileUploadFieldType<T>;
             return <FileUploadField key={key} {...fileUploadField} />;
           case 'switch':

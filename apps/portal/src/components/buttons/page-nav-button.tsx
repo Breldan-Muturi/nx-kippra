@@ -6,7 +6,7 @@ import { NavBarLinks } from '@/types/nav-links.types';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-export const OrgLink = ({ href, label }: NavBarLinks) => {
+export const PageNavButton = ({ href, label }: NavBarLinks) => {
   const path = usePathname();
   const isActive = path === href;
   return (

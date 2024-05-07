@@ -1,7 +1,9 @@
 'use server';
-import { getDownloadURL, getStorage } from 'firebase-admin/storage';
-import { initApp } from './config';
 import { ActionReturnType } from '@/types/actions.types';
+import { FilePreviewSchema } from '@/validation/reusable.validation';
+import { getDownloadURL, getStorage } from 'firebase-admin/storage';
+import path from 'path';
+import { initApp } from './config';
 
 export const uploadPDFile = async (
   buffer: Buffer,
@@ -22,18 +24,18 @@ export const uploadPDFile = async (
   }
 };
 
-type UploadImageType = {
+type UploadFileType = {
   contentType: Blob['type'];
   buffer: Buffer;
   fileName: string;
 };
 export type UploadImageReturn = { error: string } | { fileUrl: string };
 
-export const uploadImage = async ({
+export const uploadFile = async ({
   contentType,
   buffer,
   fileName,
-}: UploadImageType): Promise<UploadImageReturn> => {
+}: UploadFileType): Promise<UploadImageReturn> => {
   await initApp();
   const bucket = getStorage().bucket();
   const file = bucket.file(fileName);
@@ -46,5 +48,102 @@ export const uploadImage = async ({
   } catch (error) {
     console.error('Error pushing image to Firebase: ', error);
     return { error: 'There was an error pushing the image to Firebase' };
+  }
+};
+
+export const uploadMultiFiles = async (
+  files: File[],
+  path?: string,
+): Promise<{ error: string } | string[]> => {
+  await initApp();
+  const bucket = getStorage().bucket();
+  try {
+    const uploadPromises = files.map(async (file) => {
+      const filePath = `uploads${path ? `/${path}` : ''}/${file.name}`;
+      const upload = bucket.file(filePath);
+      const buffer = Buffer.from(await file.arrayBuffer());
+      await upload.save(buffer, {
+        metadata: { contentType: file.type },
+      });
+      return filePath;
+    });
+    return await Promise.all(uploadPromises);
+  } catch (e) {
+    console.error('Error uploading files to Firebase: ', e);
+    return {
+      error:
+        'Failed to upload files due to a server error. Please try again later',
+    };
+  }
+};
+
+type GetFileDetailsReturn = { error: string } | FilePreviewSchema[];
+export const getFileDetails = async (
+  filePath: string[],
+): Promise<GetFileDetailsReturn> => {
+  await initApp();
+  const storage = getStorage().bucket();
+
+  const filePreviewPromises = filePath.map(async (file) => {
+    const fileRef = storage.file(file);
+    try {
+      const [metadata, fileUrl] = await Promise.all([
+        fileRef.getMetadata(),
+        getDownloadURL(fileRef),
+      ]);
+      const { name, size, contentType } = metadata[0];
+      const fileName = name ? path.basename(name) : 'Unknown file';
+      const filePreview: FilePreviewSchema = {
+        fileUrl,
+        fileSize: Number(size),
+        fileType: contentType || 'unknown type',
+        fileName,
+        filePath: name || 'Unknown file',
+      };
+      return filePreview;
+    } catch (e) {
+      console.error('Error retrieving file metadata: ', e);
+      return null;
+    }
+  });
+
+  try {
+    const filePreviewResults = await Promise.all(filePreviewPromises);
+    const filteredFilePreviews = filePreviewResults.filter(
+      (filePreview): filePreview is FilePreviewSchema => filePreview !== null,
+    );
+    if (filteredFilePreviews.length === 0) {
+      return {
+        error: 'Failed to retrieve file details. Please try again later.',
+      };
+    }
+    return filteredFilePreviews;
+  } catch (e) {
+    console.error('Error retrieving file details: ', e);
+    return {
+      error:
+        'An error occurred while retrieving file details. Please try again later.',
+    };
+  }
+};
+
+export const deleteFiles = async (
+  filePaths: string[],
+): Promise<{ error: string } | string[]> => {
+  await initApp();
+  const bucket = getStorage().bucket();
+  try {
+    const deletePromises = filePaths.map(async (path) => {
+      const file = bucket.file(path);
+      await file.delete();
+      return path;
+    });
+    return await Promise.all(deletePromises);
+  } catch (e) {
+    console.error('Error deleting files from Firebase: ', e);
+    return {
+      error:
+        'Failed to delete files due to a server error. Please try again later',
+    };
   }
 };

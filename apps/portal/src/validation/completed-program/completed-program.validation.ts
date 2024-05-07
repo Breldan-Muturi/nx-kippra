@@ -23,16 +23,15 @@ export const pathCompletedSchema = fetchCompletedSchema.extend({
 });
 export type PathCompletedSchema = z.infer<typeof pathCompletedSchema>;
 
-export const rejectCompletedSchema = z.object({
+export const actionCompletedSchema = z.object({
   message: z.string().optional(),
 });
-export type RejectCompletedSchema = z.infer<typeof rejectCompletedSchema>;
+export type ActionCompletedSchema = z.infer<typeof actionCompletedSchema>;
 
 export const completedSchema = z.object({
   programId: z.string(),
   participantId: z.string(),
   completionDate: z.date(),
-  completionEvidence: validFileUpload(false),
 });
 export type CompletedSchema = z.infer<typeof completedSchema>;
 
@@ -40,3 +39,13 @@ export const updateCompletedSchema = completedSchema.extend({
   id: validString('Pass the id for the completed program to update', 1),
 });
 export type UpdateCompletedSchema = z.infer<typeof updateCompletedSchema>;
+
+export const completedForm = completedSchema.extend({
+  completionEvidence: validFileUpload(false),
+});
+export type CompletedForm = z.infer<typeof completedForm>;
+
+export const updateCompletedForm = completedForm.extend({
+  id: validString('Pass the id for the completed program to update', 1),
+});
+export type UpdateCompletedForm = z.infer<typeof updateCompletedForm>;
