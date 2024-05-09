@@ -64,7 +64,7 @@ const ProformaInvoice = async ({
   ];
 
   return (
-    <main className="container py-8 mx-auto space-y-8">
+    <main className="container flex flex-col min-h-screen py-8 mx-auto space-y-8">
       <div className="flex items-center justify-between w-full">
         <Link
           href="https://kippra.or.ke"
@@ -81,11 +81,11 @@ const ProformaInvoice = async ({
         <div>
           <p>
             <span className="font-bold">Our ref:</span>{' '}
-            <span className="capitalize">{proformaRef}</span>
+            <span className="uppercase">{proformaRef}</span>
           </p>
           <p>
             <span className="font-bold">Proforma Invoice No: </span>
-            <span className="capitalize">{proformaRef}/2024</span>
+            <span className="uppercase">{proformaRef}/2024</span>
           </p>
         </div>
       </div>
@@ -142,8 +142,8 @@ const ProformaInvoice = async ({
         </TableFooter>
       </Table>
       {/* Notes */}
-      <div className="flex items-center justify-between w-full">
-        <div className="flex flex-col items-start flex-grow space-y-4">
+      <div className="flex items-center justify-between w-full space-x-20 flex-cols-4">
+        <div className="flex flex-col items-start col-span-3 space-y-4">
           <p>
             <span className="font-bold">Note:</span>
             <br />
@@ -169,8 +169,7 @@ const ProformaInvoice = async ({
             <li>
               If you're paying through the bank, follow the instructions on the
               page, and when completed use the invoice link alongside your
-              payment
-              <br /> on{' '}
+              payment on{' '}
               <Link
                 href={paymentLink}
                 target="_blank"
@@ -187,7 +186,7 @@ const ProformaInvoice = async ({
             </li>
           </ol>
         </div>
-        <div className="flex flex-col space-y-2">
+        <div className="flex flex-col col-span-1 space-y-2">
           <div className="p-1 border-2 border-green-600 rounded-md">
             <Link href={paymentLink} target="_blank" rel="noopener noreferrer">
               <Image
@@ -212,7 +211,7 @@ const ProformaInvoice = async ({
         </div>
       </div>
       {/* Additional details */}
-      <div className="flex flex-col items-start w-full space-y-4 text-sm">
+      <div className="flex flex-col items-start flex-grow w-full space-y-4 text-sm">
         <p className="font-semibold text-red-600">
           Payment is due withing 30 days from the invoice date
         </p>
@@ -226,6 +225,7 @@ const ProformaInvoice = async ({
           {trainingVenue}
         </p>
       </div>
+      {/* Footer */}
       <div className="items-center justify-center w-full py-4 mt-auto border-t-4 border-green-600 px-auto">
         <p className="text-sm text-center">
           Disclaimer: This is an auto-generated invoice and does not require a

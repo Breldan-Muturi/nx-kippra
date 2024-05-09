@@ -36,3 +36,9 @@ export const formatFileSize = (size: number): string => {
 
 export const formatCurrency = (amount: number): string =>
   amount.toLocaleString('en-US');
+
+export const getFirstName = (fullName: string): string => {
+  const names = fullName.split(' ');
+  if (names.length > 1) return names[0];
+  return fullName;
+};

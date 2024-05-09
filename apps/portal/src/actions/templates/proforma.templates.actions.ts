@@ -1,5 +1,6 @@
 'use server';
 
+import { formatVenues } from '@/helpers/enum.helpers';
 import { QRreturn, generateQR } from '@/helpers/templates.helpers';
 import { db } from '@/lib/db';
 import { Delivery } from '@prisma/client';
@@ -87,7 +88,12 @@ export const proformaTemplate = async (
     paymentLink,
     startDate,
     endDate,
-    trainingVenue: delivery === Delivery.ONLINE ? 'Online' : venue ?? 'Online',
+    trainingVenue:
+      delivery === Delivery.ONLINE
+        ? 'Online'
+        : venue
+          ? formatVenues(venue)
+          : 'Online',
     organizationName: organization?.name,
     ownerName: name,
   };
