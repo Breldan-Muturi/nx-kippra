@@ -25,7 +25,7 @@ const programRoutesPerRole = (
     : []),
   {
     href: `/${programId}/completed-programs`,
-    label: `Completed programs`,
+    label: 'Completed programs',
   },
   {
     href: `/${programId}/topics`,

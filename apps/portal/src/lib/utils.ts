@@ -33,3 +33,6 @@ export const formatFileSize = (size: number): string => {
   }
   return `${size.toFixed(2)} ${units[index]}`;
 };
+
+export const formatCurrency = (amount: number): string =>
+  amount.toLocaleString('en-US');

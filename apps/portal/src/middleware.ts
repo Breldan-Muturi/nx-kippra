@@ -1,5 +1,3 @@
-import { NextResponse } from 'next/server';
-import NextAuth from 'next-auth';
 import authConfig from '@/auth.config';
 import {
   DEFAULT_LOGIN_REDIRECT,
@@ -8,6 +6,8 @@ import {
   publicRoutes,
   templatePrefix,
 } from '@/routes';
+import NextAuth from 'next-auth';
+import { NextResponse } from 'next/server';
 
 const { auth } = NextAuth(authConfig);
 
@@ -25,11 +25,14 @@ export default auth((req) => {
   // TODO: Access puppeteer pages in development to design the templates.
   if (isTemplateRoute) {
     const puppeteerToken = req.headers.get('x-puppeteer-secret');
-    if (puppeteerToken === process.env.PUPPETEER_SECRET) {
+    if (
+      puppeteerToken === process.env.PUPPETEER_SECRET ||
+      process.env.NODE_ENV !== 'production'
+    ) {
       // Allow Puppetter request
       return NextResponse.next();
     } else {
-      // Block unauthorized access by returining a 403 forbidden response
+      // Block unauthorized access by returning a 403 forbidden response
       return new NextResponse('Access Denied', { status: 403 });
     }
   }
