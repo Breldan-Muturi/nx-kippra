@@ -64,7 +64,7 @@ const ProformaInvoice = async ({
   ];
 
   return (
-    <main className="container flex flex-col min-h-screen py-8 mx-auto space-y-8">
+    <main className="container flex flex-col min-h-screen py-8 mx-auto space-y-6">
       <div className="flex items-center justify-between w-full">
         <Link
           href="https://kippra.or.ke"
