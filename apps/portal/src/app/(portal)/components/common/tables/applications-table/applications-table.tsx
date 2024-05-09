@@ -18,7 +18,7 @@ import { FilterApplicationType } from '@/validation/applications/table.applicati
 import { UserRole } from '@prisma/client';
 import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { FileCheck2, Send, ShieldX } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React, { useMemo, useState, useTransition } from 'react';
 import { SubmitHandler } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -71,6 +71,7 @@ const ApplicationsTable = ({
   className,
   ...props
 }: ApplicationTableProps) => {
+  const router = useRouter();
   const path = usePathname();
   const { hiddenColumns, pageSize, page, ...filterParams } = fetchParams;
   const [isPending, startTransition] = useTransition();
@@ -182,8 +183,6 @@ const ApplicationsTable = ({
     setModal((prev) => ({ modal: 'delete', id: applicationId }));
   const isDelete = !!modal && 'modal' in modal && modal.modal === 'delete';
 
-  const handleDismiss = () => setModal((prev) => undefined);
-
   // Parse hiddenColumns from a comma-separated string to an array
   const hiddenColumnsArray = useMemo(
     () => (hiddenColumns ? hiddenColumns.split(',') : []),
@@ -246,6 +245,14 @@ const ApplicationsTable = ({
         },
       ]
     : undefined;
+
+  const handleDismiss = () => {
+    if (someSelected) {
+      table.resetRowSelection();
+    }
+    setModal((prev) => undefined);
+    router.refresh();
+  };
 
   return (
     <>

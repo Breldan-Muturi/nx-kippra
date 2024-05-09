@@ -71,7 +71,7 @@ const ProformaInvoice = async ({
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Image
+          <img
             src="/kippra-doc-logo.png"
             alt="KIPPRA Logo"
             width={200}
