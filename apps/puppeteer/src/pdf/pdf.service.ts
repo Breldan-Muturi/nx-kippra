@@ -29,11 +29,12 @@ export class PdfService {
           'PUPPETEER_SECRET',
         ) as string,
       });
+
       const response = await page.goto(
         `${this.configService.get('PUPPETEER_ACCESS_ROUTE')}/templates/${applicationId}/${template}`,
         {
-          waitUntil: 'networkidle2',
-          timeout: 0,
+          waitUntil: 'networkidle0',
+          timeout: 30_000,
         },
       );
       if (!response || response?.status() !== 200) {

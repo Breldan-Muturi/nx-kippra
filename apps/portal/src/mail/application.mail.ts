@@ -1,7 +1,7 @@
 'use server';
 import { domain, from, resend } from '@/constants/mail.constants';
 import { Attachment } from '@/types/mail.types';
-import { format, add } from 'date-fns';
+import { add, format } from 'date-fns';
 
 export type NewApplicationEmailType = {
   email: string;
