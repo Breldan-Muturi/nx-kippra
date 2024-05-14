@@ -1,7 +1,8 @@
 'use client';
 import ReusableForm from '@/components/form/ReusableForm';
-import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Form } from '@/components/ui/form';
+import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { FormFieldType } from '@/types/form-field.types';
@@ -10,7 +11,7 @@ import {
   trainingSessionFeesSchema,
 } from '@/validation/training-session/training-session.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Delivery } from '@prisma/client';
+import { Delivery, UserRole } from '@prisma/client';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { ApplicationModalProps } from './application-modal-steps';
@@ -28,14 +29,18 @@ const feesFields = ({
   slotsGlobal,
   isOnpremise,
   isUsd,
-}: FeeDataFields): FormFieldType<TrainingSessionFeesForm>[] => {
+  isAdmin,
+}: FeeDataFields & {
+  isAdmin: boolean;
+}): FormFieldType<TrainingSessionFeesForm>[] => {
   return [
     {
       name: 'usingUsd',
       type: 'switch',
-      label: 'Enable USD($) payments',
-      description:
-        'This enables payments for this application to be collected in USD',
+      label: isAdmin ? 'Enable USD($) Payment' : 'Pay in USD($)',
+      description: isAdmin
+        ? 'This enables payments for this application to be collected in USD'
+        : 'Your invoice will be prepared in USD',
       className: 'col-span-2 bg-background',
     },
     ...(!isUsd && isOnpremise && slotsCitizen
@@ -45,6 +50,7 @@ const feesFields = ({
             label: 'Citizen(Kes): On premise fee',
             placeholder: 'eg. Ksh 100000',
             type: 'number',
+            disabled: !isAdmin,
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -55,6 +61,7 @@ const feesFields = ({
             label: 'Citizen(Kes): online fee',
             placeholder: 'eg. Ksh 100000',
             type: 'number',
+            disabled: !isAdmin,
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -65,6 +72,7 @@ const feesFields = ({
             label: 'East Africa(Kes): On premise fee',
             placeholder: 'eg. Ksh 100000',
             type: 'number',
+            disabled: !isAdmin,
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -75,6 +83,7 @@ const feesFields = ({
             label: 'East Africa(Kes): Online fee',
             placeholder: 'eg. Ksh 100000',
             type: 'number',
+            disabled: !isAdmin,
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -85,6 +94,7 @@ const feesFields = ({
             label: 'Global(Kes): On premise fee',
             placeholder: 'eg. Ksh 100000',
             type: 'number',
+            disabled: !isAdmin,
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -95,6 +105,7 @@ const feesFields = ({
             label: 'Global(Kes): Online fee',
             placeholder: 'eg. Ksh 100000',
             type: 'number',
+            disabled: !isAdmin,
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -105,6 +116,7 @@ const feesFields = ({
             label: 'Citizen(Usd): On premise fee',
             placeholder: 'eg. USD 1000',
             type: 'number',
+            disabled: !isAdmin,
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -115,6 +127,7 @@ const feesFields = ({
             label: 'Citizen(Usd): online fee',
             placeholder: 'eg. USD 1000',
             type: 'number',
+            disabled: !isAdmin,
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -125,6 +138,7 @@ const feesFields = ({
             label: 'East Africa(Usd): On premise fee',
             placeholder: 'eg. USD 1000',
             type: 'number',
+            disabled: !isAdmin,
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -135,6 +149,7 @@ const feesFields = ({
             label: 'East Africa(Usd): Online fee',
             placeholder: 'eg. USD 1000',
             type: 'number',
+            disabled: !isAdmin,
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -145,6 +160,7 @@ const feesFields = ({
             label: 'Global(Usd): On premise fee',
             placeholder: 'eg. USD 1000',
             type: 'number',
+            disabled: !isAdmin,
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -155,6 +171,7 @@ const feesFields = ({
             label: 'Global(Usd): Online fee',
             placeholder: 'eg. USD 1000',
             type: 'number',
+            disabled: !isAdmin,
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -166,9 +183,12 @@ type ApplicationConfirmationFeesProps = Pick<
   | 'data'
   | 'applicationTrainingSession'
   | 'formSlots'
-  | 'handleFees'
   | 'usingUsd'
->;
+  | 'role'
+  | 'applicationFee'
+> & {
+  handleFees: ({ fee, usingUsd }: { fee?: number; usingUsd?: boolean }) => void;
+};
 
 const ApplicationConfirmationFees = ({
   data,
@@ -176,7 +196,10 @@ const ApplicationConfirmationFees = ({
   formSlots,
   usingUsd,
   handleFees,
+  role,
+  applicationFee,
 }: ApplicationConfirmationFeesProps) => {
+  const isAdmin = role === UserRole.ADMIN;
   const { slotsCitizen, slotsEastAfrican, slotsGlobal } = formSlots;
   const { delivery } = data;
 
@@ -252,6 +275,39 @@ const ApplicationConfirmationFees = ({
     isOnpremise,
   });
 
+  const isConfirmedFees =
+    applicationFee === formApplicationFees && usingUsd === isUsd;
+
+  const showFeesWarning = (): boolean => {
+    if (isAdmin) {
+      return false;
+    } else if (isUsd && delivery === Delivery.ONLINE) {
+      return (
+        !applicationTrainingSession.usdCitizenOnlineFee ||
+        !applicationTrainingSession.usdEastAfricaOnlineFee ||
+        !applicationTrainingSession.usdGlobalParticipantOnlineFee
+      );
+    } else if (isUsd && delivery !== Delivery.ONLINE) {
+      return (
+        !applicationTrainingSession.usdCitizenFee ||
+        !applicationTrainingSession.usdEastAfricaFee ||
+        !applicationTrainingSession.usdGlobalParticipantFee
+      );
+    } else if (!isUsd && delivery === Delivery.ONLINE) {
+      return (
+        !applicationTrainingSession.citizenOnlineFee ||
+        !applicationTrainingSession.eastAfricaOnlineFee ||
+        !applicationTrainingSession.globalParticipantOnlineFee
+      );
+    } else {
+      return (
+        !applicationTrainingSession.citizenFee ||
+        !applicationTrainingSession.eastAfricaFee ||
+        !applicationTrainingSession.globalParticipantFee
+      );
+    }
+  };
+
   useEffect(() => {
     const subscription = watch((value, { type }) => {
       if (type === 'change') {
@@ -263,31 +319,51 @@ const ApplicationConfirmationFees = ({
 
   return (
     <Form {...form}>
-      <div className="w-full grid grid-cols-2 gap-x-2 gap-y-4">
+      <div className="grid w-full grid-cols-2 gap-x-2 gap-y-4">
         <ReusableForm
           formFields={feesFields({
             ...formSlots,
             isOnpremise,
             isUsd,
+            isAdmin,
           })}
         />
-        {!!formApplicationFees && (
-          <div className="flex flex-col col-span-2 ">
-            <Separator className="my-6" />
-            <div className="flex items-center justify-center w-full gap-x-2">
+        <div className="flex flex-col col-span-2 ">
+          <Separator className="my-6" />
+          {!!formApplicationFees && (
+            <div className="flex items-start w-full gap-x-2">
               <p className="font-medium">Total Application Fee:</p>{' '}
               <p className="font-medium text-red-600">{`${watch('usingUsd') ? 'USD' : 'KES'} ${formApplicationFees.toLocaleString('en-US')}`}</p>
             </div>
+          )}
+          <div
+            className={cn(
+              'flex col-span-2 space-x-2 items-top',
+              !!formApplicationFees && 'mt-4',
+            )}
+          >
+            <Checkbox
+              id="confirmation"
+              checked={isConfirmedFees}
+              onCheckedChange={() =>
+                handleFees({ fee: formApplicationFees, usingUsd: isUsd })
+              }
+            />
+            <div className="grid gap-1.5 leading-none">
+              <Label
+                htmlFor="confirmation"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {`Confirm application ${!!formApplicationFees || isAdmin ? 'fees' : 'payment currency'}`}
+              </Label>
+              {showFeesWarning() && (
+                <p className="text-sm text-red-600">
+                  {`For ${isUsd ? 'USD' : 'KES'} some fees have not been added. However, if you continue with the application, the admin will add the fees on approval`}
+                </p>
+              )}
+            </div>
           </div>
-        )}
-        <Button
-          variant="default"
-          className={cn('col-span-2 bg-green-600 mt-2')}
-          disabled={!formApplicationFees}
-          onClick={() => handleFees({ fee: formApplicationFees, usingUsd })}
-        >
-          Confirm Application Fees
-        </Button>
+        </div>
       </div>
     </Form>
   );

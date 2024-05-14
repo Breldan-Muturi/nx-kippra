@@ -14,6 +14,7 @@ const programPromise = async (programId: string) =>
       code: true,
       summary: true,
       serviceId: true,
+      serviceIdUsd: true,
       prerequisites: { select: { id: true } },
       moodleCourseId: true,
     },

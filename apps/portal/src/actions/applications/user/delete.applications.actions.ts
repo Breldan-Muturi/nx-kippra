@@ -1,28 +1,18 @@
 'use server';
 
-import { currentUserId } from '@/lib/auth';
+import { currentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { deletedApplicationEmail } from '@/mail/application.mail';
 import { ActionReturnType } from '@/types/actions.types';
+import { UserRole } from '@prisma/client';
 
 export const userDeleteApplication = async (
   applicationId: string,
 ): Promise<ActionReturnType> => {
-  const userId = await currentUserId();
+  const user = await currentUser();
 
-  if (!userId) {
+  if (!user) {
     return { error: 'First log in to delete this application' };
-  }
-
-  const existingUser = await db.user.findUnique({
-    where: { id: userId },
-    select: { id: true },
-  });
-
-  if (!existingUser || !existingUser.id) {
-    return {
-      error: 'This user does not exist, and cannot delete applications',
-    };
   }
 
   const existingApplication = await db.application.findUnique({
@@ -46,7 +36,10 @@ export const userDeleteApplication = async (
     return { error: 'This application cannot be deleted as it does not exist' };
   }
 
-  if (existingUser.id !== existingApplication.owner.id) {
+  if (
+    user.id !== existingApplication.owner.id &&
+    user.role !== UserRole.ADMIN
+  ) {
     return {
       error:
         'Only the owner/applicant of this application is allowed to delete it',

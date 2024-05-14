@@ -1,33 +1,18 @@
-import { db } from '@/lib/db';
-import { SelectOptions } from '@/types/form-field.types';
-import React from 'react';
-import NewApplicationForm from './components/new-application-form';
+import { formApplication } from '@/actions/applications/form.applications.actions';
+import NewApplicationForm from '../../components/common/forms/application-form/new-application-form';
 
 const NewApplicationPage = async () => {
-  const [programs, organizations] = await Promise.all([
-    db.program.findMany({
-      where: { trainingSessions: { some: { endDate: { gte: new Date() } } } },
-      select: { id: true, title: true },
-    }),
-    db.organization.findMany({
-      select: { id: true, name: true },
-    }),
-  ]);
+  const adminApplicationForm = await formApplication();
+  if ('error' in adminApplicationForm) {
+    return (
+      <div>
+        There was an error in fetching information for this application:
+        <br /> {adminApplicationForm.error}
+      </div>
+    );
+  }
 
-  const programOptions: SelectOptions[] = programs.map(({ id, title }) => ({
-    value: id,
-    optionLabel: title,
-  }));
-  const organizationOptions: SelectOptions[] = organizations.map(
-    ({ id, name }) => ({ value: id, optionLabel: name }),
-  );
-
-  return (
-    <NewApplicationForm
-      programOptions={programOptions}
-      organizationOptions={organizationOptions}
-    />
-  );
+  return <NewApplicationForm {...adminApplicationForm} />;
 };
 
 export default NewApplicationPage;

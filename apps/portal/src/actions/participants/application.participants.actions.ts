@@ -2,7 +2,7 @@
 
 import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { UserRole } from '@prisma/client';
+import { OrganizationRole, UserRole } from '@prisma/client';
 
 type FetchOrganizationParticipantsProps = {
   organizationId: string;
@@ -44,22 +44,30 @@ export const fetchOrganizationParticipants = async ({
   const userId = await currentUserId();
   if (!userId)
     return { error: 'You must be logged in to submit this application' };
+
   const existingUser = await db.user.findUnique({
     where: { id: userId },
-    select: { role: true, organizations: { select: { organizationId: true } } },
+    select: {
+      role: true,
+      organizations: {
+        where: { role: OrganizationRole.OWNER },
+        select: { organizationId: true },
+      },
+    },
   });
+
   if (!existingUser)
     return { error: 'You are not authorized to submit this application' };
   if (
     existingUser.role !== UserRole.ADMIN &&
-    !!existingUser.organizations.find(
+    !!!existingUser.organizations.find(
       ({ organizationId }) => organizationId === organizationId,
     )
-  )
+  ) {
     return {
       error: 'Only admins and organization members can submit this application',
     };
-
+  }
   try {
     const participantOptions = await fetchParticipants({
       organizationId,

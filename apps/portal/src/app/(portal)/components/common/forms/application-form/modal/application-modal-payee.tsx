@@ -1,17 +1,17 @@
 import ReusableForm from '@/components/form/ReusableForm';
-import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Form } from '@/components/ui/form';
+import { Label } from '@/components/ui/label';
 import { payApplicationFields } from '@/validation/payment/payment-fields';
 import {
   PayeeForm,
   payeeFormSchema,
 } from '@/validation/payment/payment.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2 } from 'lucide-react';
-import React, { useEffect, useTransition } from 'react';
+import { useEffect, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 
-export type ApplicationModalPayeeProps = {
+type ApplicationModalPayeeProps = {
   payee: PayeeForm | undefined;
   handlePayee: (payee: PayeeForm | undefined) => void;
 };
@@ -48,19 +48,29 @@ const ApplicationModalPayee = ({
 
   return (
     <Form {...form}>
-      <div className="w-full grid grid-cols-2 gap-x-2 gap-y-4">
+      <div className="grid w-full grid-cols-2 gap-x-2 gap-y-4">
         <ReusableForm formFields={payApplicationFields} />
-        <Button
-          variant="default"
-          className={'col-span-2 bg-green-600 mt-2'}
-          disabled={isPending || !validPayeeFields.success}
-          onClick={() => onSubmit(watch())}
-        >
-          {isPending && (
-            <Loader2 color="white" className="w-4 h-4 mr-2 animate-spin" />
-          )}
-          Confirm Application Payee
-        </Button>
+        <div className="flex col-span-2 mt-4 space-x-2 items-top">
+          <Checkbox
+            id="confirmation"
+            disabled={isPending || !validPayeeFields.success}
+            onCheckedChange={() =>
+              validPayeeFields.success && handlePayee(validPayeeFields.data)
+            }
+          />
+          <div className="grid gap-1.5 leading-none">
+            <Label
+              htmlFor="confirmation"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Confirm application payee
+            </Label>
+            <p className="text-sm text-muted-foreground">
+              This will create an invoice using the above payee details such as
+              their phone number and email
+            </p>
+          </div>
+        </div>
       </div>
     </Form>
   );

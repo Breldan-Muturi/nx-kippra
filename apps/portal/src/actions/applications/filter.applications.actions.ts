@@ -1,17 +1,17 @@
 'use server';
 
 import { formatSponsorType, formatStatus } from '@/helpers/enum.helpers';
+import { processSearchString } from '@/helpers/filter.helpers';
 import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { SelectOptions } from '@/types/form-field.types';
-import { Prisma, UserRole } from '@prisma/client';
-import filterRedirect from '../redirect.actions';
-import { processSearchString } from '@/helpers/filter.helpers';
 import {
   FetchApplicationType,
   PathApplicationType,
   pathApplicationSchema,
 } from '@/validation/applications/table.application.validation';
+import { Prisma, UserRole } from '@prisma/client';
+import filterRedirect from '../redirect.actions';
 
 export const filterApplications = async (values: PathApplicationType) => {
   await filterRedirect(values, pathApplicationSchema, values.path);
@@ -97,6 +97,7 @@ const applicationsPromise = async ({
         : undefined,
       delivery: hiddenColumnsArray.includes('delivery') ? undefined : true,
       applicationFee: hiddenColumnsArray.includes('fee') ? undefined : true,
+      currency: hiddenColumnsArray.includes('currency') ? undefined : true,
       participants: {
         select: {
           email: true,

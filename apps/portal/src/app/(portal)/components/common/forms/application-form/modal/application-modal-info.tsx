@@ -4,16 +4,17 @@ import {
   formatDeliveryMode,
 } from '@/helpers/enum.helpers';
 import { cn } from '@/lib/utils';
-import { Delivery } from '@prisma/client';
+import { Delivery, UserRole } from '@prisma/client';
 import { ApplicationModalProps } from './application-modal-steps';
 
 const ApplicationInfo = ({
   data,
   applicationTrainingSession,
   formSlots,
+  role,
 }: Pick<
   ApplicationModalProps,
-  'data' | 'applicationTrainingSession' | 'formSlots'
+  'data' | 'applicationTrainingSession' | 'formSlots' | 'role'
 >) => {
   const { slotsCitizen, slotsEastAfrican, slotsGlobal } = formSlots;
   const { delivery } = data;
@@ -41,6 +42,7 @@ const ApplicationInfo = ({
           )
           .map(({ optionLabel }) => optionLabel)[0]
       : undefined;
+  const isAdmin = role === UserRole.ADMIN;
   return (
     <ul className="space-y-2">
       <li>
@@ -103,14 +105,18 @@ const ApplicationInfo = ({
         {'/'}
         <span className="font-medium">{bookedSlots}</span>
       </li>
-      <li>
-        Pesaflow Service Id for Ksh Payments:{' '}
-        <span className="font-medium text-green-600">{serviceId}</span>
-      </li>
-      <li>
-        Pesaflow Service Id for Usd Payments:{' '}
-        <span className="font-medium text-green-600">{serviceId}</span>
-      </li>
+      {isAdmin && (
+        <>
+          <li>
+            Pesaflow Service Id for Ksh Payments:{' '}
+            <span className="font-medium text-green-600">{serviceId}</span>
+          </li>
+          <li>
+            Pesaflow Service Id for Usd Payments:{' '}
+            <span className="font-medium text-green-600">{serviceId}</span>
+          </li>
+        </>
+      )}
     </ul>
   );
 };

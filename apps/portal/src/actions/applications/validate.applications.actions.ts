@@ -1,6 +1,7 @@
 'use server';
-import { currentUserId } from '@/lib/auth';
+import { currentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { FormError } from '@/types/actions.types';
 import {
   AdminApplicationForm,
   adminApplicationSchema,
@@ -9,6 +10,7 @@ import {
   NewOrganizationForm,
   newOrganizationSchema,
 } from '@/validation/organization/organization.validation';
+import { OrganizationRole, SponsorType, UserRole } from '@prisma/client';
 
 const getTrainingSession = async (trainingSessionId: string) =>
   await db.trainingSession.findUnique({
@@ -18,6 +20,8 @@ const getTrainingSession = async (trainingSessionId: string) =>
 export type ApplicationTrainingSession = NonNullable<
   Awaited<ReturnType<typeof getTrainingSession>>
 >;
+
+// type FormError = { field: Path<AdminApplicationForm>; message: string };
 
 export type ValidAdminApplication = {
   data: AdminApplicationForm;
@@ -34,12 +38,14 @@ export type ValidAdminApplication = {
   organizationSuccess?: NewOrganizationForm;
 };
 
-export type AdminApplicationReturn = { error: string } | ValidAdminApplication;
+export type AdminApplicationReturn =
+  | { error: string; formErrors?: FormError<AdminApplicationForm>[] }
+  | ValidAdminApplication;
 export const validateAdminApplication = async (
   data: AdminApplicationForm,
 ): Promise<AdminApplicationReturn> => {
-  const userId = await currentUserId();
-  if (!userId)
+  const user = await currentUser();
+  if (!user)
     return { error: 'You need to be logged in to submit this application' };
   const validApplicationData = adminApplicationSchema.safeParse(data);
   if (!validApplicationData.success) {
@@ -54,11 +60,13 @@ export const validateAdminApplication = async (
     name,
     organizationPhone,
     organizationEmail,
+    sponsorType,
   } = validApplicationData.data;
 
-  const newOrganization = isExistingOrganization
-    ? undefined
-    : newOrganizationSchema.parse(validApplicationData.data);
+  const newOrganization =
+    isExistingOrganization || sponsorType === SponsorType.SELF_SPONSORED
+      ? undefined
+      : newOrganizationSchema.parse(validApplicationData.data);
 
   const [applicationTrainingSession, participantsExist, newOrganizationExist] =
     await Promise.all([
@@ -86,7 +94,17 @@ export const validateAdminApplication = async (
                 { email: organizationEmail },
               ],
             },
-            select: { id: true, name: true, email: true, phone: true },
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              users: {
+                where: { userId: user.id, role: OrganizationRole.OWNER },
+                distinct: ['userId'],
+                select: { userId: true },
+              },
+            },
           })
         : Promise.resolve(undefined),
     ]);
@@ -132,7 +150,11 @@ export const validateAdminApplication = async (
 
   let organizationError: ValidAdminApplication['organizationError'] | undefined;
   let organizationSuccess: NewOrganizationForm | undefined;
-  if (newOrganizationExist) {
+  const canUpdate =
+    user.role === UserRole.ADMIN ||
+    newOrganizationExist?.users[0]?.userId === user.id;
+
+  if (newOrganizationExist && canUpdate) {
     organizationError = {
       existingOrgId: newOrganizationExist.id,
       existingOrgName: newOrganizationExist.name,
@@ -153,6 +175,37 @@ export const validateAdminApplication = async (
       organizationError = undefined;
       organizationSuccess = newOrganization;
     }
+  } else if (newOrganizationExist && !canUpdate) {
+    let formErrors: FormError<AdminApplicationForm>[] = [];
+    if (name === newOrganizationExist?.name)
+      formErrors = [
+        ...formErrors,
+        {
+          field: 'name',
+          message: 'An organization with a similar name already exists',
+        },
+      ];
+    if (organizationPhone === newOrganizationExist?.phone)
+      formErrors = [
+        ...formErrors,
+        {
+          field: 'organizationPhone',
+          message: 'An organization with the same phone number already exists',
+        },
+      ];
+    if (organizationEmail === newOrganizationExist?.email)
+      formErrors = [
+        ...formErrors,
+        {
+          field: 'organizationEmail',
+          message: 'An organization with the same email already exists',
+        },
+      ];
+    return {
+      error:
+        'Could not submit this application because this organization already exists.',
+      formErrors,
+    };
   }
 
   return {

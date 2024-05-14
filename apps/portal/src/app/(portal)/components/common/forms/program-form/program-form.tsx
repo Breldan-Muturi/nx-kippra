@@ -1,11 +1,19 @@
 'use client';
-import { SelectOptions } from '@/types/form-field.types';
-import { useForm } from 'react-hook-form';
-import { Form } from '@/components/ui/form';
-import React, { useTransition } from 'react';
+import {
+  NewProgramType,
+  newProgram,
+} from '@/actions/programmes/new.programs.actions';
+import { SingleProgramReturn } from '@/actions/programmes/single.program.actions';
+import {
+  UpdateProgramType,
+  updateProgram,
+} from '@/actions/programmes/update.programs.action';
 import FormHeader from '@/components/form/FormHeader';
 import ReusableForm from '@/components/form/ReusableForm';
 import SubmitButton from '@/components/form/SubmitButton';
+import { Form } from '@/components/ui/form';
+import { cn } from '@/lib/utils';
+import { FormFieldType } from '@/types/form-field.types';
 import {
   NewProgramImageFileType,
   UpdateProgramImageFileType,
@@ -14,28 +22,17 @@ import {
 } from '@/validation/programs/program.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import React, { useTransition } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import {
-  NewProgramType,
-  newProgram,
-} from '@/actions/programmes/new.programs.actions';
-import programFields from './program-form-fields';
-import { SingleProgramReturn } from '@/actions/programmes/single.program.actions';
-import { cn } from '@/lib/utils';
-import {
-  UpdateProgramType,
-  updateProgram,
-} from '@/actions/programmes/update.programs.action';
 
 type ProgramFormProps = React.ComponentPropsWithoutRef<'form'> & {
-  programOptions?: SelectOptions[];
-  moodleCourseOptions?: SelectOptions[];
+  programForm: FormFieldType<NewProgramImageFileType>[];
   program?: SingleProgramReturn;
 };
 
 const ProgramForm = ({
-  programOptions,
-  moodleCourseOptions,
+  programForm,
   program,
   className,
   ...props
@@ -65,6 +62,8 @@ const ProgramForm = ({
         })()
       : {},
   });
+
+  const { handleSubmit, setError } = form;
 
   const onSubmit = (
     programInput: NewProgramImageFileType | UpdateProgramImageFileType,
@@ -102,12 +101,18 @@ const ProgramForm = ({
                 onClick: () => router.push(`/${data.recordId}`),
               },
             });
+            router.refresh();
           }
         });
       } else if (newProgramForm) {
         newProgram(newProgramForm).then((data) => {
           if ('error' in data) {
             toast.error(data.error);
+            if (data.formErrors && data.formErrors.length > 0) {
+              data.formErrors.map(({ field, message }) =>
+                setError(field, { type: 'manual', message }),
+              );
+            }
           } else {
             toast.success(data.success, {
               action: {
@@ -130,9 +135,9 @@ const ProgramForm = ({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(onSubmit)}
         className={cn(
-          'flex w-full flex-col gap-x-4 gap-y-2 self-center p-8 md:w-3/4',
+          'grid grid-cols-2 gap-x-4 gap-y-6 self-center p-8 md:w-3/4',
           isValidProgram ? 'md:pt-4' : 'md:pt-12',
           className,
         )}
@@ -141,14 +146,13 @@ const ProgramForm = ({
         <FormHeader
           label={`${isValidProgram ? 'Update this' : 'New'} program`}
           description={`Complete the form below and submit to ${isValidProgram ? 'update this program' : 'add a program'}`}
+          className="col-span-2"
         />
-        <ReusableForm
-          formFields={programFields(programOptions, moodleCourseOptions)}
-        />
+        <ReusableForm formFields={programForm} />
         <SubmitButton
           label={`${isValidProgram ? 'Update This' : 'Create New'} Program`}
           isSubmitting={isPending}
-          className="w-full my-8"
+          className="w-full my-4"
         />
       </form>
     </Form>

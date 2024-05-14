@@ -1,8 +1,13 @@
 'use client';
 import {
+  OrgOption,
+  ProgramOption,
+  TrainingSessionInfo,
+} from '@/actions/applications/form.applications.actions';
+import {
   ValidAdminApplication,
   validateAdminApplication,
-} from '@/actions/applications/admin/validate.admin.applications.actions';
+} from '@/actions/applications/validate.applications.actions';
 import {
   DynamicParticipantOption,
   fetchOrganizationParticipants,
@@ -19,22 +24,18 @@ import TooltipIconButton from '@/components/buttons/tooltip-icon-button';
 import FormHeader from '@/components/form/FormHeader';
 import ReusableForm from '@/components/form/ReusableForm';
 import SubmitButton from '@/components/form/SubmitButton';
-import tableSelectColumn from '@/components/table/table-select-column';
 import { Form } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
-import { SelectOptions } from '@/types/form-field.types';
 import {
   AdminApplicationForm,
   adminApplicationSchema,
 } from '@/validation/applications/admin.application.validation';
 import {
   AdminApplicationParticipant,
-  ParticipantSubmitOption,
   applicationParticipantSchema,
 } from '@/validation/applications/participants.application.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Delivery, SponsorType } from '@prisma/client';
-import { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { PlusIcon } from 'lucide-react';
 import React, { useEffect, useState, useTransition } from 'react';
@@ -47,23 +48,18 @@ import ApplicationModal from './modal/application-modal';
 import ApplicationParticipantsOrganization from './participants/participants-dropdown/application-participants-organization';
 import ApplicationParticipantForm from './participants/participants-form/application-participant-form';
 import ParticipantApplicationSheet from './participants/participants-sheet/participant-application-sheet';
-import participantApplicationActions from './participants/participants-table/participant-application-actions';
-import participantApplicationCitizenship from './participants/participants-table/participant-application-citizenship';
-import participantApplicationEmail from './participants/participants-table/participant-application-email';
-import participantApplicationNationalId from './participants/participants-table/participant-application-nationalid';
-import participantApplicationOwnerColumn from './participants/participants-table/participant-application-ower';
-import participantApplicationRegistration from './participants/participants-table/participant-application-registration';
-import participantApplicationColumnUser from './participants/participants-table/participant-application-user';
 import ParticipantApplicationsTable from './participants/participants-table/participants-application-table';
 
 type NewApplicationFormProps = React.ComponentPropsWithoutRef<'form'> & {
-  programOptions: SelectOptions[];
-  organizationOptions: SelectOptions[];
+  trainingSessionInfo?: TrainingSessionInfo;
+  programOptions?: ProgramOption[];
+  orgOptions: OrgOption[];
 };
 
 const NewApplicationForm = ({
+  trainingSessionInfo,
   programOptions,
-  organizationOptions,
+  orgOptions,
   className,
   ...props
 }: NewApplicationFormProps) => {
@@ -71,7 +67,11 @@ const NewApplicationForm = ({
   const [trainingSessionOptions, setTrainingSessionOptions] = useState<
     DynamicTrainingOption[]
   >([]);
-  const [isDisableDelivery, setDisableDelivery] = useState<boolean>(true);
+  const [isDisableDelivery, setDisableDelivery] = useState<boolean>(
+    !!trainingSessionInfo
+      ? trainingSessionInfo.mode !== Delivery.BOTH_MODES
+      : true,
+  );
   const [participantOptions, setParticipantOptions] = useState<
     DynamicParticipantOption[]
   >([]);
@@ -82,16 +82,25 @@ const NewApplicationForm = ({
     | boolean
   >(false);
 
+  const deliveryDefault: Delivery | undefined = trainingSessionInfo
+    ? trainingSessionInfo.mode === Delivery.BOTH_MODES
+      ? Delivery.ON_PREMISE
+      : trainingSessionInfo.mode
+    : undefined;
+
   const form = useForm<AdminApplicationForm>({
     resolver: zodResolver(adminApplicationSchema),
     mode: 'onChange',
     defaultValues: {
+      trainingSessionId: trainingSessionInfo?.id,
+      programId: trainingSessionInfo?.program.id,
+      delivery: deliveryDefault,
       isExistingOrganization: false,
     },
   });
 
-  const { handleSubmit, watch, setValue, reset, control, getValues } = form;
-  console.log('Form errors: ', adminApplicationSchema.safeParse(watch()));
+  const { handleSubmit, watch, setValue, reset, control, getValues, setError } =
+    form;
 
   useEffect(() => {
     const subscription = watch((value, { name }) => {
@@ -201,7 +210,7 @@ const NewApplicationForm = ({
 
   const applicationOrganizationForm = applicationOrganizationFields({
     existingOrganization: watch('isExistingOrganization'),
-    organizationOptions,
+    orgOptions,
   });
 
   const { append, remove } = useFieldArray({
@@ -209,15 +218,31 @@ const NewApplicationForm = ({
     control,
     rules: {
       minLength: { value: 1, message: 'At least one participant required' },
+      validate: {
+        hasOwner: (participants: AdminApplicationParticipant[]) => {
+          const hasOwner = participants.some(({ isOwner }) => !!isOwner);
+          return (
+            hasOwner || 'At least one participant must be set as the owner'
+          );
+        },
+      },
     },
   });
 
+  const hasOwner = !!getValues('participants')?.find(({ isOwner }) => isOwner);
+
   const handleSelectParticipant = (participant: DynamicParticipantOption) => {
-    const validParticipant =
-      applicationParticipantSchema.safeParse(participant);
+    const validParticipant = applicationParticipantSchema.safeParse({
+      ...participant,
+      userId: participant.id,
+      isOwner: !hasOwner,
+    });
     if (!validParticipant.success) {
       toast.error('Complete the participant form to add this participant');
       setFormComponents((prev) => participant);
+    } else {
+      append(validParticipant.data);
+      toast.success(`${validParticipant.data.name} added as a participant`);
     }
   };
 
@@ -232,7 +257,7 @@ const NewApplicationForm = ({
   const participantSubmit: SubmitHandler<AdminApplicationParticipant> = (
     values,
   ) => {
-    append(values);
+    append({ ...values, isOwner: !hasOwner });
     setFormComponents((prev) => false);
     toast.success(`${values.name} added as a participant`);
   };
@@ -249,26 +274,21 @@ const NewApplicationForm = ({
     });
   };
 
-  const removeParticipant = (email: string) => {
-    const index = getValues('participants')?.findIndex(
-      (participant) => participant.email === email,
-    );
-    if (index && index !== -1) {
-      const removedParticipantName = getValues(`participants.${index}.name`);
-      remove(index);
-      toast.success(`${removedParticipantName} removed successfully`);
-    } else {
-      toast.error('Participant not found');
-    }
-  };
-
   const removeManyParticipants = (emails: string[]) => {
     const currentParticipants = getValues('participants');
     const updatedParticipants = currentParticipants?.filter(
       ({ email }) => !emails.includes(email),
     );
+    const removedOwner = currentParticipants?.find(
+      ({ isOwner, email }) => !!isOwner && emails.includes(email),
+    );
+    if (removedOwner && updatedParticipants && updatedParticipants.length > 0) {
+      updatedParticipants[0].isOwner = true;
+    }
     setValue('participants', updatedParticipants);
-    toast.success(`${emails.length} participants removed`);
+    toast.success(
+      `${emails.length} participant${emails.length === 1 ? '' : 's'} removed successfully`,
+    );
   };
 
   const toggleOwner = (email: string) => {
@@ -290,24 +310,6 @@ const NewApplicationForm = ({
     }
   };
 
-  const participantColumns: ColumnDef<ParticipantSubmitOption>[] = [
-    tableSelectColumn<ParticipantSubmitOption>(isPending),
-    participantApplicationColumnUser,
-    participantApplicationRegistration,
-    participantApplicationActions({
-      isPending,
-      viewParticipant,
-      removeParticipant,
-    }),
-    participantApplicationEmail,
-    participantApplicationOwnerColumn({
-      isPending,
-      toggleOwner,
-    }),
-    participantApplicationCitizenship,
-    participantApplicationNationalId,
-  ];
-
   const showForm =
     formComponents === true ||
     (typeof formComponents === 'object' && '_count' in formComponents);
@@ -323,6 +325,14 @@ const NewApplicationForm = ({
     startTransition(() => {
       validateAdminApplication(values).then((data) => {
         if ('error' in data) {
+          if (data.formErrors) {
+            data.formErrors.map(({ field, message }) =>
+              setError(field, {
+                type: 'manual',
+                message,
+              }),
+            );
+          }
           toast.error(data.error);
         } else {
           setFormComponents((prev) => data);
@@ -365,8 +375,10 @@ const NewApplicationForm = ({
           />
           {!!getValues('participants')?.length && (
             <ParticipantApplicationsTable
+              isPending={isPending}
+              toggleOwner={toggleOwner}
+              viewParticipant={viewParticipant}
               participants={getValues('participants')!}
-              columns={participantColumns}
               removeManyParticipants={removeManyParticipants}
             />
           )}

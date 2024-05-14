@@ -33,7 +33,7 @@ export class PdfService {
       const response = await page.goto(
         `${this.configService.get('PUPPETEER_ACCESS_ROUTE')}/templates/${applicationId}/${template}`,
         {
-          waitUntil: 'networkidle0',
+          waitUntil: 'networkidle2',
           timeout: 30_000,
         },
       );

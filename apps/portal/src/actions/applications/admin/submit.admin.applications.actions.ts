@@ -4,7 +4,7 @@ import {
   PDFResponse,
   generatePDFFromApi,
 } from '@/actions/pdf/generate-pdf-api.actions';
-import { ApplicationSlots } from '@/app/(portal)/(forms)/new-application/components/modal/application-modal';
+import { ApplicationSlots } from '@/app/(portal)/components/common/forms/application-form/modal/application-modal';
 import { formatVenues } from '@/helpers/enum.helpers';
 import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -23,11 +23,8 @@ import {
 } from '@/validation/payment/payment.validation';
 import {
   Application,
-  ApplicationOfferLetter,
-  ApplicationProformaInvoice,
   ApplicationStatus,
   Delivery,
-  Invoice,
   Organization,
   OrganizationRole,
   Prisma,
@@ -148,9 +145,9 @@ export type SubmitAdminApplicationParams = {
   >;
   validOrganization?: NewOrganizationForm;
   participants?: AdminApplicationParticipant[];
-  payee: PayeeForm;
+  payee?: PayeeForm;
   organizationId?: string;
-  applicationFee: number;
+  applicationFee?: number;
   slots: ApplicationSlots;
   usingUsd: boolean;
 };
@@ -176,9 +173,6 @@ export const submitAdminApplication = async (
     slots,
   } = data;
   const { delivery, trainingSessionId, sponsorType } = applicationForm;
-
-  // Add a way to check the payee details from the db.
-  const { clientIDNumber, clientName, clientMSISD } = payee;
   const isOnPremise = delivery !== Delivery.ONLINE;
 
   let existingUser: ExistingUser,
@@ -199,8 +193,6 @@ export const submitAdminApplication = async (
   }
   if (!existingUser || !existingUser.id || !existingUser.email)
     return { error: 'User account not found, please try again later' };
-  if (!existingUser.role || existingUser.role !== UserRole.ADMIN)
-    return { error: 'You are not authorized to submit this application' };
 
   let newOrganization: Organization | undefined,
     sessionInformation: SessionInformation;
@@ -238,9 +230,8 @@ export const submitAdminApplication = async (
   try {
     newApplication = await db.application.create({
       data: {
-        applicationFee: data.applicationFee,
         delivery,
-        trainingSessionId,
+        currency: usingUsd ? 'USD' : 'KES',
         sponsorType,
         ...slots,
         ownerId: applicationOwner?.id || existingUser.id,
@@ -253,6 +244,8 @@ export const submitAdminApplication = async (
               }),
             }
           : undefined,
+        trainingSessionId: sessionInformation.id,
+        applicationFee,
       },
     });
   } catch (error) {
@@ -263,238 +256,223 @@ export const submitAdminApplication = async (
     };
   }
 
-  const apiClientID = process.env.PESAFLOW_CLIENT_ID as string;
-  const amountExpected =
-    process.env.NODE_ENV === 'production' ? applicationFee + 50 : 1;
-  const serviceID = String(serviceId || serviceIdUsd);
-  const currency = usingUsd ? 'USD' : 'KES';
-  const billRefNumber = `${new Date().toISOString()}_${newApplication.id}_admin_initiated`;
-  const billDesc = `Invoice for ${title} from ${format(startDate, 'PPP')} to ${format(endDate, 'PPP')} ${isOnPremise && venue ? formatVenues(venue) : ''}`;
-  const secret = process.env.PESAFLOW_API_SECRET as string;
-
-  const dataString =
-    apiClientID +
-    amountExpected +
-    serviceID +
-    clientIDNumber +
-    currency +
-    billRefNumber +
-    billDesc +
-    clientName +
-    secret;
-
-  const key = process.env.PESAFLOW_API_KEY as string;
-  const signed = createHmac('sha256', key)
-    .update(Buffer.from(dataString, 'utf-8'))
-    .digest();
-  const secureHash = ConversionUtils.stringToBase64(signed.toString('hex'));
-
-  const validApiData = pesaflowCheckoutApiSchema.safeParse({
-    ...payee,
-    secureHash,
-    apiClientID,
-    serviceID,
-    notificationURL: `https://nxportal.sohnandsol.com/api/payments/${newApplication.id}${process.env.NODE_ENV !== 'production' ? '/dev' : ''}`,
-    callBackURLOnSuccess: `${process.env.NEXT_PUBLIC_APP_URL}/applications`,
-    billRefNumber,
-    sendSTK: true,
-    format: 'json',
-    currency,
-    amountExpected,
-    billDesc,
-    clientMSISDN: String(clientMSISD),
-  });
-
-  if (!validApiData.success) {
-    console.error('Validation error: ', validApiData.error);
-    return { error: 'Invalid payment data, please try again later' };
-  }
-
-  let invoiceLink: string, invoiceNumber: string;
-  try {
-    const axiosResponse = await axios({
-      method: 'POST',
-      url: process.env.PESAFLOW_URL as string,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: validApiData.data,
-    });
-    invoiceLink = axiosResponse.data.invoice_link;
-    invoiceNumber = axiosResponse.data.invoice_number;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.table([
-        { type: 'Error data', value: error.response?.data },
-        { type: 'Error status', value: error.response?.status },
-        { type: 'Error headers', value: error.response?.headers },
+  if (payee && applicationFee && existingUser.role === UserRole.ADMIN) {
+    let pdfProforma: PDFResponse, pdfOffer: PDFResponse;
+    try {
+      [pdfProforma, pdfOffer] = await Promise.all([
+        generatePDFFromApi({
+          applicationId: newApplication.id,
+          template: 'pro-forma-invoice',
+        }),
+        generatePDFFromApi({
+          applicationId: newApplication.id,
+          template: 'offer-letter',
+        }),
       ]);
-      return {
-        error: 'Server responded with an error. Please try again later',
-      };
-    } else {
-      console.error('An unexpected error occurred: ', error);
+    } catch (error) {
       return { error: 'An unexpected error occurred. Please try again later' };
     }
-  }
+    if ('error' in pdfProforma)
+      return { error: `Could not generate the invoice:  ${pdfProforma.error}` };
+    if ('error' in pdfOffer)
+      return {
+        error: `Could not generate the offer-letter:  ${pdfOffer.error}`,
+      };
+    let pdfProformaUrl: ActionReturnType, pdfOfferUrl: ActionReturnType;
+    try {
+      [pdfProformaUrl, pdfOfferUrl] = await Promise.all([
+        uploadPDFile(
+          pdfProforma.generatedPDF,
+          `${newApplication.id}-proforma-invoice`,
+        ),
+        uploadPDFile(pdfProforma.generatedPDF, `${newApplication.id}-offer`),
+      ]);
+    } catch (error) {
+      return { error: 'An unexpected error occurred. Please try again later' };
+    }
+    if (pdfProformaUrl.error)
+      return {
+        error: `Could not upload the pdfProforma: ${pdfProformaUrl.error}`,
+      };
+    if (pdfOfferUrl.error)
+      return {
+        error: `Could not upload the offer-letter: ${pdfOfferUrl.error}`,
+      };
 
-  let pdfProforma: PDFResponse, pdfOffer: PDFResponse;
-  try {
-    [pdfProforma, pdfOffer] = await Promise.all([
-      generatePDFFromApi({
-        applicationId: newApplication.id,
-        template: 'pro-forma-invoice',
-      }),
-      generatePDFFromApi({
-        applicationId: newApplication.id,
-        template: 'offer-letter',
-      }),
-    ]);
-  } catch (error) {
-    return { error: 'An unexpected error occurred. Please try again later' };
-  }
-  if ('error' in pdfProforma)
-    return { error: `Could not generate the invoice:  ${pdfProforma.error}` };
-  if ('error' in pdfOffer)
-    return { error: `Could not generate the offer-letter:  ${pdfOffer.error}` };
+    const { clientIDNumber, clientName, clientMSISD } = payee;
 
-  let pdfProformaUrl: ActionReturnType, pdfOfferUrl: ActionReturnType;
-  try {
-    [pdfProformaUrl, pdfOfferUrl] = await Promise.all([
-      uploadPDFile(
-        pdfProforma.generatedPDF,
-        `${newApplication.id}-proforma-invoice`,
-      ),
-      uploadPDFile(pdfProforma.generatedPDF, `${newApplication.id}-offer`),
-    ]);
-  } catch (error) {
-    return { error: 'An unexpected error occurred. Please try again later' };
-  }
-  if (pdfProformaUrl.error)
-    return {
-      error: `Could not upload the pdfProforma: ${pdfProformaUrl.error}`,
-    };
-  if (pdfOfferUrl.error)
-    return { error: `Could not upload the offer-letter: ${pdfOfferUrl.error}` };
+    const apiClientID = process.env.PESAFLOW_CLIENT_ID as string;
+    const amountExpected =
+      process.env.NODE_ENV === 'production'
+        ? usingUsd
+          ? applicationFee + 1
+          : applicationFee + 50
+        : 1;
+    const serviceID = String(serviceId || serviceIdUsd);
+    const currency = usingUsd ? 'USD' : 'KES';
+    const billRefNumber = `${new Date().toISOString()}_${newApplication.id}_admin_initiated`;
+    const billDesc = `Invoice for ${title} from ${format(startDate, 'PPP')} to ${format(endDate, 'PPP')} ${isOnPremise && venue ? formatVenues(venue) : ''}`;
+    const secret = process.env.PESAFLOW_API_SECRET as string;
 
-  let proforma: ApplicationProformaInvoice | undefined,
-    offer: ApplicationOfferLetter | undefined,
-    invoice: Invoice | undefined;
-  try {
-    await db.$transaction(
-      async (prisma) => {
-        [proforma, offer, invoice] = await Promise.all([
-          prisma.applicationProformaInvoice.create({
-            data: {
-              application: { connect: { id: newApplication.id } },
+    const dataString =
+      apiClientID +
+      amountExpected +
+      serviceID +
+      clientIDNumber +
+      currency +
+      billRefNumber +
+      billDesc +
+      clientName +
+      secret;
+
+    const key = process.env.PESAFLOW_API_KEY as string;
+    const signed = createHmac('sha256', key)
+      .update(Buffer.from(dataString, 'utf-8'))
+      .digest();
+    const secureHash = ConversionUtils.stringToBase64(signed.toString('hex'));
+
+    const validApiData = pesaflowCheckoutApiSchema.safeParse({
+      ...payee,
+      secureHash,
+      apiClientID,
+      serviceID,
+      notificationURL: `https://nxportal.sohnandsol.com/api/payments/${newApplication.id}${process.env.NODE_ENV !== 'production' ? '/dev' : ''}`,
+      callBackURLOnSuccess: `${process.env.NEXT_PUBLIC_APP_URL}/applications`,
+      billRefNumber,
+      sendSTK: true,
+      format: 'json',
+      currency,
+      amountExpected,
+      billDesc,
+      clientMSISDN: String(clientMSISD),
+    });
+
+    if (!validApiData.success) {
+      console.error('Validation error: ', validApiData.error);
+      return { error: 'Invalid payment data, please try again later' };
+    }
+
+    let invoiceLink: string, invoiceNumber: string;
+    try {
+      const axiosResponse = await axios({
+        method: 'POST',
+        url: process.env.PESAFLOW_URL as string,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: validApiData.data,
+      });
+      invoiceLink = axiosResponse.data.invoice_link;
+      invoiceNumber = axiosResponse.data.invoice_number;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.table([
+          { type: 'Error data', value: error.response?.data },
+          { type: 'Error status', value: error.response?.status },
+          { type: 'Error headers', value: error.response?.headers },
+        ]);
+        return {
+          error: 'Server responded with an error. Please try again later',
+        };
+      } else {
+        console.error('An unexpected error occurred: ', error);
+        return {
+          error: 'An unexpected error occurred. Please try again later',
+        };
+      }
+    }
+
+    try {
+      await db.application.update({
+        where: { id: newApplication.id },
+        data: {
+          status: ApplicationStatus.APPROVED,
+          proformaInvoice: {
+            create: {
               fileName: `${newApplication.id}-proforma-invoice`,
               filePath: pdfProformaUrl.success!,
             },
-          }),
-          prisma.applicationOfferLetter.create({
-            data: {
-              application: { connect: { id: newApplication.id } },
+          },
+          offerLetter: {
+            create: {
               fileName: `${newApplication.id}-offer`,
               filePath: pdfOfferUrl.success!,
             },
-          }),
-          existingUser && existingUser.email
-            ? prisma.invoice.create({
-                data: {
-                  application: { connect: { id: newApplication.id } },
-                  invoiceEmail: applicationOwner?.email || existingUser.email,
-                  invoiceLink,
-                  invoiceNumber,
-                },
-              })
-            : Promise.resolve(undefined),
-        ]);
-
-        await prisma.application.update({
-          where: { id: newApplication.id },
-          data: {
-            status: ApplicationStatus.APPROVED,
-            proformaInvoice: { connect: { id: proforma.id } },
-            offerLetter: { connect: { id: offer.id } },
           },
+          invoice: {
+            create: {
+              invoiceEmail: applicationOwner?.email || existingUser.email,
+              invoiceLink,
+              invoiceNumber,
+            },
+          },
+        },
+      });
+    } catch (error) {
+      console.error(
+        'Failed to approve the application due to a system error: ',
+        error,
+      );
+      return {
+        error:
+          'Failed to approve the application due to a system error. Please try again later',
+      };
+    }
+
+    const emailPromises = participants?.map(
+      async ({ email: participantEmail }) => {
+        const tokenExpiry = new Date(startDate);
+        tokenExpiry.setDate(tokenExpiry.getDate() - 7);
+        const { email, token, expires } =
+          await generateApplicationConfirmationToken({
+            email: participantEmail,
+            expires: tokenExpiry,
+            trainingSessionId,
+          });
+        return newApplicationEmail({
+          email,
+          endDate,
+          expires,
+          startDate,
+          title,
+          token,
         });
       },
-      { maxWait: 20000, timeout: 20000 },
     );
-  } catch (error) {
-    console.error(
-      'Failed to approve the application due to a system error: ',
-      error,
-    );
-    return {
-      error:
-        'Failed to approve the application due to a system error. Please try again later',
-    };
-  }
-  if (pdfProformaUrl.error)
-    return {
-      error: `Could not upload the pdfProforma: ${pdfProformaUrl.error}`,
-    };
-  if (pdfOfferUrl.error)
-    return { error: `Could not upload the offer-letter: ${pdfOfferUrl.error}` };
-  if (!proforma || !offer || !invoice)
-    return {
-      error:
-        'Failed to update the application proforma, offer, and invoice due to a server error. Please try again later',
-    };
 
-  const emailPromises = participants?.map(
-    async ({ email: participantEmail }) => {
-      const tokenExpiry = new Date(startDate);
-      tokenExpiry.setDate(tokenExpiry.getDate() - 7);
-      const { email, token, expires } =
-        await generateApplicationConfirmationToken({
-          email: participantEmail,
-          expires: tokenExpiry,
-          trainingSessionId,
-        });
-      return newApplicationEmail({
-        email,
-        endDate,
-        expires,
-        startDate,
-        title,
-        token,
-      });
-    },
-  );
-  //  👇🏽 Should we update this email for this sort of approval, where it's basically done by the Admin?
-  const approveApplicationEmail = approvedApplicationEmail({
-    approvalDate: new Date(),
-    title,
-    startDate,
-    endDate,
-    venue: venue ? venue : undefined,
-    applicantEmail: applicationOwner?.email || existingUser!.email,
-    proformaInvoice: {
-      filename: proforma.fileName,
-      path: proforma.filePath,
-    },
-    offerLetter: {
-      filename: offer.fileName,
-      path: offer.filePath,
-    },
-  });
+    const newApplicationEmailPromise = approvedApplicationEmail({
+      approvalDate: new Date(),
+      title,
+      startDate,
+      endDate,
+      venue: venue ? venue : undefined,
+      applicantEmail: applicationOwner?.email || existingUser!.email,
+      proformaInvoice: {
+        filename: `${newApplication.id}-proforma-invoice`,
+        path: pdfProformaUrl.success!,
+      },
+      offerLetter: {
+        filename: `${newApplication.id}-offer`,
+        path: pdfOfferUrl.success!,
+      },
+    });
 
-  try {
-    await Promise.all([
-      !!emailPromises ? [...emailPromises] : [],
-      approveApplicationEmail,
-    ]);
-    return {
-      success:
-        'Application submitted successfully, the invoice link, and application approval emails have been sent to the participants',
-      applicationId: newApplication.id,
-    };
-  } catch (error) {
-    return {
-      error:
-        'There was an error sending email notifications. Please try again later',
-    };
+    try {
+      await Promise.all([
+        !!emailPromises ? [...emailPromises] : [],
+        newApplicationEmailPromise,
+      ]);
+    } catch (error) {
+      return {
+        error:
+          'There was an error sending email notifications. Please try again later',
+      };
+    }
   }
+
+  return {
+    success:
+      'Application submitted successfully, the invoice link, and application approval emails have been sent to the participants',
+    applicationId: newApplication.id,
+  };
 };

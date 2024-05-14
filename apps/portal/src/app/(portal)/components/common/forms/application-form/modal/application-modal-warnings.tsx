@@ -16,23 +16,24 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { AlertTriangle, ShieldAlert, Trash2 } from 'lucide-react';
-import { ApplicationModalProps } from './application-modal-steps';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { AlertTriangle, ShieldAlert, Trash2 } from 'lucide-react';
+import { ApplicationModalProps } from './application-modal-steps';
 
 type ApplicationWarningProps = Pick<
   ApplicationModalProps,
   | 'participantWarnings'
   | 'organizationError'
-  | 'handleWarning'
   | 'hasWarning'
   | 'formParticipants'
-  | 'handleParticipants'
->;
+> & {
+  handleParticipants: (participantEmail: string) => void;
+  handleWarning: (resolved: boolean) => void;
+};
 const ApplicationWarnings = ({
   participantWarnings,
   organizationError,
@@ -51,7 +52,7 @@ const ApplicationWarnings = ({
       {warningParticipants && warningParticipants.length > 0 && (
         <Card>
           <CardHeader>
-            <div className="flex items-center pb-2 gap-2">
+            <div className="flex items-center gap-2 pb-2">
               <AlertTriangle className="text-yellow-600 size-5" />
               <CardTitle className="text-yellow-600">
                 Participant Warning
@@ -100,7 +101,7 @@ const ApplicationWarnings = ({
       {organizationError && (
         <Card className="flex items-center gap-4">
           <CardHeader>
-            <div className="flex items-center pb-2 gap-2">
+            <div className="flex items-center gap-2 pb-2">
               <ShieldAlert className="size-5" color="red" />
               <CardTitle className="text-red-600">
                 {organizationError.existingOrgName}

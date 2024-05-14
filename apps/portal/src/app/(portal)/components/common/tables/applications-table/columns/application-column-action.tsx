@@ -2,11 +2,9 @@ import {
   AppTableUser,
   SingleTableApplication,
 } from '@/actions/applications/filter.applications.actions';
-import { ColumnDef } from '@tanstack/react-table';
-import TableAction, {
-  TableActionProps,
-} from '../../../../../../../components/table/table-action';
+import { ActionTriggerType } from '@/types/actions.types';
 import { ApplicationStatus, UserRole } from '@prisma/client';
+import { ColumnDef } from '@tanstack/react-table';
 import {
   Banknote,
   ClipboardX,
@@ -16,7 +14,9 @@ import {
   ShieldX,
   Trash2,
 } from 'lucide-react';
-import { ActionTriggerType } from '@/types/actions.types';
+import TableAction, {
+  TableActionProps,
+} from '../../../../../../../components/table/table-action';
 
 interface ApplicationActionColumnProps {
   existingUser: AppTableUser;
@@ -94,7 +94,7 @@ const applicationActionsColumn = ({
         },
         {
           content: 'Delete this application',
-          isVisible: isOwner,
+          isVisible: isOwner || isAdmin,
           icon: <Trash2 color="red" className="size-5" />,
           isPending,
           tooltipContentClassName: 'text-red-600',

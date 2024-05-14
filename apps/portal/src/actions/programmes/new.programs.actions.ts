@@ -1,13 +1,14 @@
 'use server';
 
-import { currentUserId } from '@/lib/auth';
+import { currentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { ActionReturnIdType } from '@/types/actions.types';
+import { FormError } from '@/types/actions.types';
 import {
+  NewProgramImageFileType,
   NewProgramImageUrl,
   NewProgramNoImageType,
-  newProgramImageFileSchema,
   newProgramImageUrlSchema,
+  newProgramNoImageSchema,
 } from '@/validation/programs/program.validation';
 import { UserRole } from '@prisma/client';
 import { uploadFile } from '../firebase/storage.actions';
@@ -17,46 +18,80 @@ export type NewProgramType = {
   data: NewProgramNoImageType;
 };
 
+type NewProgramReturn =
+  | {
+      error: string;
+      formErrors?: FormError<NewProgramImageFileType>[];
+    }
+  | { success: string; recordId: string };
+
 export const newProgram = async ({
   formData,
   data,
-}: NewProgramType): Promise<ActionReturnIdType> => {
-  const userId = await currentUserId();
-  const existingUser = await db.user.findUnique({
-    where: { id: userId },
-    select: { role: true },
-  });
-
-  if (!existingUser || existingUser.role !== UserRole.ADMIN) {
+}: NewProgramType): Promise<NewProgramReturn> => {
+  const user = await currentUser();
+  if (!user || user.role !== UserRole.ADMIN) {
     return { error: 'You are not authorized to add new programs' };
   }
   const image = formData.get('image') as File;
 
-  const validFields = newProgramImageFileSchema.safeParse({
-    ...data,
-    image,
-  });
+  const validFields = newProgramNoImageSchema.safeParse(data);
 
   if (!validFields.success) {
     return { error: 'Invalid fields' };
   }
 
-  const { name, type, title, code } = validFields.data.image;
+  const { title, code, serviceId, serviceIdUsd } = validFields.data;
+
   const [existingProgram, uploadReturn] = await Promise.all([
-    db.program.count({
+    db.program.findFirst({
       where: {
-        OR: [{ title }, { code }],
+        OR: [{ title }, { code }, { serviceId }, { serviceIdUsd }],
       },
+      select: { title: true, code: true, serviceId: true, serviceIdUsd: true },
     }),
     uploadFile({
       buffer: Buffer.from(await image.arrayBuffer()),
-      contentType: type,
-      fileName: name,
+      contentType: image.type,
+      fileName: image.name,
     }),
   ]);
-
-  if (existingProgram > 0) {
-    return { error: 'A program with this title or code already exists' };
+  let formErrors: FormError<NewProgramImageFileType>[] = [];
+  if (existingProgram) {
+    if (existingProgram.code === code) {
+      formErrors = [
+        ...formErrors,
+        { field: 'code', message: 'A program with this code already exists' },
+      ];
+    }
+    if (existingProgram.title === title) {
+      formErrors = [
+        ...formErrors,
+        { field: 'title', message: 'A program with this title already exists' },
+      ];
+    }
+    if (existingProgram.serviceId === serviceId) {
+      formErrors = [
+        ...formErrors,
+        {
+          field: 'serviceId',
+          message: 'A program with this service id (KES) already exists',
+        },
+      ];
+    }
+    if (existingProgram.serviceIdUsd === serviceIdUsd) {
+      formErrors = [
+        ...formErrors,
+        {
+          field: 'serviceIdUsd',
+          message: 'A program with this service id (USD) already exists',
+        },
+      ];
+    }
+    return {
+      error: 'A similar program already exists',
+      formErrors,
+    };
   }
 
   if ('error' in uploadReturn) {

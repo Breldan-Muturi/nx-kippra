@@ -39,6 +39,7 @@ export type ApprovedApplicationEmailType = {
   startDate: Date;
   endDate: Date;
   venue?: string;
+  message?: string;
   offerLetter: Attachment;
   proformaInvoice: Attachment;
 };
@@ -52,6 +53,7 @@ export const approvedApplicationEmail = async ({
   venue,
   offerLetter,
   proformaInvoice,
+  message,
 }: ApprovedApplicationEmailType) => {
   const formattedApprovalDate = format(approvalDate, 'PPP');
   const formattedStartDate = format(startDate, 'PPP');
@@ -62,7 +64,7 @@ export const approvedApplicationEmail = async ({
       from,
       to: applicantEmail,
       subject: `KIPPRA: Application Approval for ${title} ${venue ? `at ${venue} ` : ''}from ${formattedStartDate} to ${formattedEndDate}`,
-      html: `Your application for the program for ${title} is approved as of ${formattedApprovalDate}. The program is scheduled to start from ${formattedStartDate} to ${formattedEndDate}. Kindly ensure payment for your application is submitted by ${paymentDueDate}`,
+      html: `Your application for the program for ${title} is approved as of ${formattedApprovalDate}. The program is scheduled to start from ${formattedStartDate} to ${formattedEndDate}. Kindly ensure payment for your application is submitted by ${paymentDueDate}${message ? `<br/>Message from the admin below:<br/> ${message}` : ''}`,
       attachments: [offerLetter, proformaInvoice],
     });
   } catch (error) {

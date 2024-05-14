@@ -63,6 +63,10 @@ export const proformaTemplate = async (
       error:
         'Could not match a proforma invoice to this application. Please try again later',
     };
+  if (!proforma.applicationFee)
+    return {
+      error: 'This application has no application fee',
+    };
   if (typeof qrCode === 'object' && 'error' in qrCode)
     return { error: qrCode.error };
   const {

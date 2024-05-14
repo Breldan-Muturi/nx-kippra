@@ -1,6 +1,10 @@
 'use client';
 
 import {
+  ApplicationApproval,
+  fetchApprovalApplication,
+} from '@/actions/applications/admin/fetch-approval.applications.actions';
+import {
   FilterApplicationTableType,
   SingleTableApplication,
   filterApplications,
@@ -30,6 +34,7 @@ import tableSelectColumn from '../../../../../../components/table/table-select-c
 import TableViews from '../../../../../../components/table/table-views';
 import applicationActionsColumn from './columns/application-column-action';
 import applicantColumn from './columns/application-column-applicant';
+import applicationColumnCurrency from './columns/application-column-currency';
 import applicationFeeColumn from './columns/application-column-fee';
 import applicationProgramColumn from './columns/application-column-program';
 import applicationStatusColumn from './columns/application-column-status';
@@ -76,10 +81,14 @@ const ApplicationsTable = ({
   const { hiddenColumns, pageSize, page, ...filterParams } = fetchParams;
   const [isPending, startTransition] = useTransition();
   const [modal, setModal] = useState<
-    | ViewApplicationSheet
-    | PayApplicationModal
-    | { modal: string; id: string }
     | undefined
+    | { type: 'view'; data: ViewApplicationSheet }
+    | { type: 'pay'; data: PayApplicationModal }
+    | { type: 'approve'; data: ApplicationApproval }
+    | { type: 'email'; id: string }
+    | { type: 'reject'; id: string }
+    | { type: 'remove'; id: string }
+    | { type: 'delete'; id: string }
   >();
 
   const changePage = (pageInt: number) => {
@@ -134,34 +143,42 @@ const ApplicationsTable = ({
         if ('error' in data) {
           toast.error(data.error);
         } else {
-          setModal((prev) => data);
+          setModal((prev) => ({ type: 'view', data }));
         }
       });
     });
-  const isView = !!modal && 'isApplicationAdmin' in modal;
+  const isView =
+    !!modal && modal.type === 'view' && 'isApplicationAdmin' in modal.data;
 
   const approveApplication = (applicationId: string) => {
     if (existingUser.role === UserRole.USER) {
       toast.error('Only admin users can approve applications');
     } else {
-      setModal((prev) => ({ modal: 'approve', id: applicationId }));
+      startTransition(() => {
+        fetchApprovalApplication(applicationId).then((data) => {
+          if ('error' in data) {
+            toast.error(data.error);
+          } else {
+            setModal((prev) => ({ type: 'approve', data }));
+          }
+        });
+      });
     }
   };
-
-  const isApprove = !!modal && 'modal' in modal && modal.modal === 'approve';
+  const isApprove = !!modal && modal.type === 'approve' && 'id' in modal.data;
 
   const rejectApplication = (applicationId: string) => {
     if (existingUser.role === UserRole.USER) {
       toast.error('Only admin users can reject applications');
     } else {
-      setModal((prev) => ({ modal: 'reject', id: applicationId }));
+      setModal((prev) => ({ type: 'reject', id: applicationId }));
     }
   };
-  const isReject = !!modal && 'modal' in modal && modal.modal === 'reject';
+  const isReject = !!modal && modal.type === 'reject' && 'id' in modal;
 
   const sendEmail = (applicationId: string) =>
-    setModal((prev) => ({ modal: 'email', id: applicationId }));
-  const isEmail = !!modal && 'modal' in modal && modal.modal === 'email';
+    setModal((prev) => ({ type: 'email', id: applicationId }));
+  const isEmail = !!modal && modal.type === 'email' && 'id' in modal;
 
   const payApplication = (applicationId: string) =>
     startTransition(() => {
@@ -169,19 +186,20 @@ const ApplicationsTable = ({
         if ('error' in data) {
           toast.error(data.error);
         } else {
-          setModal((prev) => data);
+          setModal((prev) => ({ type: 'pay', data }));
         }
       });
     });
-  const isPay = !!modal && 'paymentDetails' in modal;
+  const isPay =
+    !!modal && modal.type === 'pay' && 'paymentDetails' in modal.data;
 
   const removeApplication = (applicationId: string) =>
-    setModal((prev) => ({ modal: 'remove', id: applicationId }));
-  const isRemove = !!modal && 'modal' in modal && modal.modal === 'remove';
+    setModal((prev) => ({ type: 'remove', id: applicationId }));
+  const isRemove = !!modal && modal.type === 'remove' && 'id' in modal;
 
   const deleteApplication = (applicationId: string) =>
-    setModal((prev) => ({ modal: 'delete', id: applicationId }));
-  const isDelete = !!modal && 'modal' in modal && modal.modal === 'delete';
+    setModal((prev) => ({ type: 'delete', id: applicationId }));
+  const isDelete = !!modal && modal.type === 'delete' && 'id' in modal;
 
   // Parse hiddenColumns from a comma-separated string to an array
   const hiddenColumnsArray = useMemo(
@@ -210,6 +228,7 @@ const ApplicationsTable = ({
         applicationProgramColumn,
         applicationTrainingSessionColumn,
         applicationTypeColumn,
+        applicationColumnCurrency,
         applicationFeeColumn,
       ],
     });
@@ -287,17 +306,23 @@ const ApplicationsTable = ({
         />
       </div>
       {isView && (
-        <ApplicationSheet handleDismiss={handleDismiss} application={modal} />
+        <ApplicationSheet
+          handleDismiss={handleDismiss}
+          application={modal.data}
+        />
       )}
       {isApprove && (
-        <ApproveApplication handleDismiss={handleDismiss} id={modal.id} />
+        <ApproveApplication handleDismiss={handleDismiss} data={modal.data} />
       )}
       {isReject && (
         <RejectApplication handleDismiss={handleDismiss} id={modal.id} />
       )}
       {isEmail && <SendEmail handleDismiss={handleDismiss} id={modal.id} />}
       {isPay && (
-        <PayApplication handleDismiss={handleDismiss} paymentInfo={modal} />
+        <PayApplication
+          handleDismiss={handleDismiss}
+          paymentInfo={modal.data}
+        />
       )}
       {isRemove && (
         <RemoveApplication handleDismiss={handleDismiss} id={modal.id} />

@@ -1,8 +1,8 @@
 'use client';
-import React, { useTransition } from 'react';
+import { userRemoveApplication } from '@/actions/applications/user/remove.application.action';
+import SubmitButton from '@/components/form/SubmitButton';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -10,8 +10,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useTransition } from 'react';
 import { toast } from 'sonner';
-import { userRemoveApplication } from '@/actions/applications/user/remove.application.action';
 import { ApplicationModalType } from '../applications-table';
 
 const RemoveApplication = ({ id, handleDismiss }: ApplicationModalType) => {
@@ -47,13 +47,12 @@ const RemoveApplication = ({ id, handleDismiss }: ApplicationModalType) => {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            disabled={isPending}
-            className="bg-red-600"
+          <SubmitButton
+            isSubmitting={isPending}
             onClick={handleRemoveApplication}
-          >
-            Continue
-          </AlertDialogAction>
+            className="bg-red-600 hover:bg-red-700"
+            label="Continue"
+          />
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

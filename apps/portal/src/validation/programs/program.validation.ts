@@ -5,14 +5,20 @@ import {
   validString,
 } from '../reusable.validation';
 
-export const newProgramNoImageSchema = z.object({
-  title: characterCount(8, 50),
-  code: characterCount(3, 6),
-  summary: characterCount(50, 350).optional(),
-  prerequisiteCourses: z.array(z.string()).optional(),
-  serviceId: z.number().refine((num) => num.toString().length === 7, {
+const validServiceId = z
+  .number()
+  .positive()
+  .refine((num) => num.toString().length === 7, {
     message: 'Number must be 7 digits long',
-  }),
+  });
+
+export const newProgramNoImageSchema = z.object({
+  title: characterCount(8, 200),
+  code: characterCount(3, 6),
+  summary: z.string().optional(),
+  prerequisiteCourses: z.array(z.string()).optional(),
+  serviceId: validServiceId,
+  serviceIdUsd: validServiceId,
   moodleCourseId: z.number().optional(),
 });
 export type NewProgramNoImageType = z.infer<typeof newProgramNoImageSchema>;

@@ -74,6 +74,10 @@ export const getPaymentApplicationPromise = async (
       error:
         'You are not the owner of this application and can therefore not initiate a payment on it',
     };
+  } else if (!existingApplication.applicationFee) {
+    return {
+      error: 'An application fee has not been added.',
+    };
   } else {
     const {
       id,
