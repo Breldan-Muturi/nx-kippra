@@ -1,7 +1,7 @@
 'use server';
 import { getUserById } from '@/helpers/user.helper';
 import { currentUserId } from '@/lib/auth';
-import ProfileForm from '../../components/common/forms/profile-form/profile-form';
+import ProfileForm from '../../components/forms/profile-form/profile-form';
 
 const Settings = async () => {
   const userId = await currentUserId();

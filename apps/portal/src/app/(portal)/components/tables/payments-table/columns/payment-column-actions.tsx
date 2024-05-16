@@ -1,10 +1,10 @@
 import { SinglePaymentDetail } from '@/actions/payments/filter.payment.actions';
+import { ActionTriggerType } from '@/types/actions.types';
 import { ColumnDef } from '@tanstack/react-table';
+import { Download, MousePointerSquare } from 'lucide-react';
 import TableAction, {
   TableActionProps,
-} from '../../../../../../../components/table/table-action';
-import { Download, MousePointerSquare } from 'lucide-react';
-import { ActionTriggerType } from '@/types/actions.types';
+} from '../../../../../../components/table/table-action';
 
 type PaymentActionsColumnProps = {
   isPending: boolean;

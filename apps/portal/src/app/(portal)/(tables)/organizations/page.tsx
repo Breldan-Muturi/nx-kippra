@@ -1,10 +1,6 @@
 import { fetchOrganizationsTable } from '@/actions/organization/filter.organization.actions';
-import {
-  OrganizationTableSchema,
-  organizationPathSchema,
-} from '@/validation/organization/organization.validation';
-import React from 'react';
-import OrganizationsTable from '../../components/common/tables/organizations-table/organizations-table';
+import { OrganizationTableSchema } from '@/validation/organization/organization.validation';
+import OrganizationsTable from '../../components/tables/organizations-table/organizations-table';
 
 export type OrganizationSearchParams = OrganizationTableSchema & {
   token?: string;

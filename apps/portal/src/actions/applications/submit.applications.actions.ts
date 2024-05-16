@@ -4,7 +4,7 @@ import {
   PDFResponse,
   generatePDFFromApi,
 } from '@/actions/pdf/generate-pdf-api.actions';
-import { ApplicationSlots } from '@/app/(portal)/components/common/forms/application-form/modal/application-modal';
+import { ApplicationSlots } from '@/app/(portal)/components/forms/application-form/modal/application-modal';
 import { formatVenues } from '@/helpers/enum.helpers';
 import { currentUser } from '@/lib/auth';
 import { db } from '@/lib/db';

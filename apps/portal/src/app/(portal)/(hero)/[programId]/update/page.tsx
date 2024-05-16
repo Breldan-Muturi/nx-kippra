@@ -1,6 +1,6 @@
 import { getOnlineCourseOptions } from '@/actions/moodle/moodle-courses.actions';
 import { getSingleProgram } from '@/actions/programmes/single.program.actions';
-import ProgramForm from '@/app/(portal)/components/common/forms/program-form/program-form';
+import ProgramForm from '@/app/(portal)/components/forms/program-form/program-form';
 import { getProgramPrerequisiteOptions } from '@/helpers/program.helpers';
 
 const UpdateProgramPage = async ({

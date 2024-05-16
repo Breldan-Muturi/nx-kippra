@@ -3,7 +3,7 @@ import {
   FetchApplicationType,
   fetchApplicationsSchema,
 } from '@/validation/applications/table.application.validation';
-import ApplicationsTable from '../../components/common/tables/applications-table/applications-table';
+import ApplicationsTable from '../../components/tables/applications-table/applications-table';
 
 const ApplicationsPage = async ({
   searchParams: { applicationId, ...fetchParams },

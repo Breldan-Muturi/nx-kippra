@@ -1,10 +1,9 @@
 import { fetchParticipantsTable } from '@/actions/participants/fetch.participants.actions';
-import ParticipantsTable from '@/app/(portal)/components/common/tables/participants-table/participants-table';
+import ParticipantsTable from '@/app/(portal)/components/tables/participants-table/participants-table';
 import {
   FetchParticipantsType,
   fetchParticipantsSchema,
 } from '@/validation/participants/participants.validation';
-import React from 'react';
 
 const OrganizationMembers = async ({
   searchParams,

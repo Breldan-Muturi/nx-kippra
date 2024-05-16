@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import TableAction, {
   TableActionProps,
-} from '../../../../../../../components/table/table-action';
+} from '../../../../../../components/table/table-action';
 
 interface ApplicationActionColumnProps {
   existingUser: AppTableUser;

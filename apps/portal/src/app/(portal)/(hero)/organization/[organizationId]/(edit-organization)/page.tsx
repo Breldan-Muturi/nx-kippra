@@ -1,4 +1,4 @@
-import OrganizationForm from '@/app/(portal)/components/common/forms/organization-form/organization-form';
+import OrganizationForm from '@/app/(portal)/components/forms/organization-form/organization-form';
 import { db } from '@/lib/db';
 import { redirect } from 'next/navigation';
 

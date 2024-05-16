@@ -1,10 +1,9 @@
 import { fetchPaymentsTable } from '@/actions/payments/filter.payment.actions';
-import PaymentsTable from '@/app/(portal)/components/common/tables/payments-table/payments-table';
+import PaymentsTable from '@/app/(portal)/components/tables/payments-table/payments-table';
 import {
   FetchPaymentsType,
   fetchPaymentsSchema,
 } from '@/validation/payment/payment.validation';
-import React from 'react';
 
 const OrganizationPayments = async ({
   searchParams,

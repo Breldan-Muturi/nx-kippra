@@ -1,6 +1,6 @@
 import { SinglePaymentDetail } from '@/actions/payments/filter.payment.actions';
 import { ColumnDef } from '@tanstack/react-table';
-import TableUserCell from '../../../../../../../components/table/table-user-cell';
+import TableUserCell from '../../../../../../components/table/table-user-cell';
 
 const payeeColumn: ColumnDef<SinglePaymentDetail> = {
   id: 'payee',

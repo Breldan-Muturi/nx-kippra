@@ -2,7 +2,7 @@ import Navbar from '@/app/(portal)/components/navbar';
 import { currentRole } from '@/lib/auth';
 import { SidebarLink } from '@/types/nav-links.types';
 import { UserRole } from '@prisma/client';
-import { FilePlus2, FolderPlus, LandPlot } from 'lucide-react';
+import { FilePlus2, FolderPlus } from 'lucide-react';
 import React from 'react';
 import { BiSolidReport } from 'react-icons/bi';
 import { CgOrganisation } from 'react-icons/cg';
@@ -41,12 +41,6 @@ const navLinks: SidebarLink[] = [
     label: 'Participants',
     icon: <ImUsers size="18" className="mr-1" />,
     role: UserRole.ADMIN,
-  },
-  {
-    href: '/new-inhouse-training',
-    label: 'In house training',
-    icon: <LandPlot size="18" className="mr-1" />,
-    role: UserRole.USER,
   },
   {
     href: '/organizations',

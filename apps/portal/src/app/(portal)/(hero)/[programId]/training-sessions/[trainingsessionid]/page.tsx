@@ -1,5 +1,5 @@
 import { formApplication } from '@/actions/applications/form.applications.actions';
-import NewApplicationForm from '@/app/(portal)/components/common/forms/application-form/new-application-form';
+import NewApplicationForm from '@/app/(portal)/components/forms/application-form/new-application-form';
 
 interface ApplicationPageProps {
   params: {

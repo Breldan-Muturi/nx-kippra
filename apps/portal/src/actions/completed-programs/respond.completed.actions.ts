@@ -100,7 +100,9 @@ export const respondCompleted = async ({
           }),
       ),
     );
-    return { success: 'Completed programs rejected successfully' };
+    return {
+      success: `Completed programs ${approved ? 'approve' : 'reject'} successfully`,
+    };
   } catch (e) {
     console.error('Failed to notify participant due to a server error: ', e);
     return { error: 'Failed to notify participant due to a server error' };

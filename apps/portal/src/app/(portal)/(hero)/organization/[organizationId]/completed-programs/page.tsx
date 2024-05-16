@@ -1,5 +1,5 @@
 import { fetchCompletedPrograms } from '@/actions/completed-programs/fetch.completed.actions';
-import CompletedTable from '@/app/(portal)/components/common/tables/completed-table/completed-table';
+import CompletedTable from '@/app/(portal)/components/tables/completed-table/completed-table';
 import {
   FetchCompletedSchema,
   fetchCompletedSchema,

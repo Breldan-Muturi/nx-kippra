@@ -3,8 +3,7 @@ import {
   FetchPaymentsType,
   fetchPaymentsSchema,
 } from '@/validation/payment/payment.validation';
-import React from 'react';
-import PaymentsTable from '../../components/common/tables/payments-table/payments-table';
+import PaymentsTable from '../../components/tables/payments-table/payments-table';
 
 const Payments = async ({
   searchParams,

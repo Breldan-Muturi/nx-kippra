@@ -1,5 +1,5 @@
 import { formApplication } from '@/actions/applications/form.applications.actions';
-import NewApplicationForm from '../../components/common/forms/application-form/new-application-form';
+import NewApplicationForm from '../../components/forms/application-form/new-application-form';
 
 const NewApplicationPage = async () => {
   const adminApplicationForm = await formApplication();

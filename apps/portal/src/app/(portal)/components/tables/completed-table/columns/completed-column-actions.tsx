@@ -5,7 +5,7 @@ import {
 } from '@/actions/completed-programs/fetch.completed.actions';
 import TableAction, { TableActionProps } from '@/components/table/table-action';
 import { ActionTriggerType } from '@/types/actions.types';
-import { UserRole } from '@prisma/client';
+import { CompletionStatus, UserRole } from '@prisma/client';
 import { ColumnDef } from '@tanstack/react-table';
 import {
   BadgeCheck,
@@ -42,6 +42,7 @@ const completedColumnActions = ({
     const name = userIsParticipant
       ? `${row.original.participant.name}'s`
       : 'your';
+    const status = row.original.status;
 
     const organizationIds = row.original.participant.organizations.map(
       ({ organizationId }) => organizationId,
@@ -72,7 +73,7 @@ const completedColumnActions = ({
         icon: <BadgeCheck color="green" className="size-5" />,
         isPending,
         tooltipContentClassName: 'text-green-600',
-        isVisible: adminOnly,
+        isVisible: adminOnly && status !== CompletionStatus.APPROVED,
         onClick: () => handleApprove([id]),
       },
       {
@@ -87,7 +88,7 @@ const completedColumnActions = ({
         icon: <FileX2 color="red" className="size-5" />,
         isPending,
         tooltipContentClassName: 'text-red-600',
-        isVisible: adminOnly,
+        isVisible: adminOnly && status !== CompletionStatus.REJECTED,
         onClick: () => handleReject([id]),
       },
       {

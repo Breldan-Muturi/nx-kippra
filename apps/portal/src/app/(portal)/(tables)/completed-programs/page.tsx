@@ -3,7 +3,7 @@ import {
   FetchCompletedSchema,
   fetchCompletedSchema,
 } from '@/validation/completed-program/completed-program.validation';
-import CompletedTable from '../../components/common/tables/completed-table/completed-table';
+import CompletedTable from '../../components/tables/completed-table/completed-table';
 
 const CompletedPrograms = async ({
   searchParams,

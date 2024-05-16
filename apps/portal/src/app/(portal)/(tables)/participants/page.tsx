@@ -3,8 +3,7 @@ import {
   FetchParticipantsType,
   fetchParticipantsSchema,
 } from '@/validation/participants/participants.validation';
-import React from 'react';
-import ParticipantsTable from '../../components/common/tables/participants-table/participants-table';
+import ParticipantsTable from '../../components/tables/participants-table/participants-table';
 
 const Participants = async ({
   searchParams,

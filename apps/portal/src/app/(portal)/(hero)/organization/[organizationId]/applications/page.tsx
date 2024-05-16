@@ -1,10 +1,9 @@
 import { filterApplicationsTable } from '@/actions/applications/filter.applications.actions';
-import ApplicationsTable from '@/app/(portal)/components/common/tables/applications-table/applications-table';
+import ApplicationsTable from '@/app/(portal)/components/tables/applications-table/applications-table';
 import {
   FetchApplicationType,
   fetchApplicationsSchema,
 } from '@/validation/applications/table.application.validation';
-import React from 'react';
 
 const OrganizationApplications = async ({
   searchParams,
