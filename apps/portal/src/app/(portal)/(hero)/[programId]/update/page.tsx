@@ -1,7 +1,6 @@
 import { getOnlineCourseOptions } from '@/actions/moodle/moodle-courses.actions';
 import { getSingleProgram } from '@/actions/programmes/single.program.actions';
 import ProgramForm from '@/app/(portal)/components/common/forms/program-form/program-form';
-import programFields from '@/app/(portal)/components/common/forms/program-form/program-form-fields';
 import { getProgramPrerequisiteOptions } from '@/helpers/program.helpers';
 
 const UpdateProgramPage = async ({
@@ -14,8 +13,7 @@ const UpdateProgramPage = async ({
     getOnlineCourseOptions(),
     getSingleProgram(programId),
   ]);
-  const programForm = programFields(programOptions, moodleCourseOptions);
-  return <ProgramForm {...{ programForm, program }} />;
+  return <ProgramForm {...{ programOptions, moodleCourseOptions, program }} />;
 };
 
 export default UpdateProgramPage;

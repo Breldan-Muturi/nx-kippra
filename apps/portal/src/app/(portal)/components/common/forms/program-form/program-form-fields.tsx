@@ -1,3 +1,4 @@
+'use client';
 import ComboboxOption from '@/components/form/combobox/combobox-options';
 import { FormFieldType, SelectOptions } from '@/types/form-field.types';
 import { NewProgramImageFileType } from '@/validation/programs/program.validation';

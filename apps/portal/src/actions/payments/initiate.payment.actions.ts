@@ -4,15 +4,28 @@ import { currentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import {
   PaymentForm,
-  PesaFlowCheckoutApiType,
-  PesaFlowCheckoutType,
   paymentFormSchema,
-  pesaflowCheckoutApiSchema,
 } from '@/validation/payment/payment.validation';
-import { createHmac } from 'crypto';
-import axios from 'axios';
-import { ConversionUtils } from 'turbocommons-ts';
-import { ApplicationStatus, Invoice, Payment } from '@prisma/client';
+import { ApplicationStatus } from '@prisma/client';
+import { pesaflowPayment } from '../pesaflow/pesaflow.checkout.actions';
+
+const applicationPromise = async (id: string) =>
+  await db.application.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      trainingSession: {
+        select: {
+          program: { select: { serviceId: true, serviceIdUsd: true } },
+        },
+      },
+      invoice: { select: { id: true } },
+      status: true,
+      currency: true,
+      applicationFee: true,
+    },
+  });
+type ApplicationPromise = Awaited<ReturnType<typeof applicationPromise>>;
 
 export type InitiatePaymentReturn =
   | { error: string }
@@ -32,27 +45,46 @@ export const initiatePayment = async (
     return { error: 'Invalid fields' };
   }
 
-  const { applicationId, amountExpected, ...paymentDetails } =
-    validPayment.data;
+  const { applicationId, billDesc } = validPayment.data;
 
-  const paymentApplication = await db.application.findUnique({
-    where: { id: applicationId },
-    select: {
-      id: true,
-      trainingSession: { select: { program: { select: { serviceId: true } } } },
-      invoice: { select: { id: true } },
-      status: true,
-    },
-  });
+  let paymentApplication: ApplicationPromise;
+  try {
+    paymentApplication = await applicationPromise(applicationId);
+  } catch (e) {
+    console.error('Failed to fetch application due to server error:', e);
+    return {
+      error:
+        'Failed to fetch application due to a server error please try again later',
+    };
+  }
 
-  const applicationServiceId =
-    paymentApplication?.trainingSession.program.serviceId;
-
-  if (!paymentApplication || !paymentApplication.id) {
+  if (!paymentApplication || !paymentApplication.id)
     return {
       error: 'Could not match this payment with an existing application',
     };
-  }
+  if (!paymentApplication.currency)
+    return {
+      error: 'The currency for this application has not been set',
+    };
+  if (!paymentApplication.applicationFee)
+    return {
+      error: 'The application fee for this application has not been set',
+    };
+  if (paymentApplication.status === ApplicationStatus.COMPLETED)
+    return {
+      error: 'Payment for this application is already settled',
+    };
+
+  const {
+    id,
+    currency,
+    trainingSession: {
+      program: { serviceId, serviceIdUsd },
+    },
+    applicationFee,
+  } = paymentApplication;
+  const usingUsd = currency === 'USD';
+  const applicationServiceId = usingUsd ? serviceIdUsd : serviceId;
 
   if (!applicationServiceId) {
     return {
@@ -61,119 +93,26 @@ export const initiatePayment = async (
     };
   }
 
-  if (paymentApplication.status === ApplicationStatus.COMPLETED) {
-    return {
-      error: 'Payment for this application is already settled',
-    };
-  }
-
-  const billRefNumber = `${new Date().toISOString()}_${applicationId}_${paymentApplication.invoice.length}`;
-
-  // Set the data to be passed to PesaFlow
-  const pesaflowCheckout: PesaFlowCheckoutType = {
-    apiClient: process.env.PESAFLOW_CLIENT_ID as string,
-    serviceId: String(applicationServiceId),
-    currency: 'KES',
-    billRefNumber,
-    callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/applications`,
-    notificationURL: `https://nxportal.sohnandsol.com/api/payments/${applicationId}${process.env.NODE_ENV !== 'production' ? '/dev' : ''}`,
-    format: 'json',
-    sendSTK: true,
-    url: process.env.PESAFLOW_URL as string,
-    key: process.env.PESAFLOW_API_KEY as string,
-    secret: process.env.PESAFLOW_API_SECRET as string,
+  const pesaflow = await pesaflowPayment({
+    ...validPayment.data,
     amountExpected:
-      process.env.NODE_ENV === 'production' ? amountExpected + 50 : 1,
-    ...paymentDetails,
-  };
-
-  // Create the PesaFlow dataString
-  const dataString =
-    pesaflowCheckout.apiClient +
-    pesaflowCheckout.amountExpected +
-    pesaflowCheckout.serviceId +
-    pesaflowCheckout.clientIDNumber +
-    pesaflowCheckout.currency +
-    pesaflowCheckout.billRefNumber +
-    pesaflowCheckout.billDesc +
-    pesaflowCheckout.clientName +
-    pesaflowCheckout.secret;
-
-  const signed = createHmac('sha256', pesaflowCheckout.key)
-    .update(Buffer.from(dataString, 'utf-8'))
-    .digest();
-  const secureHash = ConversionUtils.stringToBase64(signed.toString('hex'));
-
-  const validApiData = pesaflowCheckoutApiSchema.safeParse({
-    secureHash,
-    apiClientID: pesaflowCheckout.apiClient,
-    serviceID: pesaflowCheckout.serviceId,
-    notificationURL: pesaflowCheckout.notificationURL,
-    callBackURLOnSuccess: pesaflowCheckout.callbackUrl,
-    billRefNumber: pesaflowCheckout.billRefNumber,
-    sendSTK: pesaflowCheckout.sendSTK,
-    pictureURL: pesaflowCheckout.pictureURL,
-    format: pesaflowCheckout.format,
-    currency: pesaflowCheckout.currency,
-    amountExpected: pesaflowCheckout.amountExpected,
-    billDesc: pesaflowCheckout.billDesc,
-    clientMSISDN: String(pesaflowCheckout.clientMSISD),
-    clientIDNumber: pesaflowCheckout.clientIDNumber,
-    clientEmail: pesaflowCheckout.clientEmail,
-    clientName: pesaflowCheckout.clientName,
+      process.env.NODE_ENV === 'production'
+        ? usingUsd
+          ? applicationFee + 1
+          : applicationFee + 50
+        : 1,
+    applicationId: id,
+    billDesc,
+    billRefNumber: `${new Date().toISOString()}_${applicationId}_${paymentApplication.invoice.length}`,
+    serviceID: String(applicationServiceId),
+    currency: currency,
   });
 
-  if (!validApiData.success) {
-    console.log('Payment error: ', validApiData.error);
-    return { error: 'Invalid payment data, please try again' };
-  }
+  if ('error' in pesaflow) return { error: pesaflow.error };
 
-  try {
-    // Axios POST request
-    const axiosResponse = await axios({
-      method: 'POST',
-      url: pesaflowCheckout.url,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: validApiData.data,
-    });
-
-    console.log('Axios response data:', axiosResponse.data);
-
-    const invoiceData = axiosResponse.data;
-
-    const invoice = await db.invoice.create({
-      data: {
-        application: { connect: { id: applicationId } },
-        invoiceEmail: pesaflowCheckout.clientEmail,
-        invoiceLink: invoiceData.invoice_link,
-        invoiceNumber: invoiceData.invoice_number,
-      },
-    });
-
-    if (!invoice || !invoice.id || !invoice.invoiceLink) {
-      return { error: 'Error with recording your payment details' };
-    }
-
-    return {
-      success:
-        'Your payment details have been recorded successfully, proceed to complete the payment on eCitizen pesaflow',
-      invoiceLink: invoice.invoiceLink,
-    };
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      // Now we can safely access error.response because we've asserted the type
-      console.error('Error response data:', error.response?.data);
-      console.error('Error response status:', error.response?.status);
-      console.error('Error response headers:', error.response?.headers);
-      return {
-        error: `Server responded with error: ${error.response?.data.message || error.response?.data || 'Unknown error'}`,
-      };
-    } else {
-      // Error was not from Axios, handle accordingly
-      console.error('An unexpected error occurred:', error);
-      return { error: 'An unexpected error occurred.' };
-    }
-  }
+  return {
+    success:
+      'Your payment details have been recorded successfully, proceed to complete the payment on eCitizen pesaflow',
+    invoiceLink: pesaflow.invoiceLink,
+  };
 };

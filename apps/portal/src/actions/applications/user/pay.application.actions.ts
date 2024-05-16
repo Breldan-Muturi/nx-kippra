@@ -6,29 +6,13 @@ import { ApplicationPaymentDetails } from '@/validation/payment/payment.validati
 import { Delivery, InvoiceStatus } from '@prisma/client';
 import { format } from 'date-fns';
 
-export type PayApplicationReturnType =
-  | { error: string }
-  | {
-      paymentDetails: ApplicationPaymentDetails;
-      existingInvoices?: {
-        invoiceNumber: string;
-        invoiceEmail: string;
-        invoiceLink: string;
-        createdAt: Date;
-      }[];
-    };
-
-export const getPaymentApplicationPromise = async (
-  id: string,
-): Promise<PayApplicationReturnType> => {
-  const userId = await currentUserId();
-  if (!userId)
-    return { error: 'You need to be logged in to submit this application' };
-  const existingApplication = await db.application.findUnique({
+const applicationPromise = async (id: string) =>
+  await db.application.findUnique({
     where: { id },
     select: {
       id: true,
       applicationFee: true,
+      currency: true,
       delivery: true,
       invoice: {
         where: { invoiceStatus: InvoiceStatus.PENDING },
@@ -63,6 +47,38 @@ export const getPaymentApplicationPromise = async (
       },
     },
   });
+type ApplicationPromise = Awaited<ReturnType<typeof applicationPromise>>;
+
+export type PayeeApplicationModal = {
+  paymentDetails: ApplicationPaymentDetails;
+  existingInvoices?: {
+    invoiceNumber: string;
+    invoiceEmail: string;
+    invoiceLink: string;
+    createdAt: Date;
+  }[];
+  currency: string;
+};
+
+export const getPaymentApplicationPromise = async (
+  id: string,
+): Promise<{ error: string } | PayeeApplicationModal> => {
+  const userId = await currentUserId();
+  if (!userId)
+    return { error: 'You need to be logged in to submit this application' };
+  let existingApplication: ApplicationPromise;
+  try {
+    existingApplication = await applicationPromise(id);
+  } catch (e) {
+    console.error(
+      'Failed to fetch application details due to a server error: ',
+      e,
+    );
+    return {
+      error:
+        'Failed to fetch application details due to a server error. Please try again later',
+    };
+  }
 
   if (!existingApplication) {
     return { error: 'This application no-longer exists' };
@@ -74,6 +90,10 @@ export const getPaymentApplicationPromise = async (
       error:
         'You are not the owner of this application and can therefore not initiate a payment on it',
     };
+  } else if (!existingApplication.currency) {
+    return {
+      error: "The currency for this application's payment has not been set.",
+    };
   } else if (!existingApplication.applicationFee) {
     return {
       error: 'An application fee has not been added.',
@@ -83,6 +103,7 @@ export const getPaymentApplicationPromise = async (
       id,
       applicationFee,
       delivery,
+      currency,
       owner: { email, name, nationalId, phoneNumber, image },
       invoice,
       trainingSession: {
@@ -101,11 +122,12 @@ export const getPaymentApplicationPromise = async (
         billDesc,
         clientEmail: email || undefined,
         clientIDNumber: nationalId || undefined,
-        clientMSISD: phoneNumber ? parseInt(phoneNumber) : undefined,
+        clientMSISDN: phoneNumber ? parseInt(phoneNumber) : undefined,
         clientName: name || undefined,
         pictureURL: image || undefined,
       },
       existingInvoices: invoice,
+      currency,
     };
   }
 };

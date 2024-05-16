@@ -16,6 +16,7 @@ import participantApplicationColumnUser from './participant-application-user';
 
 type ParticipantApplicationsTableProps = {
   isPending: boolean;
+  isAdmin: boolean;
   toggleOwner: ActionTriggerType;
   viewParticipant: ActionTriggerType;
   participants: ParticipantSubmitOption[];
@@ -24,6 +25,7 @@ type ParticipantApplicationsTableProps = {
 
 const ParticipantApplicationsTable = ({
   isPending,
+  isAdmin,
   toggleOwner,
   viewParticipant,
   participants: data,
@@ -47,13 +49,17 @@ const ParticipantApplicationsTable = ({
         },
       }),
       participantApplicationEmail,
-      participantApplicationOwnerColumn({
-        isPending,
-        toggleOwner: (id: string) => {
-          toggleOwner(id);
-          table.resetRowSelection();
-        },
-      }),
+      ...(isAdmin
+        ? [
+            participantApplicationOwnerColumn({
+              isPending,
+              toggleOwner: (id: string) => {
+                toggleOwner(id);
+                table.resetRowSelection();
+              },
+            }),
+          ]
+        : []),
       participantApplicationCitizenship,
       participantApplicationNationalId,
     ],

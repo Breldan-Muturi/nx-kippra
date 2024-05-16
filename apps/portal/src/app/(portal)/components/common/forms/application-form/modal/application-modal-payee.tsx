@@ -2,12 +2,14 @@ import ReusableForm from '@/components/form/ReusableForm';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form } from '@/components/ui/form';
 import { Label } from '@/components/ui/label';
+import { areObjectsEqual } from '@/lib/utils';
 import { payApplicationFields } from '@/validation/payment/payment-fields';
 import {
   PayeeForm,
   payeeFormSchema,
 } from '@/validation/payment/payment.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
+// import {isEqual} from 'date-fns';
 import { useEffect, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -31,12 +33,6 @@ const ApplicationModalPayee = ({
 
   const validPayeeFields = payeeFormSchema.safeParse(watch());
 
-  const onSubmit = (data: PayeeForm) => {
-    startTransition(() => {
-      handlePayee(data);
-    });
-  };
-
   useEffect(() => {
     const subscription = watch((value, { type }) => {
       if (type === 'change') {
@@ -54,9 +50,15 @@ const ApplicationModalPayee = ({
           <Checkbox
             id="confirmation"
             disabled={isPending || !validPayeeFields.success}
-            onCheckedChange={() =>
-              validPayeeFields.success && handlePayee(validPayeeFields.data)
+            checked={
+              validPayeeFields.success &&
+              areObjectsEqual(validPayeeFields.data, payee)
             }
+            onCheckedChange={(isChecked) => {
+              if (isChecked && validPayeeFields.success) {
+                handlePayee(validPayeeFields.data);
+              }
+            }}
           />
           <div className="grid gap-1.5 leading-none">
             <Label

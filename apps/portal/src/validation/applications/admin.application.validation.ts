@@ -27,7 +27,7 @@ export const adminApplicationParticipants = z.object({
   slotsGlobal: z.number().nonnegative().optional(),
   participants: z.array(applicationParticipantSchema).optional(),
 });
-export type AdminApplicationParticipants = z.infer<
+export type FormApplicationParticipants = z.infer<
   typeof adminApplicationParticipants
 >;
 

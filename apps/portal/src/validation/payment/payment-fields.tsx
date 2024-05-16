@@ -15,7 +15,7 @@ export const payApplicationFields: FormFieldType<PayeeForm>[] = [
     placeholder: 'eg. 331331331',
   },
   {
-    name: 'clientMSISD',
+    name: 'clientMSISDN',
     type: 'number',
     label: 'Payee Phone Number',
     placeholder: 'eg. 254711223344',

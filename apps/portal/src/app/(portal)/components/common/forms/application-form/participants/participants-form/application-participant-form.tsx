@@ -1,23 +1,23 @@
 import { DynamicParticipantOption } from '@/actions/participants/application.participants.actions';
+import TooltipIconButton from '@/components/buttons/tooltip-icon-button';
 import ReusableForm from '@/components/form/ReusableForm';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
 import {
-  AdminApplicationParticipant,
+  FormApplicationParticipant,
   applicationParticipantSchema,
 } from '@/validation/applications/participants.application.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2, X } from 'lucide-react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import participantFields from './application-participant-fields';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Loader2, X } from 'lucide-react';
-import TooltipIconButton from '@/components/buttons/tooltip-icon-button';
 
 type ApplicationParticipantFormProps =
   React.ComponentPropsWithoutRef<'section'> & {
     participant?: DynamicParticipantOption;
-    customSubmit: SubmitHandler<AdminApplicationParticipant>;
+    customSubmit: SubmitHandler<FormApplicationParticipant>;
     dismissForm: () => void;
     isSubmitting: boolean;
   };
@@ -30,7 +30,7 @@ const ApplicationParticipantForm = ({
   isSubmitting,
   ...props
 }: ApplicationParticipantFormProps) => {
-  const form = useForm<AdminApplicationParticipant>({
+  const form = useForm<FormApplicationParticipant>({
     resolver: zodResolver(applicationParticipantSchema),
     defaultValues: {
       ...participant,

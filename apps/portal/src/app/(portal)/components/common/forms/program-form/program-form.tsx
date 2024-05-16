@@ -13,7 +13,7 @@ import ReusableForm from '@/components/form/ReusableForm';
 import SubmitButton from '@/components/form/SubmitButton';
 import { Form } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
-import { FormFieldType } from '@/types/form-field.types';
+import { SelectOptions } from '@/types/form-field.types';
 import {
   NewProgramImageFileType,
   UpdateProgramImageFileType,
@@ -25,14 +25,17 @@ import { useRouter } from 'next/navigation';
 import React, { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import programFields from './program-form-fields';
 
 type ProgramFormProps = React.ComponentPropsWithoutRef<'form'> & {
-  programForm: FormFieldType<NewProgramImageFileType>[];
+  programOptions?: SelectOptions[];
+  moodleCourseOptions?: SelectOptions[];
   program?: SingleProgramReturn;
 };
 
 const ProgramForm = ({
-  programForm,
+  programOptions,
+  moodleCourseOptions,
   program,
   className,
   ...props
@@ -148,7 +151,9 @@ const ProgramForm = ({
           description={`Complete the form below and submit to ${isValidProgram ? 'update this program' : 'add a program'}`}
           className="col-span-2"
         />
-        <ReusableForm formFields={programForm} />
+        <ReusableForm
+          formFields={programFields(programOptions, moodleCourseOptions)}
+        />
         <SubmitButton
           label={`${isValidProgram ? 'Update This' : 'Create New'} Program`}
           isSubmitting={isPending}

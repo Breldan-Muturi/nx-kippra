@@ -1,11 +1,11 @@
 import { DynamicParticipantOption } from '@/actions/participants/application.participants.actions';
 import { citizenshipOptions } from '@/helpers/enum.helpers';
 import { FormFieldType } from '@/types/form-field.types';
-import { AdminApplicationParticipant } from '@/validation/applications/participants.application.validation';
+import { FormApplicationParticipant } from '@/validation/applications/participants.application.validation';
 
 const participantFields = (
   participant?: DynamicParticipantOption,
-): FormFieldType<AdminApplicationParticipant>[] => [
+): FormFieldType<FormApplicationParticipant>[] => [
   {
     name: 'name',
     type: 'text',

@@ -1,14 +1,21 @@
-import { TypeOf, z } from 'zod';
+import { z } from 'zod';
+import { paginationSchema } from '../pagination.validation';
 import {
   characterCount,
   email,
   validString,
   validUrl,
 } from '../reusable.validation';
-import { paginationSchema } from '../pagination.validation';
 
 export const paymentDescriptionSchema = z.object({
-  amountExpected: z.number().positive(),
+  amountExpected:
+    process.env.NODE_ENV === 'production'
+      ? z
+          .number()
+          .int()
+          .positive()
+          .gte(50, 'Payment must include convenience fee')
+      : z.number().positive(),
   billDesc: validString('Enter a bill description'),
   applicationId: z.string(),
 });
@@ -20,13 +27,13 @@ export const payeeFormSchema = z.object({
     'Full name should be between 6 and 20 characters',
   ),
   clientIDNumber: characterCount(5, 12, 'Enter a valid ID Number'),
-  clientMSISD: z
+  clientMSISDN: z
     .number()
     .int()
     .gte(254000000000, 'Enter a valid phone number')
     .lte(254999999999, 'Enter a valid phone number'),
   clientEmail: email,
-  pictureURL: validUrl('Picture url is not valid').optional(),
+  pictureURL: z.string().url().optional(),
 });
 export type PayeeForm = z.infer<typeof payeeFormSchema>;
 
@@ -41,53 +48,32 @@ export type ApplicationPaymentDetails = z.infer<
   typeof applicationPaymentDetailsSchema
 >;
 
-export const pesaflowCheckoutSchema = z
-  .object({
-    apiClient: characterCount(3, 3),
-    serviceId: characterCount(5, 5),
-    currency: characterCount(3, 3).default('KES'),
-    billRefNumber: validString('Enter a valid bill reference No'),
-    callbackUrl: validUrl('The callback url is not valid'),
-    notificationURL: validUrl('The notification url is not valid'),
-    format: z.enum(['json', 'iframe']).default('json'),
-    sendSTK: z.boolean().default(true),
-    url: validUrl(),
-    key: validString('Missing Pesaflow API Key'),
-    secret: validString('Missing Pesaflow API Secret'),
-  })
-  .merge(paymentFormSchema.omit({ applicationId: true }));
-export type PesaFlowCheckoutType = z.infer<typeof pesaflowCheckoutSchema>;
-
-export const pesaflowCheckoutApiSchema = z.object({
-  secureHash: validString('Missing secureHash'),
-  apiClientID: characterCount(3, 3),
-  serviceID: validString('Should be at least 5 digits', 5),
-  notificationURL: validUrl('The notification url is not valid'),
-  callBackURLOnSuccess: validUrl('The callback url is not valid'),
-  billRefNumber: validString('Enter a valid bill reference No'),
-  sendSTK: z.boolean().default(true),
-  pictureURL: z.string().url().optional(),
-  format: z.enum(['json', 'iframe']).default('json'),
+export const pesaflowActionSchema = paymentFormSchema.extend({
   currency: characterCount(3, 3).default('KES'),
-  amountExpected:
-    process.env.NODE_ENV === 'production'
-      ? z
-          .number()
-          .int()
-          .positive()
-          .gte(50, 'Payment must include convenience fee')
-      : z.number().positive(),
-  billDesc: validString('Enter a bill description'),
-  clientMSISDN: z
-    .string()
-    .regex(
-      /^254[17]\d{8}$/,
-      'Enter a valid Kenyan phone number starting with 2541 or 2547',
-    ),
-  clientIDNumber: characterCount(5, 12, 'Enter a valid ID Number'),
-  clientEmail: email,
-  clientName: z.string(),
+  serviceID: validString('Service ID should be 7 characters long', 7),
+  billRefNumber: validString('Enter a valid bill reference No'),
 });
+export type PesaflowActionSchema = z.infer<typeof pesaflowActionSchema>;
+
+export const pesaflowCheckoutApiSchema = pesaflowActionSchema
+  .omit({
+    applicationId: true,
+    clientMSISDN: true,
+  })
+  .extend({
+    secureHash: validString('Missing secureHash'),
+    apiClientID: characterCount(3, 3),
+    notificationURL: validUrl('The notification url is not valid'),
+    callBackURLOnSuccess: validUrl('The callback url is not valid'),
+    sendSTK: z.boolean().default(true),
+    format: z.enum(['json', 'iframe']).default('json'),
+    clientMSISDN: z
+      .string()
+      .regex(
+        /^254[17]\d{8}$/,
+        'Enter a valid Kenyan phone number starting with 2541 or 2547',
+      ),
+  });
 export type PesaFlowCheckoutApiType = z.infer<typeof pesaflowCheckoutApiSchema>;
 
 export const paymentReferenceApiSchema = z.object({

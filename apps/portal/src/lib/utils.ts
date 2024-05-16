@@ -42,3 +42,6 @@ export const getFirstName = (fullName: string): string => {
   if (names.length > 1) return names[0];
   return fullName;
 };
+
+export const areObjectsEqual = (obj1: any, obj2: any): boolean =>
+  JSON.stringify(obj1) === JSON.stringify(obj2);

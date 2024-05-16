@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { ViewApplicationSheet } from '@/actions/applications/user/single.application.action';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -10,7 +10,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { ViewApplicationSheet } from '../applications-table';
 
 const ApplicationSheet = ({
   handleDismiss,

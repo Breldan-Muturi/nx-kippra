@@ -283,27 +283,31 @@ const ApplicationConfirmationFees = ({
       return false;
     } else if (isUsd && delivery === Delivery.ONLINE) {
       return (
-        !applicationTrainingSession.usdCitizenOnlineFee ||
-        !applicationTrainingSession.usdEastAfricaOnlineFee ||
-        !applicationTrainingSession.usdGlobalParticipantOnlineFee
+        (!applicationTrainingSession.usdCitizenOnlineFee && !!slotsCitizen) ||
+        (!applicationTrainingSession.usdEastAfricaOnlineFee &&
+          !!slotsEastAfrican) ||
+        (!applicationTrainingSession.usdGlobalParticipantOnlineFee &&
+          !!slotsGlobal)
       );
     } else if (isUsd && delivery !== Delivery.ONLINE) {
       return (
-        !applicationTrainingSession.usdCitizenFee ||
-        !applicationTrainingSession.usdEastAfricaFee ||
-        !applicationTrainingSession.usdGlobalParticipantFee
+        (!applicationTrainingSession.usdCitizenFee && !!slotsCitizen) ||
+        (!applicationTrainingSession.usdEastAfricaFee && !!slotsEastAfrican) ||
+        (!applicationTrainingSession.usdGlobalParticipantFee && !!slotsGlobal)
       );
     } else if (!isUsd && delivery === Delivery.ONLINE) {
       return (
-        !applicationTrainingSession.citizenOnlineFee ||
-        !applicationTrainingSession.eastAfricaOnlineFee ||
-        !applicationTrainingSession.globalParticipantOnlineFee
+        (!applicationTrainingSession.citizenOnlineFee && !!slotsCitizen) ||
+        (!applicationTrainingSession.eastAfricaOnlineFee &&
+          !!slotsEastAfrican) ||
+        (!applicationTrainingSession.globalParticipantOnlineFee &&
+          !!slotsGlobal)
       );
     } else {
       return (
-        !applicationTrainingSession.citizenFee ||
-        !applicationTrainingSession.eastAfricaFee ||
-        !applicationTrainingSession.globalParticipantFee
+        (!applicationTrainingSession.citizenFee && !!slotsCitizen) ||
+        (!applicationTrainingSession.eastAfricaFee && !!slotsEastAfrican) ||
+        (!applicationTrainingSession.globalParticipantFee && !!slotsGlobal)
       );
     }
   };

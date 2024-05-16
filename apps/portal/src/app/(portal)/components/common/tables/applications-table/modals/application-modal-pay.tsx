@@ -1,5 +1,10 @@
 'use client';
-import React, { useTransition } from 'react';
+import { PayeeApplicationModal } from '@/actions/applications/user/pay.application.actions';
+import { initiatePayment } from '@/actions/payments/initiate.payment.actions';
+import ReusableForm from '@/components/form/ReusableForm';
+import SubmitButton from '@/components/form/SubmitButton';
+import { Button } from '@/components/ui/button';
+import { Card, CardDescription } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -8,38 +13,34 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Form } from '@/components/ui/form';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { payApplicationFields } from '@/validation/payment/payment-fields';
 import {
   PaymentForm,
   paymentFormSchema,
 } from '@/validation/payment/payment.validation';
-import { Form } from '@/components/ui/form';
-import ReusableForm from '@/components/form/ReusableForm';
-import SubmitButton from '@/components/form/SubmitButton';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
-import { initiatePayment } from '@/actions/payments/initiate.payment.actions';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
-import { Card, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { payApplicationFields } from '@/validation/payment/payment-fields';
-import { PayApplicationModal } from '../applications-table';
+import { useTransition } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 const PayApplication = ({
   handleDismiss,
   paymentInfo,
 }: {
   handleDismiss: () => void;
-  paymentInfo: PayApplicationModal;
+  paymentInfo: PayeeApplicationModal;
 }) => {
+  const { currency, existingInvoices, paymentDetails } = paymentInfo;
   const [isPending, startTransition] = useTransition();
   const handleWindow = (target: string) => window.open(target, '_blank');
 
   const form = useForm<PaymentForm>({
     mode: 'onChange',
     resolver: zodResolver(paymentFormSchema),
-    defaultValues: paymentInfo.paymentDetails,
+    defaultValues: paymentDetails,
   });
 
   const onSubmit = (paymentForm: PaymentForm) => {
@@ -57,8 +58,7 @@ const PayApplication = ({
     });
   };
 
-  const invoicesExist =
-    paymentInfo.existingInvoices && paymentInfo.existingInvoices.length >= 1;
+  const invoicesExist = existingInvoices && existingInvoices.length >= 1;
 
   const title = invoicesExist
     ? 'Complete payment for this application'
@@ -88,12 +88,12 @@ const PayApplication = ({
 
   const paymentTabs = (
     <Tabs defaultValue="existing" className="w-full">
-      <TabsList className="w-full grid grid-cols-2">
+      <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="existing">Existing Invoice</TabsTrigger>
         <TabsTrigger value="new">Initiate Payment</TabsTrigger>
       </TabsList>
       <TabsContent value="existing" className="space-y-3">
-        {paymentInfo.existingInvoices?.map(
+        {existingInvoices?.map(
           ({ createdAt, invoiceEmail, invoiceLink, invoiceNumber }) => {
             const formatedDate = format(createdAt, 'PPP');
             const highlightClass = 'font-semibold text-green-600';
@@ -122,6 +122,11 @@ const PayApplication = ({
     </Tabs>
   );
 
+  const usingUsd = currency === 'KES';
+  const amountToShow = usingUsd
+    ? paymentDetails.amountExpected + 50
+    : paymentDetails.amountExpected + 1;
+
   return (
     <Dialog open onOpenChange={handleDismiss}>
       <DialogContent className="sm:max-w-[425px]">
@@ -132,15 +137,14 @@ const PayApplication = ({
         <div className="flex flex-col flex-grow space-y-2">
           <div className="flex flex-col flex-grow px-4 py-2 border-2 border-green-200 rounded-md">
             <p className="text-3xl font-semibold text-green-600 font">
-              Ksh{' '}
-              {paymentInfo.paymentDetails.amountExpected.toLocaleString(
-                'en-US',
-              )}
+              {currency} {amountToShow.toLocaleString('en-US')}
             </p>
           </div>
           <p className="text-xs">
             Inclusive of VAT, and eCitizen{' '}
-            <span className="font-semibold text-red-600">Ksh 50</span>{' '}
+            <span className="font-semibold text-red-600">
+              {usingUsd ? 'Kes 50' : 'Usd 1'}
+            </span>{' '}
             convenience fee
           </p>
         </div>

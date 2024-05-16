@@ -1,7 +1,7 @@
 import { FormFieldType } from '@/types/form-field.types';
-import { AdminApplicationParticipants } from '@/validation/applications/admin.application.validation';
+import { FormApplicationParticipants } from '@/validation/applications/admin.application.validation';
 
-const slotsFields: FormFieldType<AdminApplicationParticipants>[] = [
+const slotsFields: FormFieldType<FormApplicationParticipants>[] = [
   {
     name: 'slotsCitizen',
     type: 'number',

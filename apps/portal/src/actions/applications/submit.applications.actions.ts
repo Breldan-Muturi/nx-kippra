@@ -6,21 +6,19 @@ import {
 } from '@/actions/pdf/generate-pdf-api.actions';
 import { ApplicationSlots } from '@/app/(portal)/components/common/forms/application-form/modal/application-modal';
 import { formatVenues } from '@/helpers/enum.helpers';
-import { currentUserId } from '@/lib/auth';
+import { currentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { generateApplicationConfirmationToken } from '@/lib/tokens';
 import {
   approvedApplicationEmail,
   newApplicationEmail,
 } from '@/mail/application.mail';
+import { inviteOrgTokenEmail } from '@/mail/organization.mail';
 import { ActionReturnType } from '@/types/actions.types';
 import { AdminApplicationForm } from '@/validation/applications/admin.application.validation';
-import { AdminApplicationParticipant } from '@/validation/applications/participants.application.validation';
+import { FormApplicationParticipant } from '@/validation/applications/participants.application.validation';
 import { NewOrganizationForm } from '@/validation/organization/organization.validation';
-import {
-  PayeeForm,
-  pesaflowCheckoutApiSchema,
-} from '@/validation/payment/payment.validation';
+import { PayeeForm } from '@/validation/payment/payment.validation';
 import {
   Application,
   ApplicationStatus,
@@ -30,59 +28,66 @@ import {
   Prisma,
   UserRole,
 } from '@prisma/client';
-import axios from 'axios';
-import { createHmac } from 'crypto';
 import { format } from 'date-fns';
-import { ConversionUtils } from 'turbocommons-ts';
-
-const getExistingUser = async (userId: string) =>
-  await db.user.findUnique({
-    where: { id: userId },
-    select: { id: true, role: true, email: true },
-  });
-type ExistingUser = Awaited<ReturnType<typeof getExistingUser>>;
+import { v4 } from 'uuid';
+import {
+  PesaFlowReturn,
+  pesaflowPayment,
+} from '../pesaflow/pesaflow.checkout.actions';
 
 const getApplicationOwner = async (
-  participants: AdminApplicationParticipant[],
+  participants: FormApplicationParticipant[],
 ) =>
   await db.user.findFirst({
     where: { email: participants.find(({ isOwner }) => isOwner)?.email },
     select: { id: true, email: true },
   });
-type ApplicationOwnerType = Awaited<ReturnType<typeof getApplicationOwner>>;
+type ApplicationOwnerType = NonNullable<
+  Awaited<ReturnType<typeof getApplicationOwner>>
+>;
 
 const createNewOrganization = async ({
   validOrganization,
-  participants,
-  applicationOwner,
+  participants = [],
+  orgOwnerId,
 }: {
   validOrganization: NewOrganizationForm;
-  participants?: AdminApplicationParticipant[];
-  applicationOwner?: ApplicationOwnerType;
-}) =>
-  await db.organization.create({
+  participants?: FormApplicationParticipant[];
+  orgOwnerId: string;
+}) => {
+  const {
+    organizationAddress,
+    organizationEmail,
+    organizationPhone,
+    ...orgInfo
+  } = validOrganization;
+  return await db.organization.create({
     data: {
-      ...validOrganization,
-      address: validOrganization.organizationAddress,
-      email: validOrganization.organizationEmail,
-      phone: validOrganization.organizationPhone,
+      ...orgInfo,
+      address: organizationAddress,
+      email: organizationEmail,
+      phone: organizationPhone,
       users: {
-        create: participants
-          ?.filter(({ userId }) => !!userId)
-          .map(({ userId }) => ({
-            user: { connect: { id: userId } },
-            role:
-              applicationOwner && applicationOwner.id === userId
-                ? OrganizationRole.OWNER
-                : OrganizationRole.MEMBER,
-          })),
+        create: {
+          user: { connect: { id: orgOwnerId } },
+          role: OrganizationRole.OWNER,
+        },
       },
-      // Add the other participants as Invites in this organization
-      // invites: participants
-      //   ?.filter(({ userId }) => !userId)
-      //   .map(({ email }) => email),
+      invites: {
+        createMany: {
+          data: participants
+            ?.filter(({ isOwner }) => !isOwner)
+            .map((participant) => ({
+              email: participant.email,
+              expires: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+              token: v4(),
+            })),
+          skipDuplicates: true,
+        },
+      },
     },
   });
+};
 
 const getSessionInformation = async ({
   trainingSessionId,
@@ -115,7 +120,7 @@ const checkExistingParticipants = async ({
   participants,
   organization,
 }: {
-  participants: Omit<AdminApplicationParticipant, 'isOwner'>[];
+  participants: Omit<FormApplicationParticipant, 'isOwner'>[];
   organization?: Organization;
 }): Promise<
   Prisma.ApplicationParticipantUncheckedCreateWithoutApplicationInput[]
@@ -144,7 +149,7 @@ export type SubmitAdminApplicationParams = {
     'delivery' | 'sponsorType' | 'trainingSessionId'
   >;
   validOrganization?: NewOrganizationForm;
-  participants?: AdminApplicationParticipant[];
+  participants?: FormApplicationParticipant[];
   payee?: PayeeForm;
   organizationId?: string;
   applicationFee?: number;
@@ -159,8 +164,8 @@ export type SubmitAdminApplicationReturn =
 export const submitAdminApplication = async (
   data: SubmitAdminApplicationParams,
 ): Promise<SubmitAdminApplicationReturn> => {
-  const userId = await currentUserId();
-  if (!userId)
+  const user = await currentUser();
+  if (!user || !user.id || !user.email)
     return { error: 'You must be logged in to submit this application' };
   const {
     validOrganization,
@@ -174,16 +179,19 @@ export const submitAdminApplication = async (
   } = data;
   const { delivery, trainingSessionId, sponsorType } = applicationForm;
   const isOnPremise = delivery !== Delivery.ONLINE;
+  const isAdmin = payee && applicationFee && user.role === UserRole.ADMIN;
 
-  let existingUser: ExistingUser,
-    applicationOwner: ApplicationOwnerType | undefined;
+  let applicationOwner: ApplicationOwnerType = {
+    email: user.email,
+    id: user.id,
+  };
+
   try {
-    [existingUser, applicationOwner] = await Promise.all([
-      getExistingUser(userId),
-      participants
-        ? getApplicationOwner(participants)
-        : Promise.resolve(undefined),
-    ]);
+    const ownerApplication =
+      participants && isAdmin
+        ? await getApplicationOwner(participants)
+        : undefined;
+    applicationOwner = !!ownerApplication ? ownerApplication : applicationOwner;
   } catch (error) {
     console.error('Error verifying account information: ', error);
     return {
@@ -191,8 +199,6 @@ export const submitAdminApplication = async (
         'Failed to verify account information due to a server error. Please try again later',
     };
   }
-  if (!existingUser || !existingUser.id || !existingUser.email)
-    return { error: 'User account not found, please try again later' };
 
   let newOrganization: Organization | undefined,
     sessionInformation: SessionInformation;
@@ -202,7 +208,7 @@ export const submitAdminApplication = async (
         ? createNewOrganization({
             validOrganization,
             participants,
-            applicationOwner,
+            orgOwnerId: applicationOwner.id,
           })
         : Promise.resolve(undefined),
       getSessionInformation({ trainingSessionId, usingUsd, isOnPremise }),
@@ -234,7 +240,7 @@ export const submitAdminApplication = async (
         currency: usingUsd ? 'USD' : 'KES',
         sponsorType,
         ...slots,
-        ownerId: applicationOwner?.id || existingUser.id,
+        ownerId: applicationOwner?.id || user.id,
         organizationId: newOrganization?.id || organizationId,
         participants: !!participants
           ? {
@@ -256,7 +262,51 @@ export const submitAdminApplication = async (
     };
   }
 
-  if (payee && applicationFee && existingUser.role === UserRole.ADMIN) {
+  let applicationEmailPromise: Promise<void>[] = [],
+    inviteOrgEmailsPromise: Promise<void>[] = [];
+  if (participants && participants.length) {
+    applicationEmailPromise = participants?.map(
+      async ({ email: participantEmail }) => {
+        const tokenExpiry = new Date(startDate);
+        tokenExpiry.setDate(tokenExpiry.getDate() - 7);
+        const { email, token, expires } =
+          await generateApplicationConfirmationToken({
+            email: participantEmail,
+            expires: tokenExpiry,
+            trainingSessionId,
+          });
+        return newApplicationEmail({
+          email,
+          endDate,
+          expires,
+          startDate,
+          title,
+          token,
+        });
+      },
+    );
+    if (!!newOrganization) {
+      const invites = await db.inviteOrganization.findMany({
+        where: { organizationId: newOrganization.id },
+        select: { email: true, token: true },
+      });
+      inviteOrgEmailsPromise = invites.map(({ email, token }) => {
+        const isRegistered = participants.find(
+          (participant) => participant.email === email,
+        )?.userId;
+        return inviteOrgTokenEmail({
+          to: email,
+          organizationName: newOrganization!.name,
+          senderName: user.name!,
+          token,
+          inviteRoute: !!isRegistered ? 'organizations' : 'account/register',
+        });
+      });
+    }
+  }
+
+  let newApplicationEmailPromise: Promise<void> = Promise.resolve(undefined);
+  if (isAdmin) {
     let pdfProforma: PDFResponse, pdfOffer: PDFResponse;
     try {
       [pdfProforma, pdfOffer] = await Promise.all([
@@ -278,14 +328,30 @@ export const submitAdminApplication = async (
       return {
         error: `Could not generate the offer-letter:  ${pdfOffer.error}`,
       };
-    let pdfProformaUrl: ActionReturnType, pdfOfferUrl: ActionReturnType;
+    let pdfProformaUrl: ActionReturnType,
+      pdfOfferUrl: ActionReturnType,
+      pesaflow: PesaFlowReturn;
     try {
-      [pdfProformaUrl, pdfOfferUrl] = await Promise.all([
+      [pdfProformaUrl, pdfOfferUrl, pesaflow] = await Promise.all([
         uploadPDFile(
           pdfProforma.generatedPDF,
           `${newApplication.id}-proforma-invoice`,
         ),
         uploadPDFile(pdfProforma.generatedPDF, `${newApplication.id}-offer`),
+        pesaflowPayment({
+          amountExpected:
+            process.env.NODE_ENV === 'production'
+              ? usingUsd
+                ? applicationFee + 1
+                : applicationFee + 50
+              : 1,
+          applicationId: newApplication.id,
+          billDesc: `Invoice for ${title} from ${format(startDate, 'PPP')} to ${format(endDate, 'PPP')} ${isOnPremise && venue ? formatVenues(venue) : ''}`,
+          billRefNumber: `${new Date().toISOString()}_${newApplication.id}_admin_initiated`,
+          currency: usingUsd ? 'USD' : 'KES',
+          serviceID: String(serviceId || serviceIdUsd),
+          ...payee,
+        }),
       ]);
     } catch (error) {
       return { error: 'An unexpected error occurred. Please try again later' };
@@ -298,88 +364,8 @@ export const submitAdminApplication = async (
       return {
         error: `Could not upload the offer-letter: ${pdfOfferUrl.error}`,
       };
-
-    const { clientIDNumber, clientName, clientMSISD } = payee;
-
-    const apiClientID = process.env.PESAFLOW_CLIENT_ID as string;
-    const amountExpected =
-      process.env.NODE_ENV === 'production'
-        ? usingUsd
-          ? applicationFee + 1
-          : applicationFee + 50
-        : 1;
-    const serviceID = String(serviceId || serviceIdUsd);
-    const currency = usingUsd ? 'USD' : 'KES';
-    const billRefNumber = `${new Date().toISOString()}_${newApplication.id}_admin_initiated`;
-    const billDesc = `Invoice for ${title} from ${format(startDate, 'PPP')} to ${format(endDate, 'PPP')} ${isOnPremise && venue ? formatVenues(venue) : ''}`;
-    const secret = process.env.PESAFLOW_API_SECRET as string;
-
-    const dataString =
-      apiClientID +
-      amountExpected +
-      serviceID +
-      clientIDNumber +
-      currency +
-      billRefNumber +
-      billDesc +
-      clientName +
-      secret;
-
-    const key = process.env.PESAFLOW_API_KEY as string;
-    const signed = createHmac('sha256', key)
-      .update(Buffer.from(dataString, 'utf-8'))
-      .digest();
-    const secureHash = ConversionUtils.stringToBase64(signed.toString('hex'));
-
-    const validApiData = pesaflowCheckoutApiSchema.safeParse({
-      ...payee,
-      secureHash,
-      apiClientID,
-      serviceID,
-      notificationURL: `https://nxportal.sohnandsol.com/api/payments/${newApplication.id}${process.env.NODE_ENV !== 'production' ? '/dev' : ''}`,
-      callBackURLOnSuccess: `${process.env.NEXT_PUBLIC_APP_URL}/applications`,
-      billRefNumber,
-      sendSTK: true,
-      format: 'json',
-      currency,
-      amountExpected,
-      billDesc,
-      clientMSISDN: String(clientMSISD),
-    });
-
-    if (!validApiData.success) {
-      console.error('Validation error: ', validApiData.error);
-      return { error: 'Invalid payment data, please try again later' };
-    }
-
-    let invoiceLink: string, invoiceNumber: string;
-    try {
-      const axiosResponse = await axios({
-        method: 'POST',
-        url: process.env.PESAFLOW_URL as string,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: validApiData.data,
-      });
-      invoiceLink = axiosResponse.data.invoice_link;
-      invoiceNumber = axiosResponse.data.invoice_number;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.table([
-          { type: 'Error data', value: error.response?.data },
-          { type: 'Error status', value: error.response?.status },
-          { type: 'Error headers', value: error.response?.headers },
-        ]);
-        return {
-          error: 'Server responded with an error. Please try again later',
-        };
-      } else {
-        console.error('An unexpected error occurred: ', error);
-        return {
-          error: 'An unexpected error occurred. Please try again later',
-        };
-      }
+    if ('error' in pesaflow) {
+      return { error: pesaflow.error };
     }
 
     try {
@@ -401,9 +387,9 @@ export const submitAdminApplication = async (
           },
           invoice: {
             create: {
-              invoiceEmail: applicationOwner?.email || existingUser.email,
-              invoiceLink,
-              invoiceNumber,
+              invoiceEmail: applicationOwner?.email || user.email,
+              invoiceLink: pesaflow.invoiceLink,
+              invoiceNumber: pesaflow.invoiceNumber,
             },
           },
         },
@@ -419,34 +405,13 @@ export const submitAdminApplication = async (
       };
     }
 
-    const emailPromises = participants?.map(
-      async ({ email: participantEmail }) => {
-        const tokenExpiry = new Date(startDate);
-        tokenExpiry.setDate(tokenExpiry.getDate() - 7);
-        const { email, token, expires } =
-          await generateApplicationConfirmationToken({
-            email: participantEmail,
-            expires: tokenExpiry,
-            trainingSessionId,
-          });
-        return newApplicationEmail({
-          email,
-          endDate,
-          expires,
-          startDate,
-          title,
-          token,
-        });
-      },
-    );
-
-    const newApplicationEmailPromise = approvedApplicationEmail({
+    newApplicationEmailPromise = approvedApplicationEmail({
       approvalDate: new Date(),
       title,
       startDate,
       endDate,
       venue: venue ? venue : undefined,
-      applicantEmail: applicationOwner?.email || existingUser!.email,
+      applicantEmail: applicationOwner?.email || user!.email,
       proformaInvoice: {
         filename: `${newApplication.id}-proforma-invoice`,
         path: pdfProformaUrl.success!,
@@ -456,23 +421,23 @@ export const submitAdminApplication = async (
         path: pdfOfferUrl.success!,
       },
     });
-
-    try {
-      await Promise.all([
-        !!emailPromises ? [...emailPromises] : [],
-        newApplicationEmailPromise,
-      ]);
-    } catch (error) {
-      return {
-        error:
-          'There was an error sending email notifications. Please try again later',
-      };
-    }
   }
 
-  return {
-    success:
-      'Application submitted successfully, the invoice link, and application approval emails have been sent to the participants',
-    applicationId: newApplication.id,
-  };
+  try {
+    await Promise.all([
+      applicationEmailPromise,
+      inviteOrgEmailsPromise,
+      newApplicationEmailPromise,
+    ]);
+    return {
+      success:
+        'Application submitted successfully, the invoice link, and application approval emails have been sent to the participants',
+      applicationId: newApplication.id,
+    };
+  } catch (error) {
+    return {
+      error:
+        'There was an error sending email notifications. Please try again later',
+    };
+  }
 };

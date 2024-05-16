@@ -171,41 +171,42 @@ export const validateAdminApplication = async (
     }
     if (organizationError.errorMessage) {
       organizationError.errorMessage = `An organization with a similar ${organizationError.errorMessage.slice(0, -2)} exists`;
-    } else {
-      organizationError = undefined;
-      organizationSuccess = newOrganization;
+    } else if (newOrganizationExist && !canUpdate) {
+      let formErrors: FormError<AdminApplicationForm>[] = [];
+      if (name === newOrganizationExist?.name)
+        formErrors = [
+          ...formErrors,
+          {
+            field: 'name',
+            message: 'An organization with a similar name already exists',
+          },
+        ];
+      if (organizationPhone === newOrganizationExist?.phone)
+        formErrors = [
+          ...formErrors,
+          {
+            field: 'organizationPhone',
+            message:
+              'An organization with the same phone number already exists',
+          },
+        ];
+      if (organizationEmail === newOrganizationExist?.email)
+        formErrors = [
+          ...formErrors,
+          {
+            field: 'organizationEmail',
+            message: 'An organization with the same email already exists',
+          },
+        ];
+      return {
+        error:
+          'Could not submit this application because this organization already exists.',
+        formErrors,
+      };
     }
-  } else if (newOrganizationExist && !canUpdate) {
-    let formErrors: FormError<AdminApplicationForm>[] = [];
-    if (name === newOrganizationExist?.name)
-      formErrors = [
-        ...formErrors,
-        {
-          field: 'name',
-          message: 'An organization with a similar name already exists',
-        },
-      ];
-    if (organizationPhone === newOrganizationExist?.phone)
-      formErrors = [
-        ...formErrors,
-        {
-          field: 'organizationPhone',
-          message: 'An organization with the same phone number already exists',
-        },
-      ];
-    if (organizationEmail === newOrganizationExist?.email)
-      formErrors = [
-        ...formErrors,
-        {
-          field: 'organizationEmail',
-          message: 'An organization with the same email already exists',
-        },
-      ];
-    return {
-      error:
-        'Could not submit this application because this organization already exists.',
-      formErrors,
-    };
+  } else {
+    organizationError = undefined;
+    organizationSuccess = newOrganization;
   }
 
   return {

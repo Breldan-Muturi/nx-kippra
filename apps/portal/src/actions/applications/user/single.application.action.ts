@@ -117,8 +117,7 @@ export type ApplicationAdminReturn = NonNullable<
   Awaited<ReturnType<typeof applicationAdminPromise>>
 >;
 
-export type ViewApplicationReturnType =
-  | { error: string }
+export type ViewApplicationSheet =
   | {
       isApplicationAdmin: false;
       applicationParticipant: ApplicationParticipantReturn;
@@ -127,7 +126,7 @@ export type ViewApplicationReturnType =
 
 export const getApplicationByIdPromise = async (
   id: string,
-): Promise<ViewApplicationReturnType> => {
+): Promise<{ error: string } | ViewApplicationSheet> => {
   const userId = await currentUserId();
   if (!userId) return { error: 'You must be logged in to view applications' };
 

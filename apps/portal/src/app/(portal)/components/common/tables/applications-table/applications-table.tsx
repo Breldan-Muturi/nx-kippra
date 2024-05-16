@@ -10,11 +10,11 @@ import {
   filterApplications,
 } from '@/actions/applications/filter.applications.actions';
 import {
-  PayApplicationReturnType,
+  PayeeApplicationModal,
   getPaymentApplicationPromise,
 } from '@/actions/applications/user/pay.application.actions';
 import {
-  ViewApplicationReturnType,
+  ViewApplicationSheet,
   getApplicationByIdPromise,
 } from '@/actions/applications/user/single.application.action';
 import { cn } from '@/lib/utils';
@@ -23,7 +23,7 @@ import { UserRole } from '@prisma/client';
 import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { FileCheck2, Send, ShieldX } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
-import React, { useMemo, useState, useTransition } from 'react';
+import React, { useEffect, useMemo, useState, useTransition } from 'react';
 import { SubmitHandler } from 'react-hook-form';
 import { toast } from 'sonner';
 import handleTableColumns from '../../../../../../components/table/handle-table-columns';
@@ -50,21 +50,13 @@ import RejectApplication from './modals/application-modal-reject';
 import RemoveApplication from './modals/application-modal-remove';
 import ApplicationSheet from './sheets/application-sheet-view';
 
-export type ViewApplicationSheet = Exclude<
-  ViewApplicationReturnType,
-  { error: string }
->;
-export type PayApplicationModal = Exclude<
-  PayApplicationReturnType,
-  { error: string }
->;
 export type ApplicationModalType = {
   id: string;
   handleDismiss: () => void;
 };
 
 type ApplicationTableProps = React.ComponentPropsWithoutRef<'div'> &
-  FilterApplicationTableType;
+  FilterApplicationTableType & { applicationId?: string };
 
 const ApplicationsTable = ({
   existingUser,
@@ -73,6 +65,7 @@ const ApplicationsTable = ({
   count,
   filterSponsorType,
   filterStatus,
+  applicationId,
   className,
   ...props
 }: ApplicationTableProps) => {
@@ -83,7 +76,7 @@ const ApplicationsTable = ({
   const [modal, setModal] = useState<
     | undefined
     | { type: 'view'; data: ViewApplicationSheet }
-    | { type: 'pay'; data: PayApplicationModal }
+    | { type: 'pay'; data: PayeeApplicationModal }
     | { type: 'approve'; data: ApplicationApproval }
     | { type: 'email'; id: string }
     | { type: 'reject'; id: string }
@@ -149,6 +142,12 @@ const ApplicationsTable = ({
     });
   const isView =
     !!modal && modal.type === 'view' && 'isApplicationAdmin' in modal.data;
+
+  useEffect(() => {
+    if (applicationId) {
+      viewApplication(applicationId);
+    }
+  }, [applicationId]);
 
   const approveApplication = (applicationId: string) => {
     if (existingUser.role === UserRole.USER) {

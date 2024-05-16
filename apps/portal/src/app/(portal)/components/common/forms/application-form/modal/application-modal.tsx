@@ -1,5 +1,5 @@
 'use client';
-import { submitAdminApplication } from '@/actions/applications/admin/submit.admin.applications.actions';
+import { submitAdminApplication } from '@/actions/applications/submit.applications.actions';
 import { ValidAdminApplication } from '@/actions/applications/validate.applications.actions';
 import {
   AlertDialog,
@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { PayeeForm } from '@/validation/payment/payment.validation';
 import { Citizenship } from '@prisma/client';
 import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import ApplicationModalSidebar from './application-modal-sidebar';
@@ -108,6 +109,7 @@ const ApplicationModal = ({
   }
 
   const role = useCurrentRole();
+  const router = useRouter();
   const [applicationConfirmation, setApplicationConfirmation] =
     useState<ApplicationModalState>({
       formStep: 0,
@@ -152,6 +154,7 @@ const ApplicationModal = ({
             toast.error(data.error);
           } else {
             toast.success(data.success);
+            router.push(`/applications/?applicationId=${data.applicationId}`);
           }
         })
         .finally(onOpenChange);

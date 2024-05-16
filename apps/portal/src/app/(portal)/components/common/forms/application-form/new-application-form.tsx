@@ -25,17 +25,18 @@ import FormHeader from '@/components/form/FormHeader';
 import ReusableForm from '@/components/form/ReusableForm';
 import SubmitButton from '@/components/form/SubmitButton';
 import { Form } from '@/components/ui/form';
+import { useCurrentRole } from '@/hooks/use-current-role';
 import { cn } from '@/lib/utils';
 import {
   AdminApplicationForm,
   adminApplicationSchema,
 } from '@/validation/applications/admin.application.validation';
 import {
-  AdminApplicationParticipant,
+  FormApplicationParticipant,
   applicationParticipantSchema,
 } from '@/validation/applications/participants.application.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Delivery, SponsorType } from '@prisma/client';
+import { Delivery, SponsorType, UserRole } from '@prisma/client';
 import { format } from 'date-fns';
 import { PlusIcon } from 'lucide-react';
 import React, { useEffect, useState, useTransition } from 'react';
@@ -63,6 +64,7 @@ const NewApplicationForm = ({
   className,
   ...props
 }: NewApplicationFormProps) => {
+  const isAdmin = useCurrentRole() === UserRole.ADMIN;
   const [isPending, startTransition] = useTransition();
   const [trainingSessionOptions, setTrainingSessionOptions] = useState<
     DynamicTrainingOption[]
@@ -213,29 +215,18 @@ const NewApplicationForm = ({
     orgOptions,
   });
 
-  const { append, remove } = useFieldArray({
+  const { append } = useFieldArray({
     name: 'participants',
     control,
-    rules: {
-      minLength: { value: 1, message: 'At least one participant required' },
-      validate: {
-        hasOwner: (participants: AdminApplicationParticipant[]) => {
-          const hasOwner = participants.some(({ isOwner }) => !!isOwner);
-          return (
-            hasOwner || 'At least one participant must be set as the owner'
-          );
-        },
-      },
-    },
   });
-
-  const hasOwner = !!getValues('participants')?.find(({ isOwner }) => isOwner);
+  const updatesOwner =
+    !!!getValues('participants')?.find(({ isOwner }) => isOwner) && isAdmin;
 
   const handleSelectParticipant = (participant: DynamicParticipantOption) => {
     const validParticipant = applicationParticipantSchema.safeParse({
       ...participant,
       userId: participant.id,
-      isOwner: !hasOwner,
+      isOwner: !updatesOwner,
     });
     if (!validParticipant.success) {
       toast.error('Complete the participant form to add this participant');
@@ -254,10 +245,10 @@ const NewApplicationForm = ({
     )
     .map(({ id }) => id);
 
-  const participantSubmit: SubmitHandler<AdminApplicationParticipant> = (
+  const participantSubmit: SubmitHandler<FormApplicationParticipant> = (
     values,
   ) => {
-    append({ ...values, isOwner: !hasOwner });
+    append({ ...values, isOwner: !updatesOwner });
     setFormComponents((prev) => false);
     toast.success(`${values.name} added as a participant`);
   };
@@ -282,7 +273,12 @@ const NewApplicationForm = ({
     const removedOwner = currentParticipants?.find(
       ({ isOwner, email }) => !!isOwner && emails.includes(email),
     );
-    if (removedOwner && updatedParticipants && updatedParticipants.length > 0) {
+    if (
+      removedOwner &&
+      updatedParticipants &&
+      updatedParticipants.length > 0 &&
+      updatesOwner
+    ) {
       updatedParticipants[0].isOwner = true;
     }
     setValue('participants', updatedParticipants);
@@ -376,6 +372,7 @@ const NewApplicationForm = ({
           {!!getValues('participants')?.length && (
             <ParticipantApplicationsTable
               isPending={isPending}
+              isAdmin={isAdmin}
               toggleOwner={toggleOwner}
               viewParticipant={viewParticipant}
               participants={getValues('participants')!}

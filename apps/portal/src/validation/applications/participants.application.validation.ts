@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import { validString, email } from '../reusable.validation';
 import { Citizenship } from '@prisma/client';
+import { z } from 'zod';
+import { email, validString } from '../reusable.validation';
 
 export const applicationParticipantSchema = z.object({
   userId: z.string().optional(),
@@ -10,7 +10,7 @@ export const applicationParticipantSchema = z.object({
   citizenship: z.nativeEnum(Citizenship),
   nationalId: validString('Enter a valid national Id', 5),
 });
-export type AdminApplicationParticipant = z.infer<
+export type FormApplicationParticipant = z.infer<
   typeof applicationParticipantSchema
 >;
 
