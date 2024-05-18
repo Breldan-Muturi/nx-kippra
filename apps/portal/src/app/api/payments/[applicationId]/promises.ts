@@ -14,7 +14,7 @@ export const applicationPromise = async ({
       payment: { select: { id: true } },
       invoice: {
         where: { invoiceNumber },
-        select: { id: true, invoiceNumber: true },
+        select: { id: true, invoiceNumber: true, invoiceEmail: true },
       },
       trainingSession: {
         select: {

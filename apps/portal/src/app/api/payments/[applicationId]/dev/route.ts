@@ -2,7 +2,7 @@ import { uploadPDFile } from '@/actions/firebase/storage.actions';
 import { generatePDFFromApi } from '@/actions/pdf/generate-pdf-api.actions';
 import { processDateString, stringToDecimal } from '@/helpers/payment.helpers';
 import { db } from '@/lib/db';
-import { paymentCompletedEmail } from '@/mail/application.mail';
+import { paymentCompletedEmail } from '@/mail/payment.mail';
 import {
   ipnReferenceArraySchema,
   ipnSchema,
@@ -112,7 +112,11 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
   }
 
   const relevantInvoice = existingApplication?.invoice[0];
-  if (!relevantInvoice || !relevantInvoice.invoiceNumber) {
+  if (
+    !relevantInvoice ||
+    !relevantInvoice.invoiceNumber ||
+    !relevantInvoice.invoiceEmail
+  ) {
     console.error('This invoice could not be found');
     return new Response('Missing invoice details', {
       status: 404,
@@ -179,6 +183,9 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
     `Application receipt generated and saved. Link: ${uploadedReceipt.success}, sending payment confirmation email ...`,
   );
 
+  const isUpdate =
+    validPayment.data.amount_paid >= existingApplication!.applicationFee;
+
   let receipt: PaymentReceipt | undefined = undefined;
   try {
     receipt = await db.$transaction(
@@ -189,8 +196,6 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
             ...validPayment.data,
           },
         });
-        const updateApplication =
-          newPayment.amount_paid >= existingApplication!.applicationFee!;
         const [_, __, createdReceipt] = await Promise.all([
           prisma.invoice.update({
             where: { id: relevantInvoice.id },
@@ -209,7 +214,7 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
               filePath: uploadedReceipt.success!,
             },
           }),
-          updateApplication
+          isUpdate
             ? prisma.application.update({
                 where: { id: existingApplication!.id },
                 data: {
@@ -247,10 +252,11 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
 
   try {
     await paymentCompletedEmail({
-      applicantEmail: existingApplication!.owner.email,
+      to: [existingApplication!.owner.email, relevantInvoice!.invoiceEmail],
       endDate: existingApplication!.trainingSession.endDate,
       startDate: existingApplication!.trainingSession.startDate,
       title: existingApplication!.trainingSession.program.title,
+      isUpdate,
       paymentReceipt: {
         filename: receipt.fileName,
         path: receipt.filePath,

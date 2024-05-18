@@ -153,35 +153,3 @@ export const removeMeOwnerEmail = async ({
     );
   }
 };
-
-export type PaymentCompletedEmailType = {
-  applicantEmail: string;
-  title: string;
-  startDate: Date;
-  endDate: Date;
-  venue?: string;
-  paymentReceipt: Attachment;
-};
-
-export const paymentCompletedEmail = async ({
-  applicantEmail,
-  title,
-  startDate,
-  endDate,
-  venue,
-  paymentReceipt,
-}: PaymentCompletedEmailType) => {
-  const formattedStartDate = format(startDate, 'PPP');
-  const formattedEndDate = format(endDate, 'PPP');
-  try {
-    await resend.emails.send({
-      from,
-      to: applicantEmail,
-      subject: `KIPPRA: Payment confirmation`,
-      html: `Your payment for the program for ${title} has been received. The training will ${venue ? `be at ${venue}` : 'be conducted online'} starting from ${formattedStartDate} to ${formattedEndDate}`,
-      attachments: [paymentReceipt],
-    });
-  } catch (error) {
-    console.log(error);
-  }
-};
