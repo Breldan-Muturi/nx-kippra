@@ -64,7 +64,7 @@ const navLinks: SidebarLink[] = [
     icon: <MdTask size="18" className="mr-1" />,
   },
   {
-    href: 'reports',
+    href: '/reports',
     label: 'Reports',
     icon: <BiSolidReport size="18" className="mr-1" />,
     role: UserRole.ADMIN,

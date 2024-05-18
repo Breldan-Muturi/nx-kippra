@@ -45,3 +45,13 @@ export const getFirstName = (fullName: string): string => {
 
 export const areObjectsEqual = (obj1: any, obj2: any): boolean =>
   JSON.stringify(obj1) === JSON.stringify(obj2);
+
+export const formatValue = (value: number) => {
+  if (value >= 1000000) {
+    return `${(value / 1000000).toFixed(1)}M`;
+  } else if (value >= 1000) {
+    return `${(value / 1000).toFixed(1)}K`;
+  } else {
+    return value.toLocaleString('en-US');
+  }
+};

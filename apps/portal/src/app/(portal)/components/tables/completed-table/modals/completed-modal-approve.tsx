@@ -1,9 +1,9 @@
 'use client';
 
 import { respondCompleted } from '@/actions/completed-programs/respond.completed.actions';
+import SubmitButton from '@/components/form/SubmitButton';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -55,13 +55,12 @@ const CompletedModalApprove = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            disabled={isPending}
-            className="bg-green-600"
+          <SubmitButton
+            type="button"
+            isSubmitting={isPending}
             onClick={handleApproveApplication}
-          >
-            Continue
-          </AlertDialogAction>
+            label="Continue"
+          />
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

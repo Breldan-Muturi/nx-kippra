@@ -1,20 +1,19 @@
-"use client";
-import { deleteTrainingSession } from "@/actions/training-session/training-session.actions";
+'use client';
+import { deleteTrainingSession } from '@/actions/training-session/training-session.actions';
+import SubmitButton from '@/components/form/SubmitButton';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { TrainingSession } from "@prisma/client";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { toast } from "sonner";
+} from '@/components/ui/alert-dialog';
+import { TrainingSession } from '@prisma/client';
+import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
+import { toast } from 'sonner';
 
 const DeleteSession = ({
   trainingSession: { id, programId },
@@ -51,12 +50,13 @@ const DeleteSession = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete}>
-            {isPending && (
-              <Loader2 color="white" className="w-4 h-4 mr-2 animate-spin" />
-            )}
-            Continue
-          </AlertDialogAction>
+          <SubmitButton
+            type="button"
+            onClick={handleDelete}
+            isSubmitting={isPending}
+            className="bg-red-600"
+            label="Continue"
+          />
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

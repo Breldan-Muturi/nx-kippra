@@ -1,8 +1,8 @@
 'use client';
-import React, { useTransition } from 'react';
+import { deleteOrganization } from '@/actions/organization/delete.organization.actions';
+import SubmitButton from '@/components/form/SubmitButton';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -10,10 +10,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { toast } from 'sonner';
 import { TableModalProps } from '@/types/tables.types';
-import { deleteOrganization } from '@/actions/organization/delete.organization.actions';
 import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
+import { toast } from 'sonner';
 
 type DeleteOrgModalProps = TableModalProps & {
   triggeredByRemove?: boolean;
@@ -62,13 +62,12 @@ const DeleteOrgModal = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            disabled={isPending}
+          <SubmitButton
+            type="button"
+            label="Continue"
             className="bg-red-600"
             onClick={handleDeleteOrganization}
-          >
-            Continue
-          </AlertDialogAction>
+          />
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

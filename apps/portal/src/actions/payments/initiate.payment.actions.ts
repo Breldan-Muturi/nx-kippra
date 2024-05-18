@@ -6,7 +6,7 @@ import {
   PaymentForm,
   paymentFormSchema,
 } from '@/validation/payment/payment.validation';
-import { ApplicationStatus } from '@prisma/client';
+import { ApplicationStatus, Invoice } from '@prisma/client';
 import { pesaflowPayment } from '../pesaflow/pesaflow.checkout.actions';
 
 const applicationPromise = async (id: string) =>
@@ -45,7 +45,7 @@ export const initiatePayment = async (
     return { error: 'Invalid fields' };
   }
 
-  const { applicationId, billDesc } = validPayment.data;
+  const { applicationId, billDesc, clientEmail } = validPayment.data;
 
   let paymentApplication: ApplicationPromise;
   try {
@@ -110,9 +110,30 @@ export const initiatePayment = async (
 
   if ('error' in pesaflow) return { error: pesaflow.error };
 
+  let invoice: Invoice;
+  try {
+    invoice = await db.invoice.create({
+      data: {
+        applicationId: id,
+        invoiceEmail: clientEmail,
+        invoiceLink: pesaflow.invoiceLink,
+        invoiceNumber: pesaflow.invoiceNumber,
+      },
+    });
+  } catch (e) {
+    console.error(
+      'Failed to generate application invoice due to a server error: ',
+      e,
+    );
+    return {
+      error:
+        'Failed to generate application invoice due to a server error. Please try again later',
+    };
+  }
+
   return {
     success:
       'Your payment details have been recorded successfully, proceed to complete the payment on eCitizen pesaflow',
-    invoiceLink: pesaflow.invoiceLink,
+    invoiceLink: invoice.invoiceLink,
   };
 };

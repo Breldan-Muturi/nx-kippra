@@ -246,6 +246,8 @@ model Organization {
   users              UserOrganization[]
   applications       Application[]
   participants       ApplicationParticipant[]
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt()
 }
 
 model UserOrganization {
@@ -299,6 +301,8 @@ model Application {
   slotsGlobal       Int                         @default(0)
   payment           Payment[]
   invoice           Invoice[]
+  submittedAt       DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt()
 }
 
 model ApplicationParticipant {

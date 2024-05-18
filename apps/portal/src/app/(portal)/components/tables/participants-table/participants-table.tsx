@@ -6,29 +6,31 @@ import {
   filterParticipants,
 } from '@/actions/participants/fetch.participants.actions';
 import handleTableColumns from '@/components/table/handle-table-columns';
+import ReusableTable from '@/components/table/reusable-table';
+import TablesPagination from '@/components/table/table-pagination';
 import tableSelectColumn from '@/components/table/table-select-column';
+import TableViews from '@/components/table/table-views';
+import { useCurrentRole } from '@/hooks/use-current-role';
+import { cn } from '@/lib/utils';
 import {
   FilterParticipantsType,
   PathParticipantsType,
   filterParticipantsSchema,
   pathParticipantsSchema,
 } from '@/validation/participants/participants.validation';
+import { UserRole } from '@prisma/client';
+import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { usePathname } from 'next/navigation';
 import React, { useMemo, useState, useTransition } from 'react';
+import { SubmitHandler } from 'react-hook-form';
 import participantColumnApplication from './columns/participant-column-application';
-import participantColumnOrganization from './columns/participant-column-organization';
 import participantColumnEmail from './columns/participant-column-email';
 import participantColumnNationalId from './columns/participant-column-nationalid';
+import participantColumnOrganization from './columns/participant-column-organization';
 import participantColumnRole from './columns/participant-column-role';
 import participantColumnUser from './columns/participant-column-user';
-import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import TableViews from '@/components/table/table-views';
-import ReusableTable from '@/components/table/reusable-table';
-import TablesPagination from '@/components/table/table-pagination';
-import ParticipantsFilterForm from './filters/participants-filter-form';
-import { SubmitHandler } from 'react-hook-form';
 import filterParticipantsFields from './filters/participants-filter-fields';
-import { cn } from '@/lib/utils';
+import ParticipantsFilterForm from './filters/participants-filter-form';
 
 type TableParticipantsProps = React.ComponentPropsWithoutRef<'div'> &
   ParticipantsTableProps;
@@ -40,6 +42,7 @@ const ParticipantsTable = ({
   className,
   ...props
 }: TableParticipantsProps) => {
+  const isAdmin = useCurrentRole() === UserRole.ADMIN;
   const path = usePathname();
   const [isPending, startTransition] = useTransition();
   const [modal, setModal] = useState();
@@ -116,7 +119,7 @@ const ParticipantsTable = ({
         participantColumnUser,
         participantColumnEmail,
         participantColumnNationalId,
-        participantColumnRole,
+        ...(isAdmin ? [participantColumnRole] : []),
         participantColumnOrganization,
         participantColumnApplication,
       ],

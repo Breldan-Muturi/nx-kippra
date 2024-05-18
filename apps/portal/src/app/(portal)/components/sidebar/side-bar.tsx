@@ -1,12 +1,11 @@
 'use client';
-import { signOut } from 'next-auth/react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { SidebarProps } from '@/types/nav-links.types';
 import { LogOut, UserCog } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React from 'react';
 
 const SideBarArea = ({ links, className, ...props }: SidebarProps) => {
   const path = usePathname();
