@@ -1,12 +1,29 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import puppeteer from 'puppeteer';
+import puppeteer, { ElementHandle, Page } from 'puppeteer';
 import { CreatePdfDto } from '../dtos/create-pdf.dto';
 
 @Injectable()
 export class PdfService {
   private readonly logger = new Logger(PdfService.name);
   constructor(private readonly configService: ConfigService) {}
+
+  async isImageLoaded(
+    page: Page,
+    imageElementHandle: ElementHandle<HTMLImageElement>,
+  ): Promise<boolean> {
+    for (let totalIdleTime = 0; totalIdleTime < 3000; totalIdleTime += 500) {
+      if (totalIdleTime > 0) await page.waitForNetworkIdle({ idleTime: 500 });
+      if (
+        (await imageElementHandle.evaluate(
+          (imageDomElement) => imageDomElement.naturalWidth,
+        )) > 0
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   async generatePDF({ applicationId, template }: CreatePdfDto) {
     this.logger.debug(
@@ -42,6 +59,16 @@ export class PdfService {
           `Failed to load page, status code ${response?.status()}`,
         );
       }
+
+      // Ensure all images are loaded
+      const imageHandles = await page.$$('img');
+      for (const imageHandle of imageHandles) {
+        const isLoaded = await this.isImageLoaded(page, imageHandle);
+        if (!isLoaded) {
+          throw new Error('One or more images failed to load');
+        }
+      }
+
       const pdf = await page.pdf({ format: 'A4', printBackground: true });
       await browser.close();
       const pdfBuffer = Buffer.from(pdf.buffer);
