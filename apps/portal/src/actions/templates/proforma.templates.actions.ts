@@ -86,7 +86,7 @@ export const proformaTemplate = async (
   } = proforma;
   return {
     id,
-    description: `Application id ${id} for ${title} for ${String(slotsCitizen + slotsEastAfrican + slotsGlobal)} participants`,
+    description: `Application for ${title} for ${String(slotsCitizen + slotsEastAfrican + slotsGlobal)} participants`,
     applicationFee,
     qrCode,
     paymentLink,

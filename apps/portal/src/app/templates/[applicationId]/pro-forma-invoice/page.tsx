@@ -65,16 +65,16 @@ const ProformaInvoice = async ({
   ];
 
   return (
-    <main className="container flex flex-col min-h-screen py-8 mx-auto space-y-6">
+    <main className="container min-h-screen py-8 mx-auto space-y-6">
       <div className="flex items-center justify-between w-full">
         <Link
           href="https://kippra.or.ke"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Image src={KIPPRA_LOGO} alt="KIPPRA Logo" width={200} height={100} />
+          <Image src={KIPPRA_LOGO} alt="KIPPRA Logo" width={150} height={100} />
         </Link>
-        <div>
+        <div className="text-sm">
           <p>
             <span className="font-bold">Our ref:</span>{' '}
             <span className="uppercase">{proformaRef}</span>
@@ -138,49 +138,29 @@ const ProformaInvoice = async ({
         </TableFooter>
       </Table>
       {/* Notes */}
-      <div className="flex items-center justify-between w-full space-x-20 flex-cols-4">
-        <div className="flex flex-col items-start col-span-3 space-y-4">
+      <div className="flex justify-between w-full space-x-20 items-top flex-cols-4">
+        <div className="flex flex-col items-start col-span-3 space-y-2 text-sm">
           <p>
             <span className="font-bold">Note:</span>
             <br />
             <span>Payments to KIPPRA should be made through eCitizen:</span>
           </p>
-          <ol className="mt-4 text-sm list-decimal list-inside">
-            <li>
-              Login to the portal using the same account that created this
-              application
-            </li>
-            <li>
-              Go to{' '}
-              <Link
-                href={paymentLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-green-600"
-              >
-                {paymentLink}
-              </Link>
-            </li>
-            <li>Enter your payee information, and click submit payment.</li>
-            <li>
-              If you're paying through the bank, follow the instructions on the
-              page, and when completed use the invoice link alongside your
-              payment on{' '}
-              <Link
-                href={paymentLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-green-600"
-              >
-                {paymentLink}
-              </Link>{' '}
-              to navigate back to eCitizen to complete your payment.
-            </li>
-            <li>
-              For online payments such as Mpesa, Airtel-Money or Card, once the
-              payment is completed, click the Complete button.
-            </li>
-          </ol>
+          <p>
+            To complete this payment kindly scan the QR Code alongside or click
+            the <strong>Make payment</strong> button below.
+          </p>
+          <p>
+            Otherwise, use the link below:
+            <br />
+            <Link
+              href={paymentLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-green-600"
+            >
+              {paymentLink}
+            </Link>{' '}
+          </p>
         </div>
         <div className="flex flex-col col-span-1 space-y-2">
           <div className="p-1 border-2 border-green-600 rounded-md">
@@ -188,8 +168,8 @@ const ProformaInvoice = async ({
               <Image
                 src={qrCode}
                 alt="Payment QR Code"
-                height={200}
-                width={200}
+                height={150}
+                width={150}
               />
             </Link>
           </div>
@@ -222,7 +202,7 @@ const ProformaInvoice = async ({
         </p>
       </div>
       {/* Footer */}
-      <div className="items-center justify-center w-full py-4 mt-auto border-t-4 border-green-600 px-auto">
+      <div className="items-center justify-center mt-auto w-full py-4 border-t-4 border-green-600 px-auto">
         <p className="text-sm text-center">
           Disclaimer: This is an auto-generated invoice and does not require a
           signature

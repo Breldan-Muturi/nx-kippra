@@ -69,7 +69,11 @@ export class PdfService {
         }
       }
 
-      const pdf = await page.pdf({ format: 'A4', printBackground: true });
+      const pdf = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        scale: 0.9,
+      });
       await browser.close();
       const pdfBuffer = Buffer.from(pdf.buffer);
       return { generatedPDF: pdfBuffer };
