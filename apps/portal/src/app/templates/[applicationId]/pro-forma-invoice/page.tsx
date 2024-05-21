@@ -13,6 +13,7 @@ import { cn, formatCurrency } from '@/lib/utils';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import Link from 'next/link';
+import Logo from '/public/kippra-doc-logo.png';
 
 type TableItem = { description: string; amount: string };
 const ProformaInvoice = async ({
@@ -71,12 +72,7 @@ const ProformaInvoice = async ({
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Image
-            src="/kippra-doc-logo.png"
-            alt="KIPPRA Logo"
-            width={200}
-            height={100}
-          />
+          <Image src={Logo} alt="KIPPRA Logo" width={200} height={100} />
         </Link>
         <div>
           <p>
