@@ -56,7 +56,7 @@ const applicationsPromise = async ({
         select: {
           id: true,
           name: true,
-          image: true,
+          image: { select: { fileUrl: true } },
         },
       },
       organization: {

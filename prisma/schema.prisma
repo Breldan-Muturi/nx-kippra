@@ -51,7 +51,9 @@ model User {
   name                  String
   email                 String                   @unique
   emailVerified         DateTime?
-  image                 String?
+  // image                 String?
+  // userImage             UserImage?
+  image                 UserImage?
   password              String?
   phoneNumber           String?
   role                  UserRole                 @default(USER)
@@ -70,6 +72,18 @@ model User {
   ownedApplications     Application[]
   CreatedCompletions    CompletedProgram[]       @relation("CreatedCompletions")
   CompletedPrograms     CompletedProgram[]       @relation("CompletedPrograms")
+}
+
+model UserImage {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileUrl     String
+  filePath    String
+  contentType String
+  size        Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt()
 }
 
 model Account {
@@ -137,11 +151,11 @@ model CompletedProgram {
   id        String  @id @default(cuid())
   // Relation to the program
   programId String
-  program   Program @relation(fields: [programId], references: [id])
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
 
-  completionEvidence String[]
+  completionEvidence CompletionEvidence[]
   completionDate     DateTime
-  status             CompletionStatus @default(PENDING)
+  status             CompletionStatus     @default(PENDING)
 
   // Relation to the user for this completed program
   participantId String
@@ -157,17 +171,29 @@ model CompletedProgram {
   @@unique([programId, participantId])
 }
 
+model CompletionEvidence {
+  id                 String           @id @default(cuid())
+  completedProgramId String
+  completedProgram   CompletedProgram @relation(fields: [completedProgramId], references: [id], onDelete: Cascade)
+  fileUrl            String
+  filePath           String
+  contentType        String
+  size               Float
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt()
+}
+
 model Program {
-  id             String   @id @default(cuid())
-  imgUrl         String?
-  code           String   @unique
+  id             String        @id @default(cuid())
+  image          ProgramImage?
+  code           String        @unique
   summary        String?
-  title          String   @unique
+  title          String        @unique
   serviceId      Int?
   serviceIdUsd   Int?
   moodleCourseId Int?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt()
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt()
 
   // Fields for prerequisites
   prerequisites Program[] @relation("ProgramPrerequisites")
@@ -176,6 +202,18 @@ model Program {
   trainingSessions TrainingSession[]
   topics           Topic[]
   CompletedProgram CompletedProgram[]
+}
+
+model ProgramImage {
+  id          String   @id @default(cuid())
+  programId   String   @unique
+  program     Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  fileUrl     String
+  filePath    String
+  contentType String
+  size        Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt()
 }
 
 model Topic {
@@ -237,7 +275,8 @@ model Organization {
   name               String                   @unique
   phone              String                   @unique
   email              String                   @unique
-  image              String?
+  // image              String?
+  image              OrgImage?
   county             String
   address            String
   invites            InviteOrganization[]
@@ -248,6 +287,18 @@ model Organization {
   participants       ApplicationParticipant[]
   createdAt          DateTime                 @default(now())
   updatedAt          DateTime                 @updatedAt()
+}
+
+model OrgImage {
+  id             String       @id @default(cuid())
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  fileUrl        String
+  filePath       String
+  contentType    String
+  size           Float
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt()
 }
 
 model UserOrganization {
@@ -328,8 +379,10 @@ model ApplicationProformaInvoice {
   id            String      @id @default(cuid())
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt()
-  fileName      String
+  fileUrl       String
   filePath      String
+  contentType   String      @default("application/pdf")
+  size          Float       @default(20000)
   applicationId String      @unique
   application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 }
@@ -338,8 +391,10 @@ model ApplicationOfferLetter {
   id            String      @id @default(cuid())
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt()
-  fileName      String
+  fileUrl       String
   filePath      String
+  contentType   String      @default("application/pdf")
+  size          Float       @default(20000)
   applicationId String      @unique
   application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 }
@@ -362,13 +417,13 @@ enum InvoiceStatus {
 model Invoice {
   id            String        @id @default(cuid())
   applicationId String
+  application   Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   invoiceNumber String        @unique
   invoiceLink   String        @unique
   invoiceEmail  String
   invoiceStatus InvoiceStatus @default(PENDING)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt()
-  application   Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 }
 
 model Payment {
@@ -402,11 +457,13 @@ model PaymentReference {
 }
 
 model PaymentReceipt {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
-  fileName  String
-  filePath  String
-  paymentId String   @unique
-  payment   Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt()
+  fileUrl     String
+  filePath    String
+  contentType String   @default("application/pdf")
+  size        Float    @default(20000)
+  paymentId   String   @unique
+  payment     Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 }

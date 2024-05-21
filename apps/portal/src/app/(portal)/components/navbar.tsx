@@ -1,12 +1,5 @@
 'use client';
 
-import { buttonVariants } from '../../../components/ui/button';
-import { LogOut, UserCog } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { useCurrentUser } from '@/hooks/use-current-user';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -15,9 +8,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { DropDownLink } from '@/types/nav-links.types';
 import { avatarFallbackName } from '@/helpers/user.helper';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { cn } from '@/lib/utils';
+import { DropDownLink } from '@/types/nav-links.types';
+import { LogOut, UserCog } from 'lucide-react';
 import { signOut } from 'next-auth/react';
+import Image from 'next/image';
+import Link from 'next/link';
+import React from 'react';
+import { buttonVariants } from '../../../components/ui/button';
 
 const navLinks = [
   {
@@ -52,7 +52,7 @@ const kippraLogo = (
       width={200}
       height={100}
       quality={100}
-      src="/static/images/kippra_logo.png"
+      src="/kippra_logo.png"
       alt="Kippra-logo"
     />
   </Link>

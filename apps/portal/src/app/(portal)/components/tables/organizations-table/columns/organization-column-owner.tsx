@@ -14,7 +14,7 @@ const organizationColumnOwner: ColumnDef<SingleOrganizationDetail> = {
       return (
         <TableUserCell
           userName={owner.user.name}
-          userImage={owner.user.image || undefined}
+          userImage={owner.user.image?.fileUrl}
           userTableInfo={owner.user.email}
         />
       );

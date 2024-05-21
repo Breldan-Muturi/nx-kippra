@@ -48,7 +48,7 @@ const ApplicationParticipantInfo = ({
         {...props}
       >
         <Avatar>
-          {image && <AvatarImage src={image} alt={`${name}'s profile image`} />}
+          <AvatarImage src={image?.fileUrl} alt={`${name}'s profile image`} />
           <AvatarFallback className="flex items-center justify-center size-full">
             {avatarFallbackName(name)}
           </AvatarFallback>

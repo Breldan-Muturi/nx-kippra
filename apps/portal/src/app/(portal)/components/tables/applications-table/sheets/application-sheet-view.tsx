@@ -1,6 +1,6 @@
 'use client';
 
-import { ViewApplicationSheet } from '@/actions/applications/user/single.application.action';
+import { ViewApplicationSheet } from '@/actions/applications/single.application.action';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,

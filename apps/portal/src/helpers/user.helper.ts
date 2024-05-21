@@ -1,4 +1,4 @@
-import { db } from "../lib/db";
+import { db } from '../lib/db';
 
 export const getUserByEmail = async (email: string) => {
   try {
@@ -11,12 +11,16 @@ export const getUserByEmail = async (email: string) => {
 
 export const getUserById = async (id: string) => {
   try {
-    const user = await db.user.findUnique({ where: { id } });
+    const user = await db.user.findUnique({
+      where: { id },
+      include: { image: { select: { fileUrl: true } } },
+    });
     return user;
   } catch {
     return null;
   }
 };
+export type UserById = NonNullable<Awaited<ReturnType<typeof getUserById>>>;
 
 export const getAccountByUserId = async (userId: string) => {
   try {
@@ -39,16 +43,16 @@ export const splitUserName = (
   }
   // Assuming the last part is the last name and all other parts constitute the first name
   const lastName = parts.pop()!;
-  const firstName = parts.join(" ");
+  const firstName = parts.join(' ');
 
   return { firstName, lastName };
 };
 
 export const avatarFallbackName = (name?: string | null): string => {
   if (!name) {
-    return "NA";
+    return 'NA';
   }
-  const nameParts = name.trim().split(" ");
+  const nameParts = name.trim().split(' ');
   if (nameParts.length > 1) {
     return nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0);
   } else if (nameParts.length === 1 && nameParts[0].length > 1) {

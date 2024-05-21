@@ -1,6 +1,5 @@
 'use client';
-import { usePathname } from 'next/navigation';
-import React, { useTransition } from 'react';
+import { adminSendEmail } from '@/actions/applications/email.applications.actions';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { adminSendEmail } from '@/actions/applications/admin/approve.applications.actions';
+import { useTransition } from 'react';
 import { toast } from 'sonner';
 import { ApplicationModalType } from '../applications-table';
 

@@ -10,7 +10,7 @@ const programPromise = async (programId: string) =>
     select: {
       id: true,
       title: true,
-      imgUrl: true,
+      image: { select: { fileUrl: true } },
       code: true,
       summary: true,
       serviceId: true,

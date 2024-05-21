@@ -1,6 +1,7 @@
 'use server';
 
 import { processSearchString } from '@/helpers/filter.helpers';
+import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
 import {
   FetchParticipantsType,
@@ -10,7 +11,6 @@ import {
 } from '@/validation/participants/participants.validation';
 import { Prisma } from '@prisma/client';
 import filterRedirect from '../redirect.actions';
-import { currentUserId } from '@/lib/auth';
 
 const userPromise = async (id: string) =>
   await db.user.findUnique({
@@ -32,7 +32,7 @@ const selectParticipantsPromise = async (
     select: {
       id: true,
       name: true,
-      image: true,
+      image: { select: { fileUrl: true } },
       email: hiddenColumnsArray.includes('Email') ? undefined : true,
       role: true,
       userOrganization: true,

@@ -1,10 +1,10 @@
-import NextAuth from 'next-auth';
 import authConfig from '@/auth.config';
+import { getTwoFactorConfirmationByUserId } from '@/helpers/two-factor-confirmation.helper';
+import { getAccountByUserId, getUserById } from '@/helpers/user.helper';
 import { db } from '@/lib/db';
 import { PrismaAdapter } from '@auth/prisma-adapter';
-import { getAccountByUserId, getUserById } from '@/helpers/user.helper';
 import { Citizenship, UserRole } from '@prisma/client';
-import { getTwoFactorConfirmationByUserId } from '@/helpers/two-factor-confirmation.helper';
+import NextAuth from 'next-auth';
 
 export const {
   handlers: { GET, POST },
@@ -36,7 +36,6 @@ export const {
       // Prevent sign in without email verification
       if (!existingUser?.emailVerified) return false;
 
-      // TODO: Add 2FA check
       if (existingUser.isTwoFactorEnabled) {
         const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(
           existingUser.id,
@@ -50,25 +49,6 @@ export const {
       }
       return true;
     },
-    session: async ({ token, session }) => {
-      if (token.sub && session.user) {
-        session.user.id = token.sub;
-      }
-
-      if (token.role && session.user) {
-        session.user.role = token.role as UserRole;
-      }
-
-      if (session.user) {
-        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
-        session.user.name = token.name;
-        session.user.email = token.email as string;
-        session.user.isOAuth = token.isOAuth as boolean;
-        session.user.citizenship = token.citizenship as Citizenship;
-      }
-
-      return session;
-    },
     jwt: async ({ token }) => {
       if (!token.sub) return token;
       const existingUser = await getUserById(token.sub);
@@ -81,7 +61,33 @@ export const {
       token.email = existingUser.email;
       token.role = existingUser.role;
       token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
+      token.image = existingUser.image?.fileUrl;
+
       return token;
+    },
+    session: async ({ token, session }) => {
+      if (token.sub && session.user) {
+        session.user.id = token.sub;
+      }
+
+      if (token.role && session.user) {
+        session.user.role = token.role as UserRole;
+      }
+
+      if (token.image) {
+        session.user.image = token.image as string;
+      }
+
+      if (session.user) {
+        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
+        session.user.name = token.name;
+        session.user.email = token.email as string;
+        session.user.isOAuth = token.isOAuth as boolean;
+        session.user.citizenship = token.citizenship as Citizenship;
+        session.user;
+      }
+
+      return session;
     },
   },
   adapter: PrismaAdapter(db),

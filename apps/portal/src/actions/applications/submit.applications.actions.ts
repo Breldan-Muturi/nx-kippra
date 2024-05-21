@@ -1,5 +1,8 @@
 'use server';
-import { uploadPDFile } from '@/actions/firebase/storage.actions';
+import {
+  FilesUploadReturn,
+  pdfsUpload,
+} from '@/actions/firebase/storage.actions';
 import {
   PDFResponse,
   generatePDFFromApi,
@@ -14,7 +17,6 @@ import {
   newApplicationEmail,
 } from '@/mail/application.mail';
 import { inviteOrgTokenEmail } from '@/mail/organization.mail';
-import { ActionReturnType } from '@/types/actions.types';
 import { AdminApplicationForm } from '@/validation/applications/admin.application.validation';
 import { FormApplicationParticipant } from '@/validation/applications/participants.application.validation';
 import { NewOrganizationForm } from '@/validation/organization/organization.validation';
@@ -116,6 +118,7 @@ const getSessionInformation = async ({
   });
 type SessionInformation = Awaited<ReturnType<typeof getSessionInformation>>;
 
+// TODO:Confirm this actually adds the intended participants to the application
 const checkExistingParticipants = async ({
   participants,
   organization,
@@ -328,16 +331,23 @@ export const submitAdminApplication = async (
       return {
         error: `Could not generate the offer-letter:  ${pdfOffer.error}`,
       };
-    let pdfProformaUrl: ActionReturnType,
-      pdfOfferUrl: ActionReturnType,
-      pesaflow: PesaFlowReturn;
+
+    let pdfUploads: FilesUploadReturn, pesaflow: PesaFlowReturn;
     try {
-      [pdfProformaUrl, pdfOfferUrl, pesaflow] = await Promise.all([
-        uploadPDFile(
-          pdfProforma.generatedPDF,
-          `${newApplication.id}-proforma-invoice`,
+      [pdfUploads, pesaflow] = await Promise.all([
+        pdfsUpload(
+          [
+            {
+              buffer: pdfProforma.generatedPDF,
+              fileName: 'proforma-invoice',
+            },
+            {
+              buffer: pdfOffer.generatedPDF,
+              fileName: 'offer-letter',
+            },
+          ],
+          `applications/${newApplication.id}`,
         ),
-        uploadPDFile(pdfProforma.generatedPDF, `${newApplication.id}-offer`),
         pesaflowPayment({
           amountExpected:
             process.env.NODE_ENV === 'production'
@@ -356,35 +366,29 @@ export const submitAdminApplication = async (
     } catch (error) {
       return { error: 'An unexpected error occurred. Please try again later' };
     }
-    if (pdfProformaUrl.error)
+    if ('error' in pdfUploads) return { error: pdfUploads.error };
+    if ('error' in pesaflow) return { error: pesaflow.error };
+
+    const proforma = pdfUploads.find(({ filePath }) =>
+      filePath.endsWith('proforma-invoice'),
+    );
+    const offer = pdfUploads.find(({ filePath }) =>
+      filePath.endsWith('offer-letter'),
+    );
+
+    if (!proforma || !offer)
       return {
-        error: `Could not upload the pdfProforma: ${pdfProformaUrl.error}`,
+        error:
+          'Failed to generate PDFs for this application due to server error. Please try again later',
       };
-    if (pdfOfferUrl.error)
-      return {
-        error: `Could not upload the offer-letter: ${pdfOfferUrl.error}`,
-      };
-    if ('error' in pesaflow) {
-      return { error: pesaflow.error };
-    }
 
     try {
       await db.application.update({
         where: { id: newApplication.id },
         data: {
           status: ApplicationStatus.APPROVED,
-          proformaInvoice: {
-            create: {
-              fileName: `${newApplication.id}-proforma-invoice`,
-              filePath: pdfProformaUrl.success!,
-            },
-          },
-          offerLetter: {
-            create: {
-              fileName: `${newApplication.id}-offer`,
-              filePath: pdfOfferUrl.success!,
-            },
-          },
+          proformaInvoice: { create: proforma! },
+          offerLetter: { create: offer! },
           invoice: {
             create: {
               invoiceEmail: applicationOwner?.email || user.email,
@@ -413,12 +417,12 @@ export const submitAdminApplication = async (
       venue: venue ? venue : undefined,
       applicantEmail: applicationOwner?.email || user!.email,
       proformaInvoice: {
-        filename: `${newApplication.id}-proforma-invoice`,
-        path: pdfProformaUrl.success!,
+        filename: `Proforma invoice`,
+        path: proforma?.filePath!,
       },
       offerLetter: {
-        filename: `${newApplication.id}-offer`,
-        path: pdfOfferUrl.success!,
+        filename: `Offer letter`,
+        path: offer?.filePath!,
       },
     });
   }

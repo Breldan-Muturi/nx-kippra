@@ -31,7 +31,12 @@ const DropDownImage = ({
         {...props}
       >
         <Avatar className={avatarClassName}>
-          {image && <AvatarImage src={image} alt={`${name}'s image`} />}
+          {image && (
+            <AvatarImage
+              src={image ?? '/kippra_logo.png'}
+              alt={`${name}'s image`}
+            />
+          )}
           <AvatarFallback>{avatarFallbackName(name)}</AvatarFallback>
         </Avatar>
         <div className="flex-grow">

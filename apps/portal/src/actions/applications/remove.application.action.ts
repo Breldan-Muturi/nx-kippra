@@ -11,7 +11,7 @@ import { ActionReturnType } from '@/types/actions.types';
 import { Citizenship, Delivery } from '@prisma/client';
 import { format } from 'date-fns';
 
-export const userRemoveApplication = async (
+export const removeApplication = async (
   applicationId: string,
 ): Promise<ActionReturnType> => {
   const user = await currentUser();

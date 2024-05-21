@@ -1,7 +1,5 @@
-import {
-  ProgramsOption,
-  UserOption,
-} from '@/actions/completed-programs/options.completed.actions';
+import { UserOption } from '@/actions/completed-programs/options.completed.actions';
+import { ProgramsOption } from '@/actions/programmes/programs.options.actions';
 import DropDownImage from '@/components/drop-down-options/drop-down-w-image';
 import { truncateStrings } from '@/lib/utils';
 import { DatePresets, FormFieldType } from '@/types/form-field.types';
@@ -61,7 +59,7 @@ const completedModalFields = ({
               const isSelected = value === user.id;
               return (
                 <DropDownImage
-                  image={user.image ?? undefined}
+                  image={user.image?.fileUrl}
                   info={user.email}
                   name={user.name}
                   isSelected={isSelected}
@@ -106,7 +104,7 @@ const completedModalFields = ({
           <DropDownImage
             info={program.code}
             name={truncatedTitle}
-            image={program.imgUrl ?? undefined}
+            image={program.image?.fileUrl}
             isSelected={isSelected}
             avatarClassName="rounded-md"
           />

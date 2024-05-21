@@ -1,5 +1,5 @@
 'use client';
-import React, { useTransition } from 'react';
+import { adminRejectApplication } from '@/actions/applications/admin/reject.applications.actions';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { adminRejectApplication } from '@/actions/applications/admin/approve.applications.actions';
+import { useTransition } from 'react';
 import { toast } from 'sonner';
 import { ApplicationModalType } from '../applications-table';
 

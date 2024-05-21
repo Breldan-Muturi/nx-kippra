@@ -1,4 +1,4 @@
-import { ProgramOption } from '@/actions/applications/form.applications.actions';
+import { ProgramsOption } from '@/actions/programmes/programs.options.actions';
 import DropDownImage from '@/components/drop-down-options/drop-down-w-image';
 import {
   deliveryModeOptions,
@@ -10,7 +10,7 @@ import { Delivery } from '@prisma/client';
 
 type ApplicationDetailProps = {
   disabled: boolean;
-  programOptions?: ProgramOption[];
+  programOptions?: ProgramsOption[];
   trainingSessionOptions: SelectOptions[];
   isDisableDelivery: boolean;
 };
@@ -37,7 +37,7 @@ const applicationDetailsFields = ({
             return 'Select a program';
           },
           comboboxOptions: programOptions.map(
-            ({ imgUrl, code, title, id }, i) => ({
+            ({ image, code, title, id }, i) => ({
               value: id,
               optionLabel: title,
               render: (value) => {
@@ -46,7 +46,7 @@ const applicationDetailsFields = ({
                 return (
                   <DropDownImage
                     key={`${i}${id}`}
-                    image={imgUrl ?? undefined}
+                    image={image?.fileUrl ?? undefined}
                     info={code}
                     name={title}
                     isSelected={isSelected}

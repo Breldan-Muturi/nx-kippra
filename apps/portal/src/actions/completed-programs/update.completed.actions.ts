@@ -10,7 +10,7 @@ import {
 } from '@/validation/completed-program/completed-program.validation';
 import { FilePreviewSchema } from '@/validation/reusable.validation';
 import { OrganizationRole, UserRole } from '@prisma/client';
-import { deleteFiles, uploadMultiFiles } from '../firebase/storage.actions';
+import { deleteFiles, filesUpload } from '../firebase/storage.actions';
 
 const userPromise = async (id: string) =>
   await db.user.findUnique({
@@ -124,7 +124,7 @@ export const updateCompleted = async ({
     return { error: 'You are not authorized to update this completed program' };
 
   const removedFiles = completedProgram.completionEvidence.filter(
-    (filePath) =>
+    ({ filePath }) =>
       !filePreviews.map(({ filePath }) => filePath).includes(filePath),
   );
 
@@ -136,10 +136,10 @@ export const updateCompleted = async ({
 
   const [deletedFiles, uploadFiles] = await Promise.all([
     removedFiles.length > 0
-      ? deleteFiles(removedFiles)
+      ? deleteFiles(removedFiles.map(({ filePath }) => filePath))
       : Promise.resolve(undefined),
     hasFiles
-      ? uploadMultiFiles(files, `completed-evidence/${participantName}`)
+      ? filesUpload(files, `completed-evidence/${participantName}`)
       : Promise.resolve(undefined),
   ]);
   if (deletedFiles && 'error' in deletedFiles)
@@ -154,12 +154,10 @@ export const updateCompleted = async ({
         data: {
           completionDate,
           programId,
-          completionEvidence: [
-            ...completedProgram.completionEvidence.filter(
-              (path) => !deletedFiles?.includes(path),
-            ),
-            ...(uploadFiles || []),
-          ],
+          completionEvidence: {
+            deleteMany: removedFiles,
+            create: uploadFiles,
+          },
         },
       }),
       updateCompletedEmail({

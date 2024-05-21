@@ -12,11 +12,11 @@ import {
 import {
   PayeeApplicationModal,
   getPaymentApplicationPromise,
-} from '@/actions/applications/user/pay.application.actions';
+} from '@/actions/applications/pay.application.actions';
 import {
   ViewApplicationSheet,
   getApplicationByIdPromise,
-} from '@/actions/applications/user/single.application.action';
+} from '@/actions/applications/single.application.action';
 import { cn } from '@/lib/utils';
 import { FilterApplicationType } from '@/validation/applications/table.application.validation';
 import { UserRole } from '@prisma/client';

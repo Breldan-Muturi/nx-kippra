@@ -1,5 +1,5 @@
 'use client';
-import { userRemoveApplication } from '@/actions/applications/user/remove.application.action';
+import { removeApplication } from '@/actions/applications/remove.application.action';
 import SubmitButton from '@/components/form/SubmitButton';
 import {
   AlertDialog,
@@ -19,7 +19,7 @@ const RemoveApplication = ({ id, handleDismiss }: ApplicationModalType) => {
 
   const handleRemoveApplication = () => {
     startTransition(() => {
-      userRemoveApplication(id)
+      removeApplication(id)
         .then((data) => {
           if (data.error) {
             toast.error(data.error);

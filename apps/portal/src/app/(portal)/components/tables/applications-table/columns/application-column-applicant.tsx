@@ -17,7 +17,7 @@ const applicantColumn: ColumnDef<SingleTableApplication> = {
     return (
       <TableUserCell
         userName={name ?? 'Unnamed applicant'}
-        userImage={image ?? undefined}
+        userImage={image?.fileUrl}
         userTableInfo={userTableInfo}
       />
     );

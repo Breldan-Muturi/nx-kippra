@@ -52,14 +52,14 @@ const ProgramForm = ({
     mode: 'onChange',
     defaultValues: isValidProgram
       ? (() => {
-          const { prerequisites, imgUrl, ...programInfo } = program.program;
+          const { prerequisites, image, ...programInfo } = program.program;
           const prerequisiteCourses = prerequisites.map(({ id }) => id);
           const availableProgramInfo = Object.fromEntries(
             Object.entries(programInfo).filter(([_, value]) => value !== null),
           );
           return {
             ...availableProgramInfo,
-            image: imgUrl,
+            image: image?.fileUrl,
             prerequisiteCourses,
           };
         })()

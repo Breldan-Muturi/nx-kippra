@@ -5,7 +5,11 @@ import { db } from '@/lib/db';
 import { UpdateCompletedSchema } from '@/validation/completed-program/completed-program.validation';
 import { FilePreviewSchema } from '@/validation/reusable.validation';
 import { OrganizationRole, Prisma, UserRole } from '@prisma/client';
-import { getFileDetails } from '../firebase/storage.actions';
+import path from 'path';
+import {
+  ProgramsOptionsPromise,
+  programsOptionsPromise,
+} from '../programmes/programs.options.actions';
 
 const userPromise = async (id: string) =>
   await db.user.findUnique({
@@ -104,16 +108,6 @@ const participantPromise = async (id: string) =>
     },
   });
 type ParticipantPromise = Awaited<ReturnType<typeof participantPromise>>;
-
-const programsOptionsPromise = async (where: Prisma.ProgramWhereInput) =>
-  await db.program.findMany({
-    where,
-    select: { id: true, title: true, code: true, imgUrl: true },
-  });
-type ProgramsOptionsPromise = Awaited<
-  ReturnType<typeof programsOptionsPromise>
->;
-export type ProgramsOption = ProgramsOptionsPromise[number];
 
 type GetProgramOptionsReturn = { error: string } | ProgramsOptionsPromise;
 export const getProgramOptions = async (
@@ -226,14 +220,20 @@ export const getCompletedEvidence = async (
         'You are not authorized to view the details of this completed program',
     };
 
-  const previews = await getFileDetails(completedProgram.completionEvidence);
-  if ('error' in previews) return { error: previews.error };
+  const { programId, completionDate, participantId, completionEvidence } =
+    completedProgram;
 
   return {
-    id: completedProgram.id,
-    programId: completedProgram.programId,
-    completionDate: completedProgram.completionDate,
-    participantId: completedProgram.participantId,
-    previews,
+    id: id,
+    programId: programId,
+    completionDate: completionDate,
+    participantId: participantId,
+    previews: completionEvidence.map((completion) => ({
+      fileName: path.basename(completion.filePath),
+      fileSize: completion.size,
+      fileType: completion.contentType,
+      fileUrl: completion.fileUrl,
+      filePath: completion.filePath,
+    })),
   };
 };

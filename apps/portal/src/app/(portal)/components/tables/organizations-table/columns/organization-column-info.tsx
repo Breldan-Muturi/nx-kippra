@@ -10,7 +10,7 @@ const organizationColumnInfo: ColumnDef<SingleOrganizationDetail> = {
     return (
       <TableUserCell
         userName={name}
-        userImage={image || undefined}
+        userImage={image?.fileUrl}
         userTableInfo={email}
       />
     );

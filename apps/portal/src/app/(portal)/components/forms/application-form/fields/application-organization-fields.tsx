@@ -1,4 +1,4 @@
-import { OrgOption } from '@/actions/applications/form.applications.actions';
+import { OrgOption } from '@/actions/organization/org.options.actions';
 import DropDownImage from '@/components/drop-down-options/drop-down-w-image';
 import { FormFieldType } from '@/types/form-field.types';
 import { AdminApplicationOrganization } from '@/validation/applications/admin.application.validation';
@@ -45,7 +45,7 @@ const applicationOrganizationFields = ({
               return (
                 <DropDownImage
                   key={`${i}${id}`}
-                  image={image ?? undefined}
+                  image={image?.fileUrl}
                   info={county}
                   name={name}
                   isSelected={isSelected}

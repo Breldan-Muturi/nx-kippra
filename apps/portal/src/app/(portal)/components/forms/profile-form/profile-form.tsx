@@ -1,28 +1,29 @@
 'use client';
 
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { Form } from '@/components/ui/form';
-import ReusableForm from '@/components/form/ReusableForm';
-import SubmitButton from '@/components/form/SubmitButton';
-import FormHeader from '@/components/form/FormHeader';
-import { User } from '@prisma/client';
-import { splitUserName } from '@/helpers/user.helper';
-import { useTransition } from 'react';
 import {
   ProfileActionParams,
   updateProfile,
 } from '@/actions/account/profile.actions';
-import { toast } from 'sonner';
+import FormHeader from '@/components/form/FormHeader';
+import ReusableForm from '@/components/form/ReusableForm';
+import SubmitButton from '@/components/form/SubmitButton';
+import { Form } from '@/components/ui/form';
+import { UserById, splitUserName } from '@/helpers/user.helper';
 import { useCurrentisOAuth } from '@/hooks/use-current-isoauth';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { profileFields, accountFields } from './profile-fields';
 import {
   ProfileUpdateForm,
   profileUpdateSchema,
 } from '@/validation/profile/update.profile.validation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { accountFields, profileFields } from './profile-fields';
 
-const ProfileForm = ({ user }: { user: User }) => {
+const ProfileForm = ({ user }: { user: UserById }) => {
+  const { update } = useSession();
   const router = useRouter();
   const isOAuth = useCurrentisOAuth();
   const [isPending, startTransition] = useTransition();
@@ -31,13 +32,14 @@ const ProfileForm = ({ user }: { user: User }) => {
     resolver: zodResolver(profileUpdateSchema),
     mode: 'onChange',
     defaultValues: (() => {
-      const { password, name, ...fieldsUser } = user;
+      const { password, name, image, ...fieldsUser } = user;
       const { firstName, lastName } = splitUserName(name);
       const userFields = Object.fromEntries(
         Object.entries(fieldsUser).filter(([_, value]) => value !== null),
       );
       return {
         ...userFields,
+        image: image?.fileUrl,
         firstName: firstName || undefined,
         lastName: lastName || undefined,
       };
@@ -63,6 +65,7 @@ const ProfileForm = ({ user }: { user: User }) => {
             toast.error(data.error);
           }
           if (data.success) {
+            update();
             toast.success(data.success);
             router.refresh();
           }
@@ -76,18 +79,18 @@ const ProfileForm = ({ user }: { user: User }) => {
     <Form {...form}>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="self-center w-3/4 px-8 grid grid-cols-2 gap-2 space-y-3 md:px-24"
+        className="grid self-center w-3/4 grid-cols-2 gap-2 px-8 space-y-3 md:px-24"
       >
         <FormHeader
           label="Update"
           description="Your profile information"
-          className="mt-6 mb-2 col-span-2"
+          className="col-span-2 mt-6 mb-2"
         />
         <ReusableForm formFields={profileFields} />
         <FormHeader
           label="Account and security"
           description="Securely update your access settings and credentials"
-          className="my-2 col-span-2"
+          className="col-span-2 my-2"
         />
         <ReusableForm formFields={accountFields(isOAuth || false)} />
         <SubmitButton label="Update your Profile" isSubmitting={isPending} />

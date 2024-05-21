@@ -8,7 +8,11 @@ import {
   updateProgramNoImageSchema,
 } from '@/validation/programs/program.validation';
 import { UserRole } from '@prisma/client';
-import { uploadFile } from '../firebase/storage.actions';
+import {
+  FilesUpload,
+  deleteFiles,
+  filesUpload,
+} from '../firebase/storage.actions';
 
 export type UpdateProgramType =
   | {
@@ -34,7 +38,10 @@ export const updateProgram = async (
         where: { id: userId },
         select: { role: true },
       }),
-      db.program.findUnique({ where: { id }, select: { id: true } }),
+      db.program.findUnique({
+        where: { id },
+        select: { id: true, image: { select: { filePath: true } } },
+      }),
       db.program.findFirst({ where: { title }, select: { id: true } }),
       db.program.findFirst({ where: { code }, select: { id: true } }),
     ]);
@@ -51,20 +58,20 @@ export const updateProgram = async (
     return { error: 'A program with this code already exists' };
 
   let formData: FormData | undefined;
-  let imgUrl: string | undefined;
+  let programImage: FilesUpload | undefined;
 
   if ('formData' in values) {
     formData = values.formData;
     const image = formData?.get('image') as File;
-    if (image) {
-      const uploadReturn = await uploadFile({
-        buffer: Buffer.from(await image.arrayBuffer()),
-        contentType: image.type,
-        fileName: image.name,
-      });
-
-      if ('error' in uploadReturn) return { error: uploadReturn.error };
-      imgUrl = uploadReturn.fileUrl;
+    if (!!image) {
+      const [_, upload] = await Promise.all([
+        !!programExist.image?.filePath
+          ? deleteFiles([programExist.image.filePath])
+          : Promise.resolve(undefined),
+        filesUpload([image], `programs/${id}`),
+      ]);
+      if ('error' in upload) return { error: upload.error };
+      programImage = upload[0];
     }
   }
 
@@ -78,7 +85,17 @@ export const updateProgram = async (
         prerequisites: prerequisiteCourses
           ? { set: prerequisiteCourses.map((id) => ({ id })) }
           : { set: [] },
-        imgUrl,
+        image: programImage
+          ? {
+              upsert: {
+                where: {
+                  programId: id,
+                },
+                create: programImage,
+                update: programImage,
+              },
+            }
+          : undefined,
       },
     });
     return {

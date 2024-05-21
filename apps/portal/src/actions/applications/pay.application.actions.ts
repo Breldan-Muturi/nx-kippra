@@ -30,7 +30,7 @@ const applicationPromise = async (id: string) =>
           nationalId: true,
           email: true,
           phoneNumber: true,
-          image: true,
+          image: { select: { fileUrl: true } },
         },
       },
       trainingSession: {
@@ -124,7 +124,7 @@ export const getPaymentApplicationPromise = async (
         clientIDNumber: nationalId || undefined,
         clientMSISDN: phoneNumber ? parseInt(phoneNumber) : undefined,
         clientName: name || undefined,
-        pictureURL: image || undefined,
+        pictureURL: image?.fileUrl,
       },
       existingInvoices: invoice,
       currency,

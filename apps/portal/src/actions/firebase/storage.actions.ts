@@ -5,6 +5,84 @@ import { getDownloadURL, getStorage } from 'firebase-admin/storage';
 import path from 'path';
 import { initApp } from './config';
 
+export type FilesUpload = {
+  fileUrl: string;
+  filePath: string;
+  contentType: string;
+  size: number;
+};
+export type FilesUploadReturn = { error: string } | FilesUpload[];
+
+export const filesUpload = async (
+  files: File[],
+  path: string,
+): Promise<FilesUploadReturn> => {
+  await initApp();
+  const bucket = getStorage().bucket();
+  try {
+    const uploadPromises = files.map(async (file) => {
+      const filePath = `${path}/${file.name}`;
+      const upload = bucket.file(filePath);
+      const buffer = Buffer.from(await file.arrayBuffer());
+      await upload.save(buffer, {
+        metadata: { contentType: file.type },
+      });
+      const [[metadata], fileUrl] = await Promise.all([
+        upload.getMetadata(),
+        getDownloadURL(upload),
+      ]);
+      return {
+        fileUrl,
+        filePath,
+        contentType: metadata.contentType || '',
+        size: Number(metadata.size) || 0,
+      };
+    });
+    return await Promise.all(uploadPromises);
+  } catch (e) {
+    console.error('Error uploading files to Firebase: ', e);
+    return {
+      error:
+        'Failed to upload files due to a server error. Please try again later',
+    };
+  }
+};
+
+export type PDFUpload = { buffer: Buffer; fileName: string };
+export const pdfsUpload = async (
+  pdfUploads: PDFUpload[],
+  path: string,
+): Promise<FilesUploadReturn> => {
+  await initApp();
+  const bucket = getStorage().bucket();
+  try {
+    const pdfPromises = pdfUploads.map(async (pdfUpload) => {
+      const filePath = `${path}/${pdfUpload.fileName}`;
+      const file = bucket.file(filePath);
+      await file.save(pdfUpload.buffer, {
+        metadata: { contentType: 'application/pdf' },
+      });
+      const [[metadata], fileUrl] = await Promise.all([
+        file.getMetadata(),
+        getDownloadURL(file),
+      ]);
+      return {
+        fileUrl,
+        filePath,
+        contentType: metadata.contentType || '',
+        size: Number(metadata.size) || 0,
+      };
+    });
+    return await Promise.all(pdfPromises);
+  } catch (e) {
+    console.error('Error uploading files to firebase: ', e);
+    return {
+      error:
+        'Failed to upload files due to a server error. Please try again later',
+    };
+  }
+};
+
 export const uploadPDFile = async (
   buffer: Buffer,
   fileName: string,
@@ -48,32 +126,6 @@ export const uploadFile = async ({
   } catch (error) {
     console.error('Error pushing image to Firebase: ', error);
     return { error: 'There was an error pushing the image to Firebase' };
-  }
-};
-
-export const uploadMultiFiles = async (
-  files: File[],
-  path?: string,
-): Promise<{ error: string } | string[]> => {
-  await initApp();
-  const bucket = getStorage().bucket();
-  try {
-    const uploadPromises = files.map(async (file) => {
-      const filePath = `uploads${path ? `/${path}` : ''}/${file.name}`;
-      const upload = bucket.file(filePath);
-      const buffer = Buffer.from(await file.arrayBuffer());
-      await upload.save(buffer, {
-        metadata: { contentType: file.type },
-      });
-      return filePath;
-    });
-    return await Promise.all(uploadPromises);
-  } catch (e) {
-    console.error('Error uploading files to Firebase: ', e);
-    return {
-      error:
-        'Failed to upload files due to a server error. Please try again later',
-    };
   }
 };
 

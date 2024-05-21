@@ -4,6 +4,7 @@ import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { ActionReturnType } from '@/types/actions.types';
 import { OrganizationRole, UserRole } from '@prisma/client';
+import { deleteFiles } from '../firebase/storage.actions';
 
 const getExistingUser = async (id: string) =>
   await db.user.findUnique({
@@ -15,7 +16,7 @@ type DeleteOrgUser = Awaited<ReturnType<typeof getExistingUser>>;
 const getExistingOrganization = async (id: string) =>
   await db.organization.findUnique({
     where: { id },
-    select: { id: true, users: true },
+    select: { id: true, users: true, image: { select: { filePath: true } } },
   });
 type DeleteOrgUsers = Awaited<ReturnType<typeof getExistingOrganization>>;
 
@@ -26,9 +27,9 @@ export const deleteOrganization = async (
   if (!userId)
     return { error: 'You must be logged in to delete an organization' };
 
-  let existingUser: DeleteOrgUser, existingOrgUsers: DeleteOrgUsers;
+  let existingUser: DeleteOrgUser, existingOrg: DeleteOrgUsers;
   try {
-    [existingUser, existingOrgUsers] = await Promise.all([
+    [existingUser, existingOrg] = await Promise.all([
       getExistingUser(userId),
       getExistingOrganization(orgId),
     ]);
@@ -43,12 +44,12 @@ export const deleteOrganization = async (
         'Failed to confirm your account information. Please try again later',
     };
 
-  if (!existingOrgUsers || !existingOrgUsers.users || !existingOrgUsers.id)
+  if (!existingOrg || !existingOrg.users || !existingOrg.id)
     return {
       error: 'Failed to verify organization details. Please try again later',
     };
 
-  const isOrgAdmin = !!existingOrgUsers.users.find(
+  const isOrgAdmin = !!existingOrg.users.find(
     ({ userId, role }) =>
       userId === existingUser?.id && role === OrganizationRole.OWNER,
   );
@@ -61,11 +62,16 @@ export const deleteOrganization = async (
     await db.$transaction(
       async (prisma) => {
         await prisma.userOrganization.deleteMany({
-          where: { organizationId: existingOrgUsers?.id },
+          where: { organizationId: existingOrg?.id },
         });
-        await prisma.organization.delete({
-          where: { id: existingOrgUsers?.id },
-        });
+        await Promise.all([
+          !!existingOrg?.image?.filePath
+            ? deleteFiles([existingOrg.image?.filePath!])
+            : Promise.resolve(undefined),
+          prisma.organization.delete({
+            where: { id: existingOrg?.id },
+          }),
+        ]);
       },
       { maxWait: 20000, timeout: 200000 },
     );

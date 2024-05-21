@@ -5,13 +5,12 @@ import { db } from '@/lib/db';
 import { FormError } from '@/types/actions.types';
 import {
   NewProgramImageFileType,
-  NewProgramImageUrl,
   NewProgramNoImageType,
-  newProgramImageUrlSchema,
   newProgramNoImageSchema,
 } from '@/validation/programs/program.validation';
 import { UserRole } from '@prisma/client';
-import { uploadFile } from '../firebase/storage.actions';
+import { v4 } from 'uuid';
+import { filesUpload } from '../firebase/storage.actions';
 
 export type NewProgramType = {
   formData: FormData;
@@ -41,7 +40,15 @@ export const newProgram = async ({
     return { error: 'Invalid fields' };
   }
 
-  const { title, code, serviceId, serviceIdUsd } = validFields.data;
+  const {
+    title,
+    code,
+    serviceId,
+    serviceIdUsd,
+    prerequisiteCourses,
+    ...theRest
+  } = validFields.data;
+  const id = v4();
 
   const [existingProgram, uploadReturn] = await Promise.all([
     db.program.findFirst({
@@ -50,12 +57,9 @@ export const newProgram = async ({
       },
       select: { title: true, code: true, serviceId: true, serviceIdUsd: true },
     }),
-    uploadFile({
-      buffer: Buffer.from(await image.arrayBuffer()),
-      contentType: image.type,
-      fileName: image.name,
-    }),
+    filesUpload([image], `programs/${id}`),
   ]);
+
   let formErrors: FormError<NewProgramImageFileType>[] = [];
   if (existingProgram) {
     if (existingProgram.code === code) {
@@ -98,23 +102,21 @@ export const newProgram = async ({
     return { error: uploadReturn.error };
   }
 
-  const programWithImage: NewProgramImageUrl = newProgramImageUrlSchema.parse({
-    ...validFields.data,
-    imgUrl: uploadReturn.fileUrl,
-  });
-
-  const { prerequisiteCourses: prerequisites, ...newValidProgram } =
-    programWithImage;
-
   try {
     const newProgram = await db.program.create({
       data: {
-        ...newValidProgram,
-        prerequisites: prerequisites
+        id,
+        title,
+        serviceId,
+        serviceIdUsd,
+        code,
+        image: { create: uploadReturn[0] },
+        prerequisites: prerequisiteCourses
           ? {
-              connect: prerequisites.map((id) => ({ id })),
+              connect: prerequisiteCourses.map((id) => ({ id })),
             }
           : undefined,
+        ...theRest,
       },
     });
     return {

@@ -9,7 +9,11 @@ import {
   updateOrganizationSchema,
 } from '@/validation/organization/organization.validation';
 import { OrganizationRole, UserRole } from '@prisma/client';
-import { uploadFile } from '../firebase/storage.actions';
+import {
+  FilesUpload,
+  deleteFiles,
+  filesUpload,
+} from '../firebase/storage.actions';
 
 const getExistingUser = async ({
   id,
@@ -32,7 +36,10 @@ const getExistingUser = async ({
 type UpdateOrgUser = Awaited<ReturnType<typeof getExistingUser>>;
 
 const getExistingOrganization = async (id: string) =>
-  await db.organization.findUnique({ where: { id }, select: { id: true } });
+  await db.organization.findUnique({
+    where: { id },
+    select: { id: true, image: { select: { filePath: true } } },
+  });
 type UpdateOrg = Awaited<ReturnType<typeof getExistingOrganization>>;
 
 export type UpdateOrganizationType =
@@ -76,18 +83,19 @@ export const updateOrganization = async (
   if (!existingOrg || !existingOrg.id)
     return { error: 'Organization not found. Please try again later' };
 
-  let imgUrl: string | undefined;
+  let imgFile: FilesUpload | undefined;
   if ('formData' in values) {
     const formData = values.formData;
     const image = formData.get('image') as File;
     if (!!image) {
-      const uploadReturn = await uploadFile({
-        buffer: Buffer.from(await image.arrayBuffer()),
-        contentType: image.type,
-        fileName: image.name,
-      });
-      if ('error' in uploadReturn) return { error: uploadReturn.error };
-      imgUrl = uploadReturn.fileUrl;
+      const [_, upload] = await Promise.all([
+        !!existingOrg.image?.filePath
+          ? deleteFiles([existingOrg.image.filePath])
+          : Promise.resolve(undefined),
+        filesUpload([image], `organizations/${existingOrg.id}`),
+      ]);
+      if ('error' in upload) return { error: upload.error };
+      imgFile = upload[0];
     }
   }
 
@@ -104,7 +112,15 @@ export const updateOrganization = async (
         address: organizationAddress,
         email: organizationEmail,
         phone: organizationPhone,
-        image: imgUrl,
+        image: imgFile
+          ? {
+              upsert: {
+                where: { organizationId: existingOrg.id },
+                create: imgFile,
+                update: imgFile,
+              },
+            }
+          : undefined,
         ...orgInfo,
       },
     });

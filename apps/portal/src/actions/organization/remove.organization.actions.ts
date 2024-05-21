@@ -260,7 +260,7 @@ export const removeOrganizationPopup = async (
         .map(({ userId, user }) => ({
           value: userId,
           optionLabel: user.name,
-          image: user.image || undefined,
+          image: user.image?.fileUrl,
           email: user.email,
         })),
       orgId: id,

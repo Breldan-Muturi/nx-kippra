@@ -1,5 +1,5 @@
 'use client';
-import { PayeeApplicationModal } from '@/actions/applications/user/pay.application.actions';
+import { PayeeApplicationModal } from '@/actions/applications/pay.application.actions';
 import { initiatePayment } from '@/actions/payments/initiate.payment.actions';
 import ReusableForm from '@/components/form/ReusableForm';
 import SubmitButton from '@/components/form/SubmitButton';

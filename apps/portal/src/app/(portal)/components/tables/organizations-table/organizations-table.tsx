@@ -1,9 +1,18 @@
 'use client';
 import {
+  ValidateInvite,
+  validateInvite,
+} from '@/actions/invites/validate.invites.actions';
+import {
   FetchOrganizationsTable,
   SingleOrganizationDetail,
   filterOrganizations,
 } from '@/actions/organization/filter.organization.actions';
+import {
+  RemoveOrgData,
+  removeOrganizationPopup,
+} from '@/actions/organization/remove.organization.actions';
+import { OrganizationSearchParams } from '@/app/(portal)/(tables)/organizations/page';
 import handleTableColumns from '@/components/table/handle-table-columns';
 import ReusableTable from '@/components/table/reusable-table';
 import TablesPagination from '@/components/table/table-pagination';
@@ -12,7 +21,6 @@ import TableViews from '@/components/table/table-views';
 import {
   FilterOrganizationsType,
   OrganizationPathSchema,
-  OrganizationTableSchema,
   filterOrganizationsSchema,
   organizationPathSchema,
 } from '@/validation/organization/organization.validation';
@@ -20,36 +28,27 @@ import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { SubmitHandler } from 'react-hook-form';
-import OrganizationFilterForm from './filter/organizations-filter-form';
-import organizationFilterFields from './filter/organizations-filter-fields';
-import organizationColumnInfo from './columns/organization-column-info';
+import { toast } from 'sonner';
 import organizationColumnActions from './columns/organization-column-actions';
-import organizationColumnRole from './columns/organization-column-role';
-import organizationColumnOwner from './columns/organization-column-owner';
-import organizationColumnUsers from './columns/organization-column-users';
-import organizationColumnInvites from './columns/organization-column-invites';
 import organizationColumnApplications from './columns/organization-column-applications';
+import organizationColumnInfo from './columns/organization-column-info';
+import organizationColumnInvites from './columns/organization-column-invites';
+import organizationColumnOwner from './columns/organization-column-owner';
 import organizationColumnParticipants from './columns/organization-column-participants';
+import organizationColumnRole from './columns/organization-column-role';
+import organizationColumnUsers from './columns/organization-column-users';
+import organizationFilterFields from './filter/organizations-filter-fields';
+import OrganizationFilterForm from './filter/organizations-filter-form';
 import DeleteOrgModal, {
   DeleteOrgProps,
 } from './modals/organization-modal-delete';
-import RemoveOrgModal from './modals/organization-modal-remove';
-import {
-  RemoveOrgData,
-  removeOrganizationPopup,
-} from '@/actions/organization/remove.organization.actions';
-import { toast } from 'sonner';
-import {
-  ValidateInvite,
-  validateInvite,
-} from '@/actions/invites/validate.invites.actions';
 import InviteOrgModal from './modals/organization-modal-invite';
-import { OrganizationSearchParams } from '@/app/(portal)/(tables)/organizations/page';
+import RemoveOrgModal from './modals/organization-modal-remove';
 
 type OrganizationTableProps = {
   orgInvite?: ValidateInvite;
   searchParams: OrganizationSearchParams;
-  organizationTable: Exclude<FetchOrganizationsTable, { error: string }>;
+  organizationTable: FetchOrganizationsTable;
 };
 
 const OrganizationsTable = ({

@@ -19,7 +19,7 @@ const fetchParticipants = async ({
       id: true,
       name: true,
       email: true,
-      image: true,
+      image: { select: { fileUrl: true } },
       citizenship: true,
       nationalId: true,
       _count: {

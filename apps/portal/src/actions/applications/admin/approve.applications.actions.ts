@@ -1,10 +1,13 @@
 'use server';
-import { uploadPDFile } from '@/actions/firebase/storage.actions';
+import {
+  FilesUploadReturn,
+  pdfsUpload,
+} from '@/actions/firebase/storage.actions';
 import {
   PDFResponse,
   generatePDFFromApi,
 } from '@/actions/pdf/generate-pdf-api.actions';
-import { currentRole, currentUser } from '@/lib/auth';
+import { currentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { approvedApplicationEmail } from '@/mail/application.mail';
 import { ActionReturnType } from '@/types/actions.types';
@@ -97,9 +100,9 @@ export const adminApproveApplication = async ({
     }
   }
 
-  let proforma: PDFResponse, offer: PDFResponse;
+  let pdfProforma: PDFResponse, pdfOffer: PDFResponse;
   try {
-    [proforma, offer] = await Promise.all([
+    [pdfProforma, pdfOffer] = await Promise.all([
       generatePDFFromApi({
         applicationId: existingApplication.id,
         template: 'pro-forma-invoice',
@@ -116,31 +119,34 @@ export const adminApproveApplication = async ({
         'Failed to generate pdfs due to a server error. Please try again later',
     };
   }
-  if ('error' in proforma) {
+  if ('error' in pdfProforma) {
     return {
       error:
         'Failed to generate proforma due to a server error. Please try again later',
     };
   }
-  if ('error' in offer) {
+  if ('error' in pdfOffer) {
     return {
       error:
         'Failed to generate offer letter due to a server error. Please try again later',
     };
   }
 
-  let proformaSaved: ActionReturnType, offerSaved: ActionReturnType;
+  let pdfUploads: FilesUploadReturn;
   try {
-    [proformaSaved, offerSaved] = await Promise.all([
-      uploadPDFile(
-        proforma.generatedPDF,
-        `${existingApplication.id}-proforma-invoice`,
-      ),
-      uploadPDFile(
-        offer.generatedPDF,
-        `${existingApplication.id}-offer-letter`,
-      ),
-    ]);
+    pdfUploads = await pdfsUpload(
+      [
+        {
+          buffer: pdfProforma.generatedPDF,
+          fileName: 'proforma-invoice',
+        },
+        {
+          buffer: pdfOffer.generatedPDF,
+          fileName: 'offer-letter',
+        },
+      ],
+      `applications/${existingApplication.id}`,
+    );
   } catch (e) {
     console.error('Failed to save pdfs due to a server error: ', e);
     return {
@@ -148,19 +154,21 @@ export const adminApproveApplication = async ({
         'Failed to save pdfs due to a server error. Please try again later',
     };
   }
-  if (proformaSaved.error) {
-    return {
-      error:
-        'Failed to save proforma due to a server error. Please try again later',
-    };
-  }
-  if (offerSaved.error) {
-    return {
-      error:
-        'Failed to save offer letter due to a server error. Please try again later',
-    };
-  }
 
+  if ('error' in pdfUploads) return { error: pdfUploads.error };
+
+  const proforma = pdfUploads.find(({ filePath }) =>
+    filePath.endsWith('proforma-invoice'),
+  );
+  const offer = pdfUploads.find(({ filePath }) =>
+    filePath.endsWith('offer-letter'),
+  );
+
+  if (!proforma || !offer)
+    return {
+      error:
+        'Failed to generate PDFs for this application due to server error. Please try again later',
+    };
   // Update Application Status, Proforma-Invoice, and Offer Letter
   try {
     // Use a transaction to create the documents and update the application
@@ -168,18 +176,8 @@ export const adminApproveApplication = async ({
       where: { id: existingApplication.id },
       data: {
         status: ApplicationStatus.APPROVED,
-        proformaInvoice: {
-          create: {
-            fileName: `${existingApplication.id}-proforma-invoice`,
-            filePath: proformaSaved.success!,
-          },
-        },
-        offerLetter: {
-          create: {
-            fileName: `${existingApplication.id}-offer-letter`,
-            filePath: offerSaved.success!,
-          },
-        },
+        proformaInvoice: { create: proforma! },
+        offerLetter: { create: offer! },
       },
     });
   } catch (error) {
@@ -200,12 +198,12 @@ export const adminApproveApplication = async ({
       applicantEmail: existingApplication.owner.email,
       message,
       proformaInvoice: {
-        filename: `${existingApplication.id}-proforma-invoice`,
-        path: proformaSaved.success!,
+        filename: `Proforma invoice`,
+        path: proforma?.filePath!,
       },
       offerLetter: {
-        filename: `${existingApplication.id}-offer-letter`,
-        path: offerSaved.success!,
+        filename: `Offer letter`,
+        path: offer?.filePath!,
       },
     });
     return { success: 'Application approved successfully' };
@@ -213,27 +211,4 @@ export const adminApproveApplication = async ({
     console.log(error);
     return { error: 'There was an error sending the notification email' };
   }
-};
-
-export const adminRejectApplication = async (
-  applicationId: string,
-): Promise<ActionReturnType> => {
-  const role = await currentRole();
-  if (role !== UserRole.ADMIN)
-    return { error: 'You are not permited to reject applications' };
-
-  // Update Application Status
-  // Send Applcation Rejection Email
-  return { success: 'Application approved successfully' };
-};
-
-export const adminSendEmail = async (
-  applicationId: string,
-): Promise<ActionReturnType> => {
-  const role = await currentRole();
-  if (role !== UserRole.ADMIN)
-    return { error: 'Only admins can send application related email' };
-
-  // Send Application Related Email
-  return { success: 'Email successfully sent to the applicant' };
 };

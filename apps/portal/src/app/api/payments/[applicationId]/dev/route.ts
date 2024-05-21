@@ -1,4 +1,4 @@
-import { uploadPDFile } from '@/actions/firebase/storage.actions';
+import { pdfsUpload } from '@/actions/firebase/storage.actions';
 import { generatePDFFromApi } from '@/actions/pdf/generate-pdf-api.actions';
 import { processDateString, stringToDecimal } from '@/helpers/payment.helpers';
 import { db } from '@/lib/db';
@@ -164,14 +164,20 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
   }
 
   // Save the application receipt
-  const uploadedReceipt = await uploadPDFile(
-    applicationReceipt.generatedPDF,
-    `${existingApplication.id}-receipt`,
+  const uploadedReceipt = await pdfsUpload(
+    [
+      {
+        buffer: applicationReceipt.generatedPDF,
+        fileName: `receipt-${existingApplication!.payment.length + 1}`,
+      },
+    ],
+    `applications/${existingApplication.id}`,
   );
 
-  if (uploadedReceipt.error || !uploadedReceipt.success) {
+  if ('error' in uploadedReceipt) {
     console.error(
-      'There was an error in saving the application receipt to the database',
+      'There was an error in saving the application receipt to the database: ',
+      uploadedReceipt.error,
     );
     return new Response('Application receipt error', {
       status: 500,
@@ -180,7 +186,7 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
   }
 
   console.log(
-    `Application receipt generated and saved. Link: ${uploadedReceipt.success}, sending payment confirmation email ...`,
+    `Application receipt generated and saved. Link: ${uploadedReceipt[0].fileUrl}, sending payment confirmation email ...`,
   );
 
   const isUpdate =
@@ -208,11 +214,7 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
             })),
           }),
           prisma.paymentReceipt.create({
-            data: {
-              payment: { connect: { id: newPayment.id } },
-              fileName: `${existingApplication!.id}-receipt-${existingApplication!.payment.length + 1}`,
-              filePath: uploadedReceipt.success!,
-            },
+            data: { paymentId: newPayment.id, ...uploadedReceipt[0] },
           }),
           isUpdate
             ? prisma.application.update({
@@ -258,7 +260,7 @@ export async function POST(req: Request, { params: { applicationId } }: Props) {
       title: existingApplication!.trainingSession.program.title,
       isUpdate,
       paymentReceipt: {
-        filename: receipt.fileName,
+        filename: 'Payment receipt',
         path: receipt.filePath,
       },
     });

@@ -3,7 +3,6 @@ import {
   newCompleted,
 } from '@/actions/completed-programs/new.completed.actions';
 import {
-  ProgramsOption,
   UserOption,
   getProgramOptions,
 } from '@/actions/completed-programs/options.completed.actions';
@@ -11,6 +10,7 @@ import {
   UpdateCompletedArgs,
   updateCompleted,
 } from '@/actions/completed-programs/update.completed.actions';
+import { ProgramsOption } from '@/actions/programmes/programs.options.actions';
 import ReusableForm from '@/components/form/ReusableForm';
 import SubmitButton from '@/components/form/SubmitButton';
 import { Button } from '@/components/ui/button';

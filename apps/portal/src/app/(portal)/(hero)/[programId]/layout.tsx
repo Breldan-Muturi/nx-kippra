@@ -1,7 +1,7 @@
-import React from 'react';
-import DescriptionTabs from './components/DescriptionTabs';
 import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
+import React from 'react';
+import DescriptionTabs from './components/DescriptionTabs';
 
 interface ProgramLayoutProps {
   children: React.ReactNode;
@@ -16,7 +16,7 @@ const ProgramLayout = async ({
     where: { id: programId },
     select: {
       title: true,
-      imgUrl: true,
+      image: { select: { fileUrl: true } },
     },
   });
 

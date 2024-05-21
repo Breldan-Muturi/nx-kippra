@@ -82,7 +82,10 @@ const Homepage = async ({
   });
 
   const programsPromise = db.program.findMany({
-    include: {
+    select: {
+      id: true,
+      title: true,
+      image: { select: { fileUrl: true } },
       _count: {
         select: { trainingSessions: true },
       },
@@ -186,18 +189,20 @@ const Homepage = async ({
 
   return (
     <div className="w-full">
-      <Hero image="/static/images/hero_image.jpeg" alt="KIPPRA hero image" />
+      <Hero image="/hero_image.jpeg" alt="KIPPRA hero image" />
       <SectionWrapper sectionLabel="Our Programmes">
         <ResponsiveGrid>
           {programs
             .sort(
               (a, b) => b._count.trainingSessions - a._count.trainingSessions,
             )
-            .map(({ _count: { trainingSessions }, ...programData }, i) => (
+            .map(({ _count: { trainingSessions }, id, image, title }, i) => (
               <ProgramCard
-                key={`${i}-${programData.id}`}
+                key={`${i}${id}`}
                 sessions={trainingSessions}
-                {...programData}
+                imgUrl={image?.fileUrl}
+                id={id}
+                title={title}
               />
             ))}
         </ResponsiveGrid>

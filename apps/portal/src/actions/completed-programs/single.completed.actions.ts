@@ -40,6 +40,7 @@ const completedPromise = async (id: string) =>
       creator: true,
       participant: true,
       program: true,
+      completionEvidence: true,
     },
   });
 type CompletedPromise = Awaited<ReturnType<typeof completedPromise>>;

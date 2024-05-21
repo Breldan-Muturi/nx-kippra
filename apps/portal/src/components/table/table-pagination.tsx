@@ -66,7 +66,7 @@ const TablesPagination = ({
       </div>
       <div className="flex items-center justify-end px-4 space-x-2">
         <Select
-          disabled={isPending}
+          disabled={isPending || count <= 10}
           onValueChange={changePageSize}
           value={pageSize}
         >

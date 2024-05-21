@@ -6,7 +6,7 @@ import { deletedApplicationEmail } from '@/mail/application.mail';
 import { ActionReturnType } from '@/types/actions.types';
 import { UserRole } from '@prisma/client';
 
-export const userDeleteApplication = async (
+export const deleteApplication = async (
   applicationId: string,
 ): Promise<ActionReturnType> => {
   const user = await currentUser();

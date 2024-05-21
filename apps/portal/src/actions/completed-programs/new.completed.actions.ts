@@ -7,8 +7,8 @@ import {
   CompletedSchema,
   completedSchema,
 } from '@/validation/completed-program/completed-program.validation';
-import { CompletedProgram, OrganizationRole, UserRole } from '@prisma/client';
-import { uploadMultiFiles } from '../firebase/storage.actions';
+import { OrganizationRole, UserRole } from '@prisma/client';
+import { filesUpload } from '../firebase/storage.actions';
 
 const userPromise = async (id: string) =>
   await db.user.findUnique({
@@ -101,20 +101,21 @@ export const newCompleted = async ({
     return { error: 'You are not authorized to submit this completed program' };
 
   const files = formData.getAll('completionEvidence') as File[];
-  const completionEvidence = await uploadMultiFiles(
+  const completionEvidence = await filesUpload(
     files,
     `completed-evidence/${!!participant ? participant.name : user.name}`,
   );
   if ('error' in completionEvidence)
     return { error: 'Failed to upload files, please try again later' };
 
-  let completedProgram: CompletedProgram;
   try {
-    completedProgram = await db.completedProgram.create({
+    await db.completedProgram.create({
       data: {
         ...validData.data,
-        completionEvidence,
         creatorId: user.id,
+        completionEvidence: {
+          createMany: { data: completionEvidence, skipDuplicates: true },
+        },
       },
     });
   } catch (error) {
@@ -131,10 +132,7 @@ export const newCompleted = async ({
     await newCompletedEmail({
       participantName: !!participant ? participant.name : user.name,
       programTitle: program.title,
-      to: [
-        ...(participant ? ([participant.email] as string[]) : []),
-        user.email,
-      ],
+      to: [...(participant ? [participant.email] : []), user.email],
     });
     return { success: 'New completed program added successfully' };
   } catch (e) {

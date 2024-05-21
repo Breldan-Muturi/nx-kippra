@@ -1,13 +1,10 @@
 'use client';
-import {
-  OrgOption,
-  ProgramOption,
-  TrainingSessionInfo,
-} from '@/actions/applications/form.applications.actions';
+import { TrainingSessionInfo } from '@/actions/applications/form.applications.actions';
 import {
   ValidAdminApplication,
   validateAdminApplication,
 } from '@/actions/applications/validate.applications.actions';
+import { OrgOption } from '@/actions/organization/org.options.actions';
 import {
   DynamicParticipantOption,
   fetchOrganizationParticipants,
@@ -16,6 +13,7 @@ import {
   SingleApplicationParticipant,
   getSingleParticipant,
 } from '@/actions/participants/single.participant.actions';
+import { ProgramsOption } from '@/actions/programmes/programs.options.actions';
 import {
   DynamicTrainingOption,
   fetchProgramTrainingSessions,
@@ -53,7 +51,7 @@ import ParticipantApplicationsTable from './participants/participants-table/part
 
 type NewApplicationFormProps = React.ComponentPropsWithoutRef<'form'> & {
   trainingSessionInfo?: TrainingSessionInfo;
-  programOptions?: ProgramOption[];
+  programOptions?: ProgramsOption[];
   orgOptions: OrgOption[];
 };
 

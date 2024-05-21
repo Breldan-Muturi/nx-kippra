@@ -1,6 +1,5 @@
 'use server';
 
-import { unstable_update } from '@/auth';
 import { getUserByEmail, getUserById } from '@/helpers/user.helper';
 import { db } from '@/lib/db';
 import { generateVerificationToken } from '@/lib/tokens';
@@ -11,7 +10,11 @@ import {
 } from '@/validation/profile/update.profile.validation';
 import { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import { uploadFile } from '../firebase/storage.actions';
+import {
+  FilesUpload,
+  deleteFiles,
+  filesUpload,
+} from '../firebase/storage.actions';
 
 export type ProfileActionParams =
   | {
@@ -73,21 +76,19 @@ export const updateProfile = async (
     userData.password = hashedPassword;
   }
 
-  let imageUrl: string | undefined;
-
+  let imageUser: FilesUpload | undefined;
   if (formData) {
     const image = formData.get('image') as File;
-    const uploadReturn = await uploadFile({
-      buffer: Buffer.from(await image.arrayBuffer()),
-      contentType: image.type,
-      fileName: image.name,
-    });
-
-    if ('error' in uploadReturn) {
-      return { error: uploadReturn.error };
+    const [_, upload] = await Promise.all([
+      !!dbUser.image?.fileUrl
+        ? deleteFiles([dbUser.image.fileUrl])
+        : Promise.resolve(undefined),
+      filesUpload([image], `participant/${dbUser.id}`),
+    ]);
+    if ('error' in upload) {
+      return { error: upload.error };
     }
-
-    imageUrl = uploadReturn.fileUrl;
+    imageUser = upload[0];
   }
 
   const updatedUser = await db.user.update({
@@ -95,18 +96,29 @@ export const updateProfile = async (
     data: {
       ...userData,
       name: username,
-      image: imageUrl,
+      image: !!imageUser
+        ? {
+            upsert: {
+              where: { userId: dbUser.id },
+              create: imageUser,
+              update: imageUser,
+            },
+          }
+        : undefined,
+    },
+    include: {
+      image: { select: { fileUrl: true } },
     },
   });
 
-  unstable_update({
-    user: {
-      email: updatedUser.email,
-      name: updatedUser.name,
-      isTwoFactorEnabled: updatedUser.isTwoFactorEnabled,
-      image: updatedUser.image,
-    },
-  });
+  // unstable_update({
+  //   user: {
+  //     email: updatedUser.email,
+  //     name: updatedUser.name,
+  //     isTwoFactorEnabled: updatedUser.isTwoFactorEnabled,
+  //     image: updatedUser.image?.fileUrl,
+  //   },
+  // });
 
   // Update this so the new user data updates the form fields
   return { success: 'Profile updated successfully 🎉', user: updatedUser };

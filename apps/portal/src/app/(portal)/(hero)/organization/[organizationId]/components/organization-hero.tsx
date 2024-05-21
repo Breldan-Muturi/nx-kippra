@@ -8,9 +8,9 @@ import { PageNavButton } from '../../../../../../components/buttons/page-nav-but
 const OrganizationHero = async ({ id }: { id: string }) => {
   const heroInfo = await db.organization.findUnique({
     where: { id },
-    select: { name: true, image: true },
+    select: { name: true, image: { select: { fileUrl: true } } },
   });
-  const heroImage = heroInfo?.image;
+  const heroImage = heroInfo?.image?.fileUrl;
   const heroTitle = heroInfo?.name;
 
   const organizationRoutes: NavBarLinks[] = [

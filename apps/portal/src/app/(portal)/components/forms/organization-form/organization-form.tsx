@@ -8,6 +8,7 @@ import {
   UpdateOrganizationType,
   updateOrganization,
 } from '@/actions/organization/update.organization.actions';
+import { OrganizationPromise } from '@/app/(portal)/(hero)/organization/[organizationId]/(edit-organization)/page';
 import FormHeader from '@/components/form/FormHeader';
 import ReusableForm from '@/components/form/ReusableForm';
 import SubmitButton from '@/components/form/SubmitButton';
@@ -21,7 +22,6 @@ import {
   updateOrganizationImageFileSchema,
 } from '@/validation/organization/organization.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Organization } from '@prisma/client';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
@@ -29,7 +29,7 @@ import { toast } from 'sonner';
 import { organizationFields } from './organization-fields';
 
 type OrganizationFormProps = React.ComponentPropsWithoutRef<'form'> & {
-  organization?: Organization;
+  organization?: OrganizationPromise;
 };
 
 const OrganizationForm = ({
@@ -51,14 +51,16 @@ const OrganizationForm = ({
     mode: 'onChange',
     defaultValues: !!organization
       ? (() => {
+          const { address, email, phone, image, ...org } = organization;
           const organizationInfo = Object.fromEntries(
-            Object.entries(organization).filter(([_, value]) => value !== null),
+            Object.entries(org).filter(([_, value]) => value !== null),
           );
           return {
             ...organizationInfo,
-            organizationAddress: organization.address,
-            organizationEmail: organization.email,
-            organizationPhone: organization.phone,
+            organizationAddress: address,
+            organizationEmail: email,
+            organizationPhone: phone,
+            image: image?.fileUrl,
           };
         })()
       : {},

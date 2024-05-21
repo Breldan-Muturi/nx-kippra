@@ -45,20 +45,20 @@ const organizationsPromise = async (
     select: {
       id: true,
       name: true,
-      image: true,
       email: true,
+      contactPersonEmail: showContact,
+      image: { select: { fileUrl: true } },
       invites: {
         where: { email },
         select: { email: true, token: true },
         take: 1,
       },
-      contactPersonEmail: showContact,
       users: {
         select: {
           role: showUsers,
           user: {
             select: {
-              image: showUsers,
+              image: { select: { fileUrl: showUsers } },
               email: showUsers,
               name: showUsers,
               id: true,
@@ -86,18 +86,16 @@ export type OrganizationsTableData = Awaited<
   ReturnType<typeof organizationsPromise>
 >;
 export type SingleOrganizationDetail = OrganizationsTableData[number];
-
-export type FetchOrganizationsTable =
-  | { error: string }
-  | {
-      organizations: OrganizationsTableData;
-      count: number;
-      existingUser: OrganizationTableUser;
-    };
+export type FetchOrganizationsTable = {
+  organizations: OrganizationsTableData;
+  count: number;
+  existingUser: OrganizationTableUser;
+};
+export type FetchOrgTableReturn = { error: string } | FetchOrganizationsTable;
 
 export const fetchOrganizationsTable = async (
   params: OrganizationTableSchema,
-): Promise<FetchOrganizationsTable> => {
+): Promise<FetchOrgTableReturn> => {
   const userId = await currentUserId();
   if (!userId)
     return { error: 'You need to be logged in to access organizations.' };

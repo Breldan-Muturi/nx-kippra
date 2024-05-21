@@ -16,7 +16,7 @@ import { TableModalProps } from '@/types/tables.types';
 import { format } from 'date-fns';
 import { CheckSquare2, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useTransition } from 'react';
+import { useTransition } from 'react';
 import { toast } from 'sonner';
 
 type InviteOrgModalProps = Omit<TableModalProps, 'id'> & {
@@ -76,7 +76,7 @@ const InviteOrgModal = ({
         {validInvite && (
           <Avatar className="size-16 ring-4 ring-green-600/60">
             <AvatarImage
-              src={orgInvite.invite?.organization.image || undefined}
+              src={orgInvite.invite?.organization.image?.fileUrl}
               alt={`${orgInvite.invite?.organization.name}'s profile image`}
             />
             <AvatarFallback className="text-4xl">
@@ -103,7 +103,7 @@ const InviteOrgModal = ({
               Decline
             </Button>
             <Button
-              className="w-full bg-green-600 gap-2"
+              className="w-full gap-2 bg-green-600"
               onClick={() => handleResponse(true)}
               disabled={isPending}
             >

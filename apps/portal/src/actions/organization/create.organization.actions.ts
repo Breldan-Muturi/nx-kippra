@@ -5,7 +5,8 @@ import { db } from '@/lib/db';
 import { ActionReturnIdType } from '@/types/actions.types';
 import { NewOrganizationForm } from '@/validation/organization/organization.validation';
 import { OrganizationRole } from '@prisma/client';
-import { UploadImageReturn, uploadFile } from '../firebase/storage.actions';
+import { v4 } from 'uuid';
+import { FilesUploadReturn, filesUpload } from '../firebase/storage.actions';
 
 const getExistingUser = async (userId: string) =>
   await db.user.findUnique({
@@ -41,21 +42,17 @@ export const userNewOrganization = async ({
     return { error: 'You need to be logged in to add an organization' };
 
   const image = formData.get('image') as File;
+  const id = v4();
 
   let existingUser: NewOrganizationExistingUser,
     existingOrganizations: NewOrgValidateOrg,
-    uploadImageReturn: UploadImageReturn;
+    uploadReturn: FilesUploadReturn;
   try {
-    [existingUser, existingOrganizations, uploadImageReturn] =
-      await Promise.all([
-        getExistingUser(userId),
-        getExistingOrganizations(organization),
-        uploadFile({
-          buffer: Buffer.from(await image.arrayBuffer()),
-          contentType: image.type,
-          fileName: image.name,
-        }),
-      ]);
+    [existingUser, existingOrganizations, uploadReturn] = await Promise.all([
+      getExistingUser(userId),
+      getExistingOrganizations(organization),
+      filesUpload([image], `organizations/${id}`),
+    ]);
   } catch (error) {
     console.error('Could not validate details: ', error);
     return {
@@ -67,7 +64,7 @@ export const userNewOrganization = async ({
   if (!existingUser || !existingUser.id)
     return { error: 'User account not found. Please try again later' };
 
-  if ('error' in uploadImageReturn)
+  if ('error' in uploadReturn)
     return {
       error:
         'Failed to upload the image due to a server error. Please try again later',
@@ -98,7 +95,8 @@ export const userNewOrganization = async ({
   try {
     const newOrganization = await db.organization.create({
       data: {
-        image: uploadImageReturn.fileUrl,
+        id,
+        image: { create: uploadReturn[0] },
         address: organization.organizationAddress,
         email: organization.organizationEmail,
         phone: organization.organizationPhone,

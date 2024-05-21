@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import { completedDeletedEmail } from '@/mail/completed-program.mail';
 import { ActionReturnType } from '@/types/actions.types';
 import { OrganizationRole, UserRole } from '@prisma/client';
+import { deleteFiles } from '../firebase/storage.actions';
 
 const userPromise = async (id: string) =>
   await db.user.findUnique({
@@ -27,6 +28,7 @@ const completedPromise = async (ids: string[]) =>
     where: { id: { in: ids } },
     select: {
       id: true,
+      completionEvidence: { select: { filePath: true } },
       participantId: true,
       participant: {
         select: {
@@ -91,6 +93,11 @@ export const deleteCompleted = async ({
       db.completedProgram.deleteMany({
         where: { id: { in: authorizedDelete.map(({ id }) => id) } },
       }),
+      deleteFiles(
+        authorizedDelete.flatMap(({ completionEvidence }) =>
+          completionEvidence.map(({ filePath }) => filePath),
+        ),
+      ),
       completedDeletedEmail({
         name: user.name,
         bcc: [

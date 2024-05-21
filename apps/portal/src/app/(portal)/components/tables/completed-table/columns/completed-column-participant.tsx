@@ -10,7 +10,7 @@ const completedColumnParticipant: ColumnDef<SingleCompletedProgram> = {
     return (
       <TableUserCell
         userName={name}
-        userImage={image || undefined}
+        userImage={image?.fileUrl}
         userTableInfo={email}
       />
     );

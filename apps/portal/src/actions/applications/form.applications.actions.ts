@@ -3,6 +3,14 @@
 import { currentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { OrganizationRole, Prisma, UserRole } from '@prisma/client';
+import {
+  OrganizationPromise,
+  organizationPromise,
+} from '../organization/org.options.actions';
+import {
+  ProgramsOptionsPromise,
+  programsOptionsPromise,
+} from '../programmes/programs.options.actions';
 
 const trainingSessionPromise = async (id: string) =>
   await db.trainingSession.findUnique({
@@ -29,31 +37,10 @@ type TrainingSessionPromise = Awaited<
 >;
 export type TrainingSessionInfo = NonNullable<TrainingSessionPromise>;
 
-const organizationPromise = async (where: Prisma.OrganizationWhereInput) =>
-  await db.organization.findMany({
-    where,
-    select: {
-      id: true,
-      name: true,
-      image: true,
-      county: true,
-    },
-  });
-type OrganizationPromise = Awaited<ReturnType<typeof organizationPromise>>;
-export type OrgOption = OrganizationPromise[number];
-
-const programsPromise = async () =>
-  await db.program.findMany({
-    where: { trainingSessions: { some: { endDate: { gte: new Date() } } } },
-    select: { id: true, title: true, code: true, imgUrl: true },
-  });
-type ProgramPromise = Awaited<ReturnType<typeof programsPromise>>;
-export type ProgramOption = ProgramPromise[number];
-
 export type FormApplication = {
   orgOptions: OrganizationPromise;
   trainingSessionInfo?: TrainingSessionInfo;
-  programOptions?: ProgramPromise;
+  programOptions?: ProgramsOptionsPromise;
 };
 
 export const formApplication = async (
@@ -62,7 +49,7 @@ export const formApplication = async (
   const user = await currentUser();
   if (!user) return { error: 'Login to submit this application' };
   const isAdmin = user.role === UserRole.ADMIN;
-  let organizationWhere: Prisma.OrganizationWhereInput = {};
+  let organizationWhere: Prisma.OrganizationWhereInput | undefined;
   if (!isAdmin)
     organizationWhere = {
       users: {
@@ -74,12 +61,12 @@ export const formApplication = async (
 
   let trainingSessionInfo: TrainingSessionPromise | undefined,
     orgOptions: OrganizationPromise,
-    programOptions: ProgramPromise | undefined;
+    programOptions: ProgramsOptionsPromise | undefined;
   try {
     [trainingSessionInfo, orgOptions, programOptions] = await Promise.all([
       id ? trainingSessionPromise(id) : Promise.resolve(undefined),
       organizationPromise(organizationWhere),
-      isAdmin && !id ? programsPromise() : Promise.resolve(undefined),
+      isAdmin && !id ? programsOptionsPromise() : Promise.resolve(undefined),
     ]);
   } catch (e) {
     console.error(

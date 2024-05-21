@@ -1,27 +1,27 @@
 'use client';
+import { register } from '@/actions/account/register.actions';
+import { ValidateInvite } from '@/actions/invites/validate.invites.actions';
+import ComposableDescription from '@/components/form/ComposableDescription';
 import FormHeader from '@/components/form/FormHeader';
+import SubmitButton from '@/components/form/SubmitButton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Form } from '@/components/ui/form';
+import { avatarFallbackName } from '@/helpers/user.helper';
+import { cn } from '@/lib/utils';
 import {
   RegisterForm,
   registerSchema,
 } from '@/validation/account/account.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { MessageSquareWarning } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React, { useTransition } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import AccountForm from '../../components/AccountForm';
-import SubmitButton from '@/components/form/SubmitButton';
-import ComposableDescription from '@/components/form/ComposableDescription';
 import { toast } from 'sonner';
-import { register } from '@/actions/account/register.actions';
-import Link from 'next/link';
+import AccountForm from '../../components/AccountForm';
 import SocialLogin from '../../components/SocialLogin';
-import { useRouter } from 'next/navigation';
 import registerFields from './register-fields';
-import { ValidateInvite } from '@/actions/invites/validate.invites.actions';
-import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MessageSquareWarning } from 'lucide-react';
-import { avatarFallbackName } from '@/helpers/user.helper';
 
 type FormRegisterProps = React.ComponentPropsWithoutRef<'form'> & {
   validInvite?: ValidateInvite;
@@ -106,7 +106,7 @@ const FormRegister = ({
             {isInviteValid ? (
               <Avatar className="size-16 ring-4 ring-green-600/60">
                 <AvatarImage
-                  src={validInvite.invite?.organization.image || undefined}
+                  src={validInvite.invite?.organization.image?.fileUrl}
                   alt={`${validInvite.invite?.organization.name}'s profile image`}
                 />
                 <AvatarFallback className="text-lg">

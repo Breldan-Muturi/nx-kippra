@@ -1,4 +1,6 @@
 'use server';
+import { processSearchString } from '@/helpers/filter.helpers';
+import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { SelectOptions } from '@/types/form-field.types';
 import {
@@ -9,8 +11,6 @@ import {
 } from '@/validation/payment/payment.validation';
 import { Prisma, UserRole } from '@prisma/client';
 import filterRedirect from '../redirect.actions';
-import { processSearchString } from '@/helpers/filter.helpers';
-import { currentUserId } from '@/lib/auth';
 
 const userPromise = async (id: string) =>
   await db.user.findUnique({ where: { id }, select: { id: true, role: true } });
@@ -30,7 +30,9 @@ const selectPaymentsPromise = async (
       id: true,
       application: {
         select: {
-          owner: { select: { image: true, name: true } },
+          owner: {
+            select: { image: { select: { fileUrl: true } }, name: true },
+          },
           organization: { select: { name: true } },
           trainingSession: {
             select: {

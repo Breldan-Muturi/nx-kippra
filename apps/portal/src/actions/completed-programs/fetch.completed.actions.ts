@@ -67,7 +67,7 @@ const completedPromise = async ({
           id: true,
           name: true,
           email: true,
-          image: true,
+          image: { select: { fileUrl: true } },
           organizations: { select: { organizationId: true } },
         },
       },
