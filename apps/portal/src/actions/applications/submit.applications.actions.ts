@@ -415,7 +415,12 @@ export const submitAdminApplication = async (
       startDate,
       endDate,
       venue: venue ? venue : undefined,
-      applicantEmail: applicationOwner?.email || user!.email,
+      to: [
+        applicationOwner.email,
+        ...(!!user.email && applicationOwner.email !== user.email
+          ? [user.email]
+          : []),
+      ],
       proformaInvoice: {
         filename: `Proforma invoice`,
         path: proforma?.filePath!,

@@ -33,7 +33,7 @@ export const newApplicationEmail = async ({
 };
 
 export type ApprovedApplicationEmailType = {
-  applicantEmail: string;
+  to: string[];
   approvalDate: Date;
   title: string;
   startDate: Date;
@@ -45,7 +45,7 @@ export type ApprovedApplicationEmailType = {
 };
 
 export const approvedApplicationEmail = async ({
-  applicantEmail,
+  to,
   approvalDate,
   title,
   startDate,
@@ -62,7 +62,7 @@ export const approvedApplicationEmail = async ({
   try {
     await resend.emails.send({
       from,
-      to: applicantEmail,
+      to,
       subject: `KIPPRA: Application Approval for ${title} ${venue ? `at ${venue} ` : ''}from ${formattedStartDate} to ${formattedEndDate}`,
       html: `Your application for the program for ${title} is approved as of ${formattedApprovalDate}. The program is scheduled to start from ${formattedStartDate} to ${formattedEndDate}. Kindly ensure payment for your application is submitted by ${paymentDueDate}${message ? `<br/>Message from the admin below:<br/> ${message}` : ''}`,
       attachments: [offerLetter, proformaInvoice],

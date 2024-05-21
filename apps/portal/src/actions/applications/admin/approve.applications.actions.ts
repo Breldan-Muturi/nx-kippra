@@ -185,7 +185,6 @@ export const adminApproveApplication = async ({
     console.log(error);
     return { error: 'Failed to approve the application due to a system error' };
   }
-
   // Send Applcation Approval Email
   try {
     await approvedApplicationEmail({
@@ -196,7 +195,12 @@ export const adminApproveApplication = async ({
       endDate: existingApplication.trainingSession.endDate,
       venue: existingApplication.trainingSession.venue ?? undefined,
       // Applicant information
-      applicantEmail: existingApplication.owner.email,
+      to: [
+        existingApplication.owner.email,
+        ...(!!user.email && existingApplication.owner.email !== user.email
+          ? [user.email!]
+          : []),
+      ],
       message,
       proformaInvoice: {
         filename: `Proforma invoice`,
