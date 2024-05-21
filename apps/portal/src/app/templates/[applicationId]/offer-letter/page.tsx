@@ -1,4 +1,5 @@
 import { offerTemplate } from '@/actions/templates/offer.templates.actions';
+import { KIPPRA_LOGO } from '@/constants/template.constants';
 import { getFirstName } from '@/lib/utils';
 import { format } from 'date-fns';
 import Image from 'next/image';
@@ -21,12 +22,7 @@ const OfferLetter = async ({
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Image
-            src="/kippra-doc-logo.png"
-            alt="KIPPRA Logo"
-            width={200}
-            height={100}
-          />
+          <Image src={KIPPRA_LOGO} alt="KIPPRA Logo" width={200} height={100} />
         </Link>
       </div>
       {/* Content */}
