@@ -120,6 +120,7 @@ export const adminApproveApplication = async ({
     };
   }
   if ('error' in pdfProforma) {
+    console.error('Error generating proforma: ', pdfProforma.error);
     return {
       error:
         'Failed to generate proforma due to a server error. Please try again later',
