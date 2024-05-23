@@ -68,7 +68,7 @@ model User {
   organizations         UserOrganization[]
   applications          ApplicationParticipant[]
   ownedApplications     Application[]
-  completedPrograms CompletedPrograms[]
+  completedPrograms     CompletedPrograms[]
 }
 
 model Account {
