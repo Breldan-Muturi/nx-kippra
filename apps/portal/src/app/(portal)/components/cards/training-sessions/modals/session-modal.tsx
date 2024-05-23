@@ -30,55 +30,53 @@ type SessionModalProps = React.ComponentPropsWithoutRef<'div'> &
   (
     | { programId: string; trainingSession?: never }
     | { programId?: never; trainingSession: TrainingSession }
-  );
+  ) & { dismissModal: () => void };
 
 const SessionModal = ({
   programId,
   trainingSession,
+  dismissModal,
   className,
   ...props
 }: SessionModalProps) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const dismissModal = () =>
-    router.push(
-      `/${programId !== undefined ? programId : trainingSession.programId}/training-sessions`,
-    );
+  const newSession = trainingSession === undefined;
+  console.log('Training session: ', JSON.stringify(trainingSession, null, 2));
 
   const form = useForm<NewTrainingSessionForm | UpdateTrainingSessionForm>({
     resolver: zodResolver(trainingSessionSchema),
     mode: 'onChange',
-    defaultValues:
-      programId !== undefined
-        ? {
-            programId,
-            usingUsd: false,
-            usingDifferentFees: false,
-          }
-        : (() => {
-            const {
-              onlineSlotsTaken,
-              onPremiseSlotsTaken,
-              ...restTrainingSession
-            } = trainingSession;
-            return {
-              ...Object.fromEntries(
-                Object.entries(restTrainingSession).filter(
-                  ([_, value]) => value !== null,
-                ),
+    defaultValues: newSession
+      ? {
+          programId,
+          usingUsd: false,
+          usingDifferentFees: false,
+        }
+      : (() => {
+          const {
+            onlineSlotsTaken,
+            onPremiseSlotsTaken,
+            ...restTrainingSession
+          } = trainingSession;
+          return {
+            ...Object.fromEntries(
+              Object.entries(restTrainingSession).filter(
+                ([_, value]) => value !== null,
               ),
-              usingUsd: [
-                trainingSession.usdCitizenFee,
-                trainingSession.usdCitizenOnlineFee,
-              ].some(Boolean),
-              usingDifferentFees: [
-                trainingSession.mode !== Delivery.ONLINE &&
-                  trainingSession.eastAfricaFee,
-                trainingSession.mode !== Delivery.ON_PREMISE &&
-                  trainingSession.eastAfricaOnlineFee,
-              ].some(Boolean),
-            };
-          })(),
+            ),
+            usingUsd: [
+              trainingSession.usdCitizenFee,
+              trainingSession.usdCitizenOnlineFee,
+            ].some(Boolean),
+            usingDifferentFees: [
+              trainingSession.mode !== Delivery.ONLINE &&
+                trainingSession.eastAfricaFee,
+              trainingSession.mode !== Delivery.ON_PREMISE &&
+                trainingSession.eastAfricaOnlineFee,
+            ].some(Boolean),
+          };
+        })(),
   });
 
   const { handleSubmit, getValues, reset, watch } = form;
@@ -158,13 +156,14 @@ const SessionModal = ({
     data: NewTrainingSessionForm | UpdateTrainingSessionForm,
   ) => {
     startTransition(() => {
-      if (programId !== undefined) {
+      if (newSession) {
         newTrainingSession(data as NewTrainingSessionForm)
           .then((data) => {
             if (data.error) {
               toast.error(data.error);
             } else if (data.success) {
               toast.success(data.success);
+              router.refresh();
             }
           })
           .finally(dismissModal);
@@ -175,6 +174,7 @@ const SessionModal = ({
               toast.error(data.error);
             } else if (data.success) {
               toast.success(data.success);
+              router.refresh();
             }
           })
           .finally(dismissModal);
@@ -186,9 +186,9 @@ const SessionModal = ({
     <Dialog open onOpenChange={dismissModal}>
       <DialogContent className={className} {...props}>
         <DialogHeader>
-          <DialogTitle>{`${programId !== undefined ? 'New' : 'Update'} training session`}</DialogTitle>
+          <DialogTitle>{`${newSession ? 'New' : 'Update'} training session`}</DialogTitle>
           <DialogDescription className="text-green-600">
-            {`${programId !== undefined ? 'Submit details for the new training session' : 'Complete the form correctly to update this training session'}`}
+            {`${newSession ? 'Submit details for the new training session' : 'Complete the form correctly to update this training session'}`}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -223,7 +223,7 @@ const SessionModal = ({
             )}
             <SubmitButton
               className="my-4"
-              label="Add Session"
+              label={`${newSession ? 'New' : 'Update'} session`}
               isSubmitting={isPending}
             />
           </form>

@@ -2,12 +2,11 @@ import Navbar from '@/app/(portal)/components/navbar';
 import { currentRole } from '@/lib/auth';
 import { SidebarLink } from '@/types/nav-links.types';
 import { UserRole } from '@prisma/client';
-import { FilePlus2, FolderPlus } from 'lucide-react';
+import { FilePlus2, FolderPlus, GraduationCap } from 'lucide-react';
 import React from 'react';
 import { BiSolidReport } from 'react-icons/bi';
 import { CgOrganisation } from 'react-icons/cg';
 import { ImUsers } from 'react-icons/im';
-import { IoMdHome } from 'react-icons/io';
 import { MdLibraryBooks, MdPayment, MdTask } from 'react-icons/md';
 import ContentArea from './components/content';
 import MobileNav from './components/sidebar/mobile-sidebar';
@@ -16,10 +15,9 @@ import SideBarArea from './components/sidebar/side-bar';
 const navLinks: SidebarLink[] = [
   {
     href: '/',
-    label: 'Dashboard',
-    icon: <IoMdHome size="18" className="mr-1" />,
+    label: 'Programs',
+    icon: <GraduationCap size="18" className="mr-1" />,
   },
-
   {
     href: '/applications',
     label: 'Applications',

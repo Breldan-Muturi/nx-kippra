@@ -1,19 +1,19 @@
-import { TextFieldType } from "@/types/form-field.types";
-import React from "react";
-import ComposableField from "./ComposableField";
-import { FormControl } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { FieldValues } from "react-hook-form";
-import { Textarea } from "../ui/textarea";
+import { FormControl } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { TextFieldType } from '@/types/form-field.types';
+import React from 'react';
+import { FieldValues } from 'react-hook-form';
+import { Textarea } from '../ui/textarea';
+import ComposableField from './ComposableField';
 
 interface TextFieldProps<T extends FieldValues> extends TextFieldType<T> {}
 
 const TextField = <T extends FieldValues>({
   ...textField
 }: TextFieldProps<T>) => {
-  const { type = "text", placeholder, disabled, minValue } = textField;
+  const { type = 'text', placeholder, disabled, minValue } = textField;
   // Determine the component based on the type
-  const Component = type === "textarea" ? Textarea : Input;
+  const Component = type === 'textarea' ? Textarea : Input;
   return (
     <ComposableField {...textField}>
       {({ field: { value, onChange, ...field } }) => {
@@ -23,7 +23,7 @@ const TextField = <T extends FieldValues>({
         ) => {
           // Get the current input value
           const newValue = e.target.value;
-          if (type === "number") {
+          if (type === 'number') {
             if (minValue) {
               const numberValue = newValue
                 ? Number(newValue) < minValue
@@ -45,7 +45,7 @@ const TextField = <T extends FieldValues>({
             <Component
               type={type}
               placeholder={placeholder}
-              value={value ?? ""}
+              value={value ?? ''}
               onChange={handleChange}
               {...field}
               className="bg-background"

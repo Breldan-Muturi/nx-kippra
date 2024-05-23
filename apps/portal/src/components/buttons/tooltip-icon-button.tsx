@@ -7,12 +7,12 @@ import {
 import { cn } from '@/lib/utils';
 import React from 'react';
 
-export interface TooltipIconButtonProps
-  extends React.ComponentPropsWithoutRef<'button'> {
-  isVisible?: boolean;
-  icon: React.ReactNode;
-  tooltipLabel: string;
-}
+export type TooltipIconButtonProps =
+  React.ComponentPropsWithoutRef<'button'> & {
+    isVisible?: boolean;
+    icon: React.ReactNode;
+    tooltipLabel: string;
+  };
 
 const TooltipIconButton = ({
   isVisible = true,

@@ -1,11 +1,10 @@
-"use client";
-import React from "react";
-import { Search } from "lucide-react";
-import { SearchFieldType } from "@/types/form-field.types";
-import ComposableField from "./ComposableField";
-import { FormControl } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { FieldValues } from "react-hook-form";
+'use client';
+import { FormControl } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { SearchFieldType } from '@/types/form-field.types';
+import { Search } from 'lucide-react';
+import { FieldValues } from 'react-hook-form';
+import ComposableField from './ComposableField';
 
 interface SearchFieldProps<T extends FieldValues> extends SearchFieldType<T> {}
 
@@ -22,7 +21,7 @@ const SearchField = <T extends FieldValues>({
             <Input
               type={type}
               placeholder={placeholder}
-              className="pl-8"
+              className="pl-8 bg-background"
               {...field}
             />
           </FormControl>

@@ -11,7 +11,6 @@ export type TableActionsType = {
   isVisible?: boolean;
   content: string;
   icon: React.ReactNode;
-  // Pass a tailwind color
   tooltipContentClassName?: string;
   isPending: boolean;
 };

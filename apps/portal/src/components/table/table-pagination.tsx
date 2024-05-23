@@ -18,13 +18,14 @@ import {
 } from 'lucide-react';
 import React from 'react';
 
-interface TablesPaginationProps extends React.ComponentPropsWithoutRef<'div'> {
+type TablesPaginationProps = React.ComponentPropsWithoutRef<'div'> & {
   isPending: boolean;
   pagination: PaginationType;
   count: number;
   changePage: (page: number) => void;
   changePageSize: (newPageSize: string) => void;
-}
+  pageSizeSteps?: number;
+};
 
 const TablesPagination = ({
   isPending,
@@ -32,6 +33,7 @@ const TablesPagination = ({
   count,
   changePage,
   changePageSize,
+  pageSizeSteps = 10,
 }: TablesPaginationProps) => {
   const pageInt = parseInt(page);
   const pageSizeInt = parseInt(pageSize);
@@ -46,9 +48,10 @@ const TablesPagination = ({
 
   // Dynamically generate pageSize options based on count
   let pageSizeOptions = Array.from(
-    { length: Math.min(Math.ceil(count / 10), 10) },
-    (_, i) => `${(i + 1) * 10}`,
+    { length: Math.min(Math.ceil(count / pageSizeSteps), pageSizeSteps) },
+    (_, i) => `${(i + 1) * pageSizeSteps}`,
   );
+
   if (!pageSizeOptions.includes('100') && count > 50)
     pageSizeOptions.push('100');
 
@@ -79,7 +82,7 @@ const TablesPagination = ({
               {pageSizeOptions.map((size, i) => {
                 const label = `${size} Records per page`;
                 return (
-                  <SelectItem key={`${i}${size}${label}`} value={size}>
+                  <SelectItem key={`${i}${size}`} value={size}>
                     {label}
                   </SelectItem>
                 );

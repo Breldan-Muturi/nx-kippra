@@ -18,7 +18,7 @@ export const formatDeliveryMode = (mode: Delivery) => {
     case Delivery.ON_PREMISE:
       return 'On premise';
     case Delivery.BOTH_MODES:
-      return 'Both modes available';
+      return 'Online or on premise';
     default:
       return mode;
   }

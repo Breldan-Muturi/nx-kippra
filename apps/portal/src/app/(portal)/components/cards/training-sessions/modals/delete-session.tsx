@@ -1,5 +1,5 @@
 'use client';
-import { deleteTrainingSession } from '@/actions/training-session/training-session.actions';
+import { deleteTrainingSession } from '@/actions/training-session/delete.training-session.actions';
 import SubmitButton from '@/components/form/SubmitButton';
 import {
   AlertDialog,
@@ -10,19 +10,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { TrainingSession } from '@prisma/client';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
 
 const DeleteSession = ({
-  trainingSession: { id, programId },
+  id,
+  dismissModal,
 }: {
-  trainingSession: TrainingSession;
+  id: string;
+  dismissModal: () => void;
 }) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const dismissModal = () => router.push(`/${programId}/training-sessions`);
   const handleDelete = () => {
     startTransition(() => {
       deleteTrainingSession(id)

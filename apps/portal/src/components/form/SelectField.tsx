@@ -1,16 +1,16 @@
-import React from 'react';
-import { Select, SelectGroup } from '../ui/select';
+import { SelectFieldType } from '@/types/form-field.types';
+import { SelectLabel } from '@radix-ui/react-select';
+import { FieldValues } from 'react-hook-form';
+import { FormControl } from '../ui/form';
 import {
+  Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
-import { FieldValues } from 'react-hook-form';
-import { SelectFieldType } from '@/types/form-field.types';
 import ComposableField from './ComposableField';
-import { FormControl } from '../ui/form';
-import { SelectLabel } from '@radix-ui/react-select';
 
 interface SelectFieldProps<T extends FieldValues> extends SelectFieldType<T> {}
 
@@ -36,7 +36,7 @@ const SelectField = <T extends FieldValues>({
             value={value ? value : undefined}
             disabled={disabled}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-background">
               {value ? <SelectValue placeholder={placeholder} /> : placeholder}
             </SelectTrigger>
             <SelectContent>

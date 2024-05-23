@@ -259,10 +259,10 @@ model TrainingSession {
   usdGlobalParticipantOnlineFee Int?
 
   // Handle Slots
-  onlineSlots         Int?
-  onlineSlotsTaken    Int? @default(0)
-  onPremiseSlots      Int?
-  onPremiseSlotsTaken Int? @default(0)
+  onlineSlots         Int @default(0)
+  onlineSlotsTaken    Int @default(0)
+  onPremiseSlots      Int @default(0)
+  onPremiseSlotsTaken Int @default(0)
 
   // Handle Relationships
   programId    String

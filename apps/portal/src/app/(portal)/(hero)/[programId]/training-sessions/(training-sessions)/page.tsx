@@ -1,127 +1,24 @@
-'use server';
+import { fetchTrainingSessions } from '@/actions/training-session/fetch.training-sessions.actions';
+import TrainingSessions from '@/app/(portal)/components/cards/training-sessions/training-sessions';
+import { FetchSessionsSchema } from '@/validation/training-session/fetch.sessions.validations';
 
-import TrainingSessionCard from '@/app/(portal)/(home)/components/training-session';
-import ResponsiveGrid from '@/components/layouts/responsive-grid';
-import { buttonVariants } from '@/components/ui/button';
-import { currentRole } from '@/lib/auth';
-import { db } from '@/lib/db';
-import { cn } from '@/lib/utils';
-import { UserRole } from '@prisma/client';
-import Link from 'next/link';
-import React from 'react';
-import SessionModal from './components/session-modal';
-import DeleteSession from './components/delete-session';
-import { Pencil, Trash2 } from 'lucide-react';
-
-const page = async ({
+const ProgramSessions = async ({
   params: { programId },
-  searchParams: { updateSession, deleteSession, newSession },
+  searchParams,
 }: {
   params: { programId: string };
-  searchParams: {
-    updateSession: string;
-    deleteSession: string;
-    newSession: boolean;
-  };
+  searchParams: FetchSessionsSchema;
 }) => {
-  const [programTitle, programTrainingSessions, role] = await Promise.all([
-    db.program.findUnique({
-      where: { id: programId },
-      select: {
-        title: true,
-      },
-    }),
-    db.trainingSession.findMany({
-      where: { programId },
-      orderBy: { startDate: 'asc' },
-    }),
-    currentRole(),
-  ]);
+  const fetchSessionsReturn = await fetchTrainingSessions({
+    ...searchParams,
+    programId,
+  });
 
-  const isAdmin = role === UserRole.ADMIN;
-  const updateThisSession = programTrainingSessions.find(
-    ({ id }) => id === updateSession,
-  );
-
-  const deleteThisSession = programTrainingSessions.find(
-    ({ id }) => id === deleteSession,
-  );
-
-  return (
-    <>
-      <ResponsiveGrid>
-        {isAdmin && (
-          <div className="flex justify-center col-span-3">
-            <Link
-              href={{
-                pathname: `/${programId}/training-sessions/`,
-                query: { newSession: true },
-              }}
-              className={cn(
-                buttonVariants({ variant: 'link' }),
-                'text-center text-xl font-bold',
-              )}
-            >
-              📅 Add a new Training Session
-            </Link>
-          </div>
-        )}
-        {programTrainingSessions.map((trainingSession, i) => (
-          <div
-            key={`${i}-${trainingSession.id}`}
-            className="flex flex-col col-span-1 space-y-2"
-          >
-            <TrainingSessionCard
-              title={programTitle?.title ?? 'Unnamed program'}
-              trainingSession={trainingSession}
-              className="flex-grow"
-            />
-            {isAdmin && (
-              <div className="flex justify-end space-x-2">
-                <Link
-                  href={{
-                    pathname: `/${programId}/training-sessions/`,
-                    query: { updateSession: trainingSession.id },
-                  }}
-                  className={cn(
-                    buttonVariants({
-                      variant: 'ghost',
-                      size: 'icon',
-                    }),
-                    'h-6 w-6 rounded-full bg-green-600/80 hover:bg-green-600',
-                  )}
-                >
-                  <Pencil className="w-4 h-4" color="white" />
-                </Link>
-                <Link
-                  href={{
-                    pathname: `/${programId}/training-sessions/`,
-                    query: { deleteSession: trainingSession.id },
-                  }}
-                  className={cn(
-                    buttonVariants({
-                      variant: 'destructive',
-                      size: 'icon',
-                    }),
-                    'h-6 w-6 rounded-full',
-                  )}
-                >
-                  <Trash2 className="w-4 h-4" color="white" />
-                </Link>
-              </div>
-            )}
-          </div>
-        ))}
-      </ResponsiveGrid>
-      {isAdmin && newSession && <SessionModal programId={programId} />}
-      {isAdmin && updateThisSession && (
-        <SessionModal trainingSession={updateThisSession} />
-      )}
-      {isAdmin && deleteThisSession && (
-        <DeleteSession trainingSession={deleteThisSession} />
-      )}
-    </>
-  );
+  if ('error' in fetchSessionsReturn)
+    return (
+      <div>{`There was an error fetching organizations: ${fetchSessionsReturn.error}`}</div>
+    );
+  return <TrainingSessions {...{ ...fetchSessionsReturn, programId }} />;
 };
 
-export default page;
+export default ProgramSessions;
