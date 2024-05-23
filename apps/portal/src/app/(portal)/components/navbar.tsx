@@ -1,10 +1,10 @@
 'use client';
 
 import { buttonVariants } from '../../../components/ui/button';
-import { LogOut, UserCog } from 'lucide-react';
+import { LogOut, UserCog, Menu, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import React from 'react';
+import React, {useState} from 'react';
 import { cn } from '@/lib/utils';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -62,15 +62,16 @@ interface NavBarProps extends React.ComponentPropsWithRef<'div'> {}
 
 const Navbar = ({ className, ...props }: NavBarProps) => {
   const user = useCurrentUser();
+  const [ showMenu, setShowMenu ] = useState(false)
 
   return (
     <div
       className={cn('sticky top-0 w-full bg-white z-30', className)}
       {...props}
     >
-      <div className="flex flex-row items-center justify-between w-full px-4 py-2 border border-b-gray-300">
+      <div className="hidden md:flex flex-row items-center justify-between w-full px-4 py-2 border border-b-gray-300">
         {kippraLogo}
-        <nav className="flex items-center md:space-x-2 lg:space-x-4">
+        <nav className="sm:hidden md:flex items-center md:space-x-2 lg:space-x-4">
           {navLinks.map(({ href, label }, i) => (
             <Link
               key={`${i}-${href}`}
@@ -123,6 +124,38 @@ const Navbar = ({ className, ...props }: NavBarProps) => {
             SIGNUP OR LOGIN
           </Link>
         )}
+      </div>
+      {/*mobile menu */}
+      <div className="flex flex-col md:hidden items-center justify-center w-full px-4 py-2 border border-b-gray-300">
+        <div className="w-full flex-row items-center justify-between">
+          {kippraLogo}
+          {showMenu ? <button onClick={() => setShowMenu(false)}><X size="18" color="black" /> </button> : <button onClick={() =>setShowMenu(prev => !prev)}><Menu size="18" color="black" /> </button>}
+
+        </div>
+        {showMenu && 
+          <nav className="flex flex-col items-center space-y-3">
+            {navLinks.map(({ href, label }, i) => (
+              <Link
+                key={`${i}-${href}`}
+                href={href}
+                title={`Visit the ${label} page`}
+                className="text-base font-semibold text-muted-foreground"
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+        
+         {user && (
+           <Link
+             href="/account"
+             title="Sign up or login"
+             className={buttonVariants({ variant: 'custom' })}
+           >
+             SIGNUP OR LOGIN
+           </Link>
+         )}
+        }
       </div>
     </div>
   );
