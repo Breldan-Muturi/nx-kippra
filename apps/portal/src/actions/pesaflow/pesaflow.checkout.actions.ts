@@ -71,6 +71,7 @@ export const pesaflowPayment = async (
         'Valid api data: ',
         JSON.stringify(validApiData.data, null, 2),
       );
+      console.log('Error: ', error);
       console.table([
         { type: 'Error data', value: error.response?.data },
         { type: 'Error status', value: error.response?.status },
