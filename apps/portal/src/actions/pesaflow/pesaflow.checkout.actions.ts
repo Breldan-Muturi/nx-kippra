@@ -60,12 +60,17 @@ export const pesaflowPayment = async (
       },
       data: validApiData.data,
     });
+
     return {
       invoiceLink: axiosResponse.data.invoice_link,
       invoiceNumber: axiosResponse.data.invoice_number,
     };
   } catch (error) {
     if (axios.isAxiosError(error)) {
+      console.log(
+        'Valid api data: ',
+        JSON.stringify(validApiData.data, null, 2),
+      );
       console.table([
         { type: 'Error data', value: error.response?.data },
         { type: 'Error status', value: error.response?.status },

@@ -56,17 +56,12 @@ export const adminApplicationsLine = async (): Promise<LineRequest> => {
     const series = Object.entries(aggregatedData).map(
       ([programCode, monthlyCounts]) => ({
         id: programCode,
-        // data: Object.entries(monthlyCounts).map(([month, count]) => ({
-        //   x: month,
-        //   y: count,
-        // })),
         data: uniqueMonths.map((month) => ({
           x: month,
           y: monthlyCounts[month] || 0,
         })),
       }),
     );
-    console.log('Series: ', JSON.stringify(series, null, 2));
     return series;
   } catch (e) {
     console.error(

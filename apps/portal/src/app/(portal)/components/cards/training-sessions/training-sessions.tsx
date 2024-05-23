@@ -47,7 +47,7 @@ const TrainingSessions = ({
     | undefined
   >();
 
-  const { pageSize, page } = params;
+  const { pageSize, page, showPast } = params;
   const changePage = (pageInt: number) => {
     startTransition(() => {
       filterTrainingSessions({
@@ -153,6 +153,7 @@ const TrainingSessions = ({
                 updateSession,
                 deleteSession,
                 showProgram,
+                showPast,
               }}
             />
           ))}

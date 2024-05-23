@@ -92,7 +92,6 @@ export const fetchTrainingSessions = async (
     ...(params.endDate ? { endDate: new Date(params.endDate) } : {}),
   });
 
-  console.log('Valid params page size: ', validParams.pageSize);
   const {
     page,
     pageSize,

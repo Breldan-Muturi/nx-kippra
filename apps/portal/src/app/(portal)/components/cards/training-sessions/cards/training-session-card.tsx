@@ -27,6 +27,7 @@ type TrainingSessionCardProps = React.ComponentPropsWithoutRef<'div'> & {
   updateSession: (data: TrainingSession) => void;
   deleteSession: (id: string) => void;
   showProgram: boolean;
+  showPast?: 'true' | 'false';
 };
 
 const TrainingSessionCard = ({
@@ -36,6 +37,7 @@ const TrainingSessionCard = ({
   updateSession,
   deleteSession,
   showProgram,
+  showPast,
 }: TrainingSessionCardProps) => {
   const {
     program: { title, code },
@@ -51,6 +53,7 @@ const TrainingSessionCard = ({
     id,
   } = data;
   const router = useRouter();
+  const isShowPast = showPast === 'true';
   const isAdmin = user?.role === UserRole.ADMIN;
 
   const actionButtons: TableActionProps[] = [
@@ -135,17 +138,19 @@ const TrainingSessionCard = ({
         </ul>
       </CardContent>
       <CardFooter className="flex items-center justify-between">
-        <Link
-          href={`/${programId}/training-sessions/${id}`}
-          title="Apply for session"
-          className={cn(
-            buttonVariants(),
-            'bg-green-600 rounded-full hover:bg-green-500',
-          )}
-        >
-          Apply for session
-        </Link>
-        <div className="flex items-center space-x-1">
+        {!isShowPast && (
+          <Link
+            href={`/${programId}/training-sessions/${id}`}
+            title="Apply for session"
+            className={cn(
+              buttonVariants(),
+              'bg-green-600 rounded-full hover:bg-green-500',
+            )}
+          >
+            Apply for session
+          </Link>
+        )}
+        <div className="flex ml-auto items-center space-x-1">
           {actionButtons.map((action) => (
             <TableAction {...action} />
           ))}
