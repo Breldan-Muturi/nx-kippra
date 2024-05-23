@@ -10,7 +10,7 @@ const ContentArea = ({ children }: { children: React.ReactNode }) => {
           Copyright @{new Date().getFullYear()} Kenya Institute of Public Policy
           Research and Analysis
         </p>
-        <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+        <div className="flex items-center text-xs space-x-1 text-muted-foreground">
           <p>Developed by</p>
           <Link
             href="https://sohnandsol.com"

@@ -6,7 +6,7 @@ const paymentColumnCurrency: ColumnDef<SinglePaymentDetail> = {
   id: 'Currency',
   header: 'Currency',
   cell: ({ row }) => (
-    <Badge variant="secondary" className="border-green-600 text-green-600">
+    <Badge variant="secondary" className="text-green-600 border-green-600">
       {row.original.currency}
     </Badge>
   ),

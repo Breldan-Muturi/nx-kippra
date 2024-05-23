@@ -18,7 +18,7 @@ import {
 } from '@/validation/organization/organization.validation';
 import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { usePathname, useRouter } from 'next/navigation';
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import { SubmitHandler } from 'react-hook-form';
 import OrganizationFilterForm from './filter/organizations-filter-form';
 import organizationFilterFields from './filter/organizations-filter-fields';
@@ -39,25 +39,34 @@ import {
   removeOrganizationPopup,
 } from '@/actions/organization/remove.organization.actions';
 import { toast } from 'sonner';
+import {
+  ValidateInvite,
+  validateInvite,
+} from '@/actions/invites/validate.invites.actions';
+import InviteOrgModal from './modals/organization-modal-invite';
+import { OrganizationSearchParams } from '@/app/(portal)/(tables)/organizations/page';
 
 type OrganizationTableProps = {
-  searchParams: OrganizationTableSchema;
+  orgInvite?: ValidateInvite;
+  searchParams: OrganizationSearchParams;
   organizationTable: Exclude<FetchOrganizationsTable, { error: string }>;
 };
 
 const OrganizationsTable = ({
-  searchParams,
+  orgInvite,
+  searchParams: { token, ...fetchParams },
   organizationTable: { count, organizations, existingUser },
 }: OrganizationTableProps) => {
+  console.log('token: ', token);
   const path = usePathname();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [action, setAction] = useState<
-    RemoveOrgData | DeleteOrgProps | undefined
-  >();
+    RemoveOrgData | DeleteOrgProps | ValidateInvite | undefined
+  >(orgInvite);
 
   const pathParams: OrganizationPathSchema = organizationPathSchema.parse({
-    ...searchParams,
+    ...fetchParams,
     path,
   });
   const { hiddenColumns, page, pageSize } = pathParams;
@@ -128,8 +137,24 @@ const OrganizationsTable = ({
         }
       });
     });
+  const removeModal = !!action && 'orgId' in action;
 
   const handleDelete = (orgId: string) => setAction((prev) => ({ id: orgId }));
+  const deleteModal = !!action && 'id' in action;
+
+  const handleInvite = (inviteToken: string) =>
+    startTransition(() => {
+      validateInvite(inviteToken).then((data) => setAction((prev) => data));
+    });
+
+  useEffect(() => {
+    if (token) handleInvite(token);
+  }, [token]);
+
+  const inviteModal =
+    !!action &&
+    ('error' in action || 'invalid' in action || 'invite' in action);
+
   const handleView = (orgId: string) => router.push(`/organization/${orgId}`);
 
   const { visibleColumns, allColumnIds } =
@@ -144,6 +169,7 @@ const OrganizationsTable = ({
           handleView,
           handleDelete,
           handleRemove,
+          handleInvite,
         }),
         organizationColumnRole({
           userId: existingUser.id,
@@ -165,9 +191,6 @@ const OrganizationsTable = ({
 
   const handleDismiss = () => setAction((prev) => undefined);
 
-  const deleteModal = !!action && 'id' in action;
-  const removeModal = !!action && 'orgId' in action;
-
   return (
     <>
       <div className="flex flex-col space-y-4">
@@ -178,7 +201,7 @@ const OrganizationsTable = ({
           filterValues={filterValues}
           filterForm={organizationFilterFields(isPending)}
         />
-        <div className="space-y-2 pb-4">
+        <div className="pb-4 space-y-2">
           <TableViews
             columnIds={allColumnIds}
             hiddenColumnArray={hiddenColumnsArray}
@@ -207,6 +230,14 @@ const OrganizationsTable = ({
           open={removeModal}
           handleDismiss={handleDismiss}
           {...action}
+        />
+      )}
+
+      {inviteModal && (
+        <InviteOrgModal
+          open={inviteModal}
+          handleDismiss={handleDismiss}
+          orgInvite={action}
         />
       )}
     </>

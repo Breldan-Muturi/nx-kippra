@@ -2,6 +2,7 @@
 
 import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { ActionReturnIdType } from '@/types/actions.types';
 import {
   NewProgramImageUrl,
   NewProgramNoImageType,
@@ -9,8 +10,7 @@ import {
   newProgramImageUrlSchema,
 } from '@/validation/programs/program.validation';
 import { UserRole } from '@prisma/client';
-import { uploadImage } from '../firebase/storage.actions';
-import { ActionReturnIdType } from '@/types/actions.types';
+import { uploadFile } from '../firebase/storage.actions';
 
 export type NewProgramType = {
   formData: FormData;
@@ -48,7 +48,7 @@ export const newProgram = async ({
         OR: [{ title }, { code }],
       },
     }),
-    uploadImage({
+    uploadFile({
       buffer: Buffer.from(await image.arrayBuffer()),
       contentType: type,
       fileName: name,

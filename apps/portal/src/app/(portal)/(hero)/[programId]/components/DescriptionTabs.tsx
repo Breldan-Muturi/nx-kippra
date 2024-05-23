@@ -1,40 +1,41 @@
 'use server';
-import Image from 'next/image';
-import { buttonVariants } from '@/components/ui/button';
+import { PageNavButton } from '@/components/buttons/page-nav-button';
 import { currentRole } from '@/lib/auth';
-import { UserRole } from '@prisma/client';
-import Link from 'next/link';
-import React from 'react';
 import { db } from '@/lib/db';
+import { NavBarLinks } from '@/types/nav-links.types';
+import { UserRole } from '@prisma/client';
+import Image from 'next/image';
 import { redirect } from 'next/navigation';
 
 const programRoutesPerRole = (
   isAdmin: boolean,
   programId: string,
-): { href: string; label: string }[] => {
-  let routes = [
-    {
-      href: `/${programId}`,
-      label: 'Program Summary',
-    },
-    {
-      href: `/${programId}/topics`,
-      label: 'Topics',
-    },
-    {
-      href: `/${programId}/training-sessions`,
-      label: 'Training Sessions',
-    },
-  ];
-  if (isAdmin) {
-    routes.push({
-      href: `/${programId}/update`,
-      label: 'Update program',
-    });
-  }
-
-  return routes;
-};
+): NavBarLinks[] => [
+  {
+    href: `/${programId}`,
+    label: 'Program Summary',
+  },
+  ...(isAdmin
+    ? ([
+        {
+          href: `/${programId}/update`,
+          label: 'Update program',
+        },
+      ] as NavBarLinks[])
+    : []),
+  {
+    href: `/${programId}/completed-programs`,
+    label: 'Completed programs',
+  },
+  {
+    href: `/${programId}/topics`,
+    label: 'Topics',
+  },
+  {
+    href: `/${programId}/training-sessions`,
+    label: 'Training Sessions',
+  },
+];
 
 const DescriptionTabs = async ({ programId }: { programId: string }) => {
   const isAdmin = (await currentRole()) === UserRole.ADMIN;
@@ -54,15 +55,9 @@ const DescriptionTabs = async ({ programId }: { programId: string }) => {
           {heroTitle}
         </p>
       </div>
-      <div className="shadom-md flex w-full items-center border-b-2 border-b-gray-200 bg-gray-200">
+      <div className="flex items-center w-full bg-gray-200 border-b-2 shadom-md border-b-gray-200">
         {programRoutes.map(({ href, label }, i) => (
-          <Link
-            key={`${i}-${href}`}
-            href={href}
-            className={buttonVariants({ variant: 'link' })}
-          >
-            {label}
-          </Link>
+          <PageNavButton key={`${i}${href}${label}`} {...{ href, label }} />
         ))}
       </div>
     </div>

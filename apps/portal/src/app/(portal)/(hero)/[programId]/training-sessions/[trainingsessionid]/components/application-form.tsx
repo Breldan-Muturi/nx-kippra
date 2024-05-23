@@ -30,9 +30,9 @@ import { validateApplication } from '@/actions/applications/validate.application
 import { formatDeliveryMode } from '@/helpers/enum.helpers';
 import AddParticipant from './add-participant';
 import { PlusIcon, TrashIcon } from 'lucide-react';
-import ParticipantButton, {
-  ParticipantButtonProps,
-} from './participant-button';
+import TooltipIconButton, {
+  TooltipIconButtonProps,
+} from '../../../../../../../components/buttons/tooltip-icon-button';
 import ExistingUsers from './existing-users';
 import { cn } from '@/lib/utils';
 import { userNewApplication } from '@/actions/applications/user/new.application.action';
@@ -282,14 +282,14 @@ const ApplicationForm = ({
       <Form {...form}>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="grid w-3/5 grid-cols-2 items-end justify-center gap-x-4 gap-y-2"
+          className="items-end justify-center w-3/5 grid grid-cols-2 gap-x-4 gap-y-2"
         >
           {forms.map(({ title, description, form }, i) => (
             <React.Fragment key={`${i}-${title}`}>
               <FormHeader
                 label={`${i + 1}. ${title}`}
                 description={description}
-                className="col-span-2 justify-start"
+                className="justify-start col-span-2"
               />
               <ReusableForm formFields={form} />
             </React.Fragment>
@@ -298,10 +298,10 @@ const ApplicationForm = ({
           <FormHeader
             label={`${forms.length + 1}. Participant details`}
             description="Add your application participants by reserving total slots, and adding available participant details"
-            className="col-span-2 justify-start"
+            className="justify-start col-span-2"
           />
-          <div className="col-span-2 flex items-end justify-between space-x-2">
-            <div className="flex-cols-3 flex w-1/3 flex-grow items-center gap-x-2">
+          <div className="flex items-end justify-between col-span-2 space-x-2">
+            <div className="flex items-center flex-grow w-1/3 flex-cols-3 gap-x-2">
               <ReusableForm
                 formFields={slotsFields({
                   kenyanParticipantCount,
@@ -318,18 +318,18 @@ const ApplicationForm = ({
                 className="flex-grow"
               />
             )}
-            <ParticipantButton
+            <TooltipIconButton
               icon={<PlusIcon />}
               tooltipLabel="Add new participant"
               onClick={appendFunction}
               className="bg-green-600/80 hover:bg-green-600"
             />
           </div>
-          <div className="col-span-2 flex flex-col items-center justify-start space-y-2 divide-y-2 divide-gray-300">
+          <div className="flex flex-col items-center justify-start col-span-2 space-y-2 divide-y-2 divide-gray-300">
             {fields.map((field, i) => {
               const isLast = fields.length - 1 === i;
               const badgeText = `Participant ${i + 1} of ${fields.length}`;
-              const actionButtons: ParticipantButtonProps[] = [
+              const actionButtons: TooltipIconButtonProps[] = [
                 {
                   icon: <TrashIcon />,
                   tooltipLabel: 'Remove participant',
@@ -357,7 +357,7 @@ const ApplicationForm = ({
                   <div className="flex flex-col items-center justify-end space-y-2">
                     {actionButtons.map((actionButton, i) => {
                       const key = `${i}${actionButton.tooltipLabel}`;
-                      return <ParticipantButton key={key} {...actionButton} />;
+                      return <TooltipIconButton key={key} {...actionButton} />;
                     })}
                   </div>
                 </div>

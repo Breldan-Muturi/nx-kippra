@@ -16,7 +16,7 @@ const applicationTrainingSessionColumn: ColumnDef<SingleTableApplication> = {
     const delivery = row.original.delivery;
     const { startDate, endDate, venue } = row.original.trainingSession;
     return (
-      <div className="flex min-w-40 flex-grow flex-col space-y-1">
+      <div className="flex flex-col flex-grow min-w-40 space-y-1">
         <p>
           <span className="font-semibold">{format(startDate, "PPP")}</span> to{" "}
           <span className="font-semibold">{format(endDate, "PPP")}</span>

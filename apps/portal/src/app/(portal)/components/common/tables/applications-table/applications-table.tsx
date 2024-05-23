@@ -1,50 +1,49 @@
 'use client';
 
-import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import React, { useMemo, useState, useTransition } from 'react';
-import { usePathname } from 'next/navigation';
-import { SubmitHandler } from 'react-hook-form';
-import TablesPagination from '../../../../../../components/table/table-pagination';
-import ApplicationsFilter from './filters/applications-filter-form';
-import { filterApplicationsForm } from './filters/application-filter-fields';
-import applicationActionsColumn from './columns/application-column-action';
-import applicationProgramColumn from './columns/application-column-program';
-import applicationTrainingSessionColumn from './columns/application-column-training-session';
-import applicationStatusColumn from './columns/application-column-status';
-import tableSelectColumn from '../../../../../../components/table/table-select-column';
-import applicantColumn from './columns/application-column-applicant';
-import applicationTypeColumn from './columns/application-column-type';
-import applicationFeeColumn from './columns/application-column-fee';
-import handleTableColumns from '../../../../../../components/table/handle-table-columns';
-import { TableActionProps } from '../../../../../../components/table/table-action';
-import { FileCheck2, Send, ShieldX } from 'lucide-react';
-import TableViews from '../../../../../../components/table/table-views';
-import ReusableTable from '../../../../../../components/table/reusable-table';
-import {
-  ViewApplicationReturnType,
-  getApplicationByIdPromise,
-} from '@/actions/applications/user/single.application.action';
-import {
-  PayApplicationReturnType,
-  getPaymentApplicationPromise,
-} from '@/actions/applications/user/pay.application.actions';
-import { toast } from 'sonner';
-import ApplicationSheet from './sheets/application-sheet-view';
-import ApproveApplication from './modals/application-modal-approve';
-import RejectApplication from './modals/application-modal-reject';
-import SendEmail from './modals/application-modal-email';
-import DeleteApplication from './modals/application-modal-delete';
-import RemoveApplication from './modals/application-modal-remove';
-import PayApplication from './modals/application-modal-pay';
-import { currentRole } from '@/lib/auth';
-import { UserRole } from '@prisma/client';
 import {
   FilterApplicationTableType,
   SingleTableApplication,
   filterApplications,
 } from '@/actions/applications/filter.applications.actions';
-import { FilterApplicationType } from '@/validation/applications/table.application.validation';
+import {
+  PayApplicationReturnType,
+  getPaymentApplicationPromise,
+} from '@/actions/applications/user/pay.application.actions';
+import {
+  ViewApplicationReturnType,
+  getApplicationByIdPromise,
+} from '@/actions/applications/user/single.application.action';
 import { cn } from '@/lib/utils';
+import { FilterApplicationType } from '@/validation/applications/table.application.validation';
+import { UserRole } from '@prisma/client';
+import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { FileCheck2, Send, ShieldX } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import React, { useMemo, useState, useTransition } from 'react';
+import { SubmitHandler } from 'react-hook-form';
+import { toast } from 'sonner';
+import handleTableColumns from '../../../../../../components/table/handle-table-columns';
+import ReusableTable from '../../../../../../components/table/reusable-table';
+import { TableActionProps } from '../../../../../../components/table/table-action';
+import TablesPagination from '../../../../../../components/table/table-pagination';
+import tableSelectColumn from '../../../../../../components/table/table-select-column';
+import TableViews from '../../../../../../components/table/table-views';
+import applicationActionsColumn from './columns/application-column-action';
+import applicantColumn from './columns/application-column-applicant';
+import applicationFeeColumn from './columns/application-column-fee';
+import applicationProgramColumn from './columns/application-column-program';
+import applicationStatusColumn from './columns/application-column-status';
+import applicationTrainingSessionColumn from './columns/application-column-training-session';
+import applicationTypeColumn from './columns/application-column-type';
+import { filterApplicationsForm } from './filters/application-filter-fields';
+import ApplicationsFilter from './filters/applications-filter-form';
+import ApproveApplication from './modals/application-modal-approve';
+import DeleteApplication from './modals/application-modal-delete';
+import SendEmail from './modals/application-modal-email';
+import PayApplication from './modals/application-modal-pay';
+import RejectApplication from './modals/application-modal-reject';
+import RemoveApplication from './modals/application-modal-remove';
+import ApplicationSheet from './sheets/application-sheet-view';
 
 export type ViewApplicationSheet = Exclude<
   ViewApplicationReturnType,
@@ -72,6 +71,7 @@ const ApplicationsTable = ({
   className,
   ...props
 }: ApplicationTableProps) => {
+  const router = useRouter();
   const path = usePathname();
   const { hiddenColumns, pageSize, page, ...filterParams } = fetchParams;
   const [isPending, startTransition] = useTransition();
@@ -183,8 +183,6 @@ const ApplicationsTable = ({
     setModal((prev) => ({ modal: 'delete', id: applicationId }));
   const isDelete = !!modal && 'modal' in modal && modal.modal === 'delete';
 
-  const handleDismiss = () => setModal((prev) => undefined);
-
   // Parse hiddenColumns from a comma-separated string to an array
   const hiddenColumnsArray = useMemo(
     () => (hiddenColumns ? hiddenColumns.split(',') : []),
@@ -227,14 +225,14 @@ const ApplicationsTable = ({
     ? [
         {
           content: 'Approve applications',
-          icon: <FileCheck2 color="green" className="h-5 w-5" />,
+          icon: <FileCheck2 color="green" className="w-5 h-5" />,
           isPending,
           tooltipContentClassName: 'text-green-600',
           className: 'mr-2',
         },
         {
           content: 'Reject applications',
-          icon: <ShieldX color="red" className="h-5 w-5" />,
+          icon: <ShieldX color="red" className="w-5 h-5" />,
           isPending,
           tooltipContentClassName: 'text-red-600',
           className: 'mr-2',
@@ -242,11 +240,19 @@ const ApplicationsTable = ({
 
         {
           content: 'Send mass emails',
-          icon: <Send className="h-5 w-5" />,
+          icon: <Send className="w-5 h-5" />,
           isPending,
         },
       ]
     : undefined;
+
+  const handleDismiss = () => {
+    if (someSelected) {
+      table.resetRowSelection();
+    }
+    setModal((prev) => undefined);
+    router.refresh();
+  };
 
   return (
     <>
@@ -262,7 +268,7 @@ const ApplicationsTable = ({
           filterValues={filterParams}
           clearFilters={clearFilters}
         />
-        <div className="space-y-2 pb-4">
+        <div className="pb-4 space-y-2">
           <TableViews
             columnIds={allColumnIds}
             hiddenColumnArray={hiddenColumnsArray}

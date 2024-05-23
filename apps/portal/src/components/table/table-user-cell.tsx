@@ -5,22 +5,22 @@ import { cn } from '@/lib/utils';
 interface TableUserCellProps extends React.ComponentPropsWithoutRef<'div'> {
   userName: string;
   userImage?: string;
-  userTableOrganization?: string | null;
+  userTableInfo?: string | null;
 }
 
 const TableUserCell = ({
   userName,
   userImage,
-  userTableOrganization,
+  userTableInfo,
   className,
   ...props
 }: TableUserCellProps) => {
   let userTableOrganizationLabel: string | undefined | null;
-  if (userTableOrganization) {
-    if (userTableOrganization.length > 15) {
-      userTableOrganizationLabel = `${userTableOrganization.slice(0, 14)}...`;
+  if (userTableInfo) {
+    if (userTableInfo.length > 15) {
+      userTableOrganizationLabel = `${userTableInfo.slice(0, 14)}...`;
     } else {
-      userTableOrganizationLabel = userTableOrganization;
+      userTableOrganizationLabel = userTableInfo;
     }
   }
   return (
@@ -36,8 +36,8 @@ const TableUserCell = ({
       <div className="flex flex-col items-start justify-start">
         <p>{userName}</p>
         {userTableOrganizationLabel && (
-          <p className="truncate font-semibold text-green-600">
-            {userTableOrganization}
+          <p className="font-semibold text-green-600 truncate">
+            {userTableInfo}
           </p>
         )}
       </div>

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "Send organization invite",
+  "steps": [
+    {
+      "file": "apps/portal/src/actions/invites/send.invites.actions.ts",
+      "description": "Gets the information for the current user, the invite, and the organization. Checks whether the invite is a registered user based on their email.",
+      "line": 77
+    },
+    {
+      "file": "apps/portal/src/actions/invites/send.invites.actions.ts",
+      "description": "Checks whether the user is found, whether the user is an admin or an organization owner. Or whether the invite had already been sent to the user. Checks that the organization exists.",
+      "line": 95
+    },
+    {
+      "file": "apps/portal/src/actions/invites/send.invites.actions.ts",
+      "description": "Creates a new invite with that email, adding the expiry date 15 days after the invite is created",
+      "line": 123
+    },
+    {
+      "file": "apps/portal/src/actions/invites/send.invites.actions.ts",
+      "description": "Sends the invite",
+      "line": 141
+    }
+  ]
+}

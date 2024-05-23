@@ -110,7 +110,7 @@ const applicationActionsColumn = ({
         },
         {
           content: `Send an email to ${isAdmin ? name : 'the portal admin'}`,
-          icon: <Send className="h-5 w-5" />,
+          icon: <Send className="w-5 h-5" />,
           isPending,
           onClick: () => sendEmail(id),
         },

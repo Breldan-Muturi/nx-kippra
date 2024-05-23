@@ -6,7 +6,12 @@ import TableAction, { TableActionProps } from '@/components/table/table-action';
 import { ActionTriggerType } from '@/types/actions.types';
 import { OrganizationRole, UserRole } from '@prisma/client';
 import { ColumnDef } from '@tanstack/react-table';
-import { ClipboardX, MousePointerSquare, Trash2 } from 'lucide-react';
+import {
+  ClipboardX,
+  MailCheck,
+  MousePointerSquare,
+  Trash2,
+} from 'lucide-react';
 
 type OrganizationActionsProps = {
   existingUser: OrganizationTableUser;
@@ -14,6 +19,7 @@ type OrganizationActionsProps = {
   handleDelete: ActionTriggerType;
   handleRemove: ActionTriggerType;
   handleView: ActionTriggerType;
+  handleInvite: ActionTriggerType;
 };
 
 const organizationColumnActions = ({
@@ -22,6 +28,7 @@ const organizationColumnActions = ({
   handleDelete,
   handleRemove,
   handleView,
+  handleInvite,
 }: OrganizationActionsProps): ColumnDef<SingleOrganizationDetail> => ({
   id: 'Actions',
   header: 'Actions',
@@ -34,9 +41,11 @@ const organizationColumnActions = ({
           id === existingUser.id && role === OrganizationRole.OWNER,
       );
 
+    const isInvited = invites[0]?.email === existingUser.email;
+
     const isInOrg = [
       users.map(({ user: { id } }) => id).includes(existingUser.id),
-      invites.includes(existingUser.email),
+      invites.map(({ email }) => email).includes(existingUser.email),
     ].some(Boolean);
     const organizationActions: TableActionProps[] = [
       {
@@ -61,6 +70,14 @@ const organizationColumnActions = ({
         isPending,
         tooltipContentClassName: 'text-red-600',
         onClick: () => handleRemove(id),
+      },
+      {
+        content: `See invite from ${name}`,
+        isVisible: isInvited,
+        icon: <MailCheck color="green" className="size-5" />,
+        isPending,
+        tooltipContentClassName: 'text-green-600',
+        onClick: () => handleInvite(invites[0].token),
       },
     ];
     return (

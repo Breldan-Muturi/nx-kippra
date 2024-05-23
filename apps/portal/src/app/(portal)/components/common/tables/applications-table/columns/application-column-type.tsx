@@ -14,7 +14,7 @@ const applicationTypeColumn: ColumnDef<SingleTableApplication> = {
     } = row.original;
     const participantCount = slotsCitizen + slotsEastAfrican + slotsGlobal;
     return (
-      <div className="flex min-w-40 flex-col items-start justify-start">
+      <div className="flex flex-col items-start justify-start min-w-40">
         <p>{formatSponsorType(type)}</p>
         <p className="font-semibold text-green-600">
           {`${participantCount} participants`}

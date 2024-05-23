@@ -148,7 +148,7 @@ const ProgramForm = ({
         <SubmitButton
           label={`${isValidProgram ? 'Update This' : 'Create New'} Program`}
           isSubmitting={isPending}
-          className="my-8 w-full"
+          className="w-full my-8"
         />
       </form>
     </Form>

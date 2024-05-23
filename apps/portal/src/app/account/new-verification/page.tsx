@@ -58,11 +58,11 @@ const NewVerification = () => {
   }, [onSubmit]);
 
   return (
-    <div className="flex w-3/5 flex-col space-y-4">
+    <div className="flex flex-col w-3/5 space-y-4">
       {!success && !error && (
         <>
           <div className="flex items-center space-x-4">
-            <Skeleton className="h-12 w-12 rounded-full" />
+            <Skeleton className="w-12 h-12 rounded-full" />
             <div className="space-y-2">
               <Skeleton className="h-4 w-[250px]" />
               <Skeleton className="h-4 w-[200px]" />
@@ -80,7 +80,7 @@ const NewVerification = () => {
             <CheckCircle2
               fill="green"
               fillOpacity={0.3}
-              className="h-12 w-12 border-green-600 text-green-600"
+              className="w-12 h-12 text-green-600 border-green-600"
             />
             <div className="space-y-1">
               <p className="text-2xl font-semibold">{success}</p>
@@ -96,7 +96,7 @@ const NewVerification = () => {
             <XCircle
               fill="red"
               fillOpacity={0.3}
-              className="h-12 w-12 rounded-full border-red-600 text-red-600"
+              className="w-12 h-12 text-red-600 border-red-600 rounded-full"
             />
             <div className="space-y-1">
               <p className="text-2xl font-semibold">{error}</p>

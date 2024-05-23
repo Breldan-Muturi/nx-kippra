@@ -19,8 +19,13 @@ const organizationColumnRole = ({
       ({ user: { id } }) => id === userId,
     )?.role;
     const isOrgEmail = row.original.email === email;
-    const isInvite = row.original.invites.includes(email);
+
+    const isInvite = row.original.invites
+      .map(({ email }) => email)
+      .includes(email);
+
     const isContactEmail = row.original.contactPersonEmail === email;
+
     const noRole = [
       !isOrgEmail,
       !isInvite,
@@ -36,12 +41,12 @@ const organizationColumnRole = ({
         )}
         {isOrgEmail && <Badge>Organization email</Badge>}
         {isInvite && (
-          <Badge variant="outline" className="border-green-600 text-green-600">
+          <Badge variant="outline" className="text-green-600 border-green-600">
             Invite
           </Badge>
         )}
         {isContactEmail && (
-          <Badge variant="outline" className="border-green-600 text-green-600">
+          <Badge variant="outline" className="text-green-600 border-green-600">
             Contact person
           </Badge>
         )}

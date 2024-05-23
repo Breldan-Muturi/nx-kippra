@@ -3,7 +3,7 @@ import { avatarFallbackName } from '@/helpers/user.helper';
 import { db } from '@/lib/db';
 import { NavBarLinks } from '@/types/nav-links.types';
 import Image from 'next/image';
-import { OrgLink } from './organization-nav-links';
+import { PageNavButton } from '../../../../../../components/buttons/page-nav-button';
 
 const OrganizationHero = async ({ id }: { id: string }) => {
   const heroInfo = await db.organization.findUnique({
@@ -31,25 +31,21 @@ const OrganizationHero = async ({ id }: { id: string }) => {
       label: 'Members',
     },
     {
-      href: `organization/${id}/completed-programs`,
+      href: `/organization/${id}/completed-programs`,
       label: 'Completed programs',
     },
     {
       href: `/organization/${id}/invites`,
       label: 'Invites',
     },
-    {
-      href: `organization/${id}/join-requests`,
-      label: 'Join requests',
-    },
   ];
 
   return (
     <div className="flex flex-col w-full">
-      <div className="relative m-0 h-52 w-full p-0">
+      <div className="relative w-full p-0 m-0 h-52">
         <Image src="/newhero.jpg" fill alt="KIPPRA hero image" />
-        <div className="absolute inset-0 bg-gray-900/60 z-10" />
-        <div className="absolute flex space-x-4 items-center bottom-8 left-4 right-4 z-20">
+        <div className="absolute inset-0 z-10 bg-gray-900/60" />
+        <div className="absolute z-20 flex items-center space-x-4 bottom-8 left-4 right-4">
           <Avatar className="size-20 ring-4 ring-green-600/60">
             <AvatarImage
               src={heroImage || undefined}
@@ -60,13 +56,13 @@ const OrganizationHero = async ({ id }: { id: string }) => {
             </AvatarFallback>
           </Avatar>
           {heroTitle && (
-            <p className="text-4xl text-background font-bold">{heroTitle}</p>
+            <p className="text-4xl font-bold text-background">{heroTitle}</p>
           )}
         </div>
       </div>
-      <div className="shadow-md flex w-full items-center border-b-2 border-b-gray-200 bg-gray-200">
+      <div className="flex items-center w-full bg-gray-200 border-b-2 shadow-md border-b-gray-200">
         {organizationRoutes.map(({ href, label }) => (
-          <OrgLink key={`${href}${label}`} {...{ href, label }} />
+          <PageNavButton key={`${href}${label}`} {...{ href, label }} />
         ))}
       </div>
     </div>

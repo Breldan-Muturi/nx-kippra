@@ -53,7 +53,7 @@ const ResetPage = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex w-4/5 flex-col space-y-4 md:w-3/5"
+        className="flex flex-col w-4/5 space-y-4 md:w-3/5"
       >
         <FormHeader
           label="Enter your email"

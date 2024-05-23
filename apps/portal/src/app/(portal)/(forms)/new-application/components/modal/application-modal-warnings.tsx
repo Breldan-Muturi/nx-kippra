@@ -1,4 +1,4 @@
-import ParticipantButton from '@/app/(portal)/(hero)/[programId]/training-sessions/[trainingsessionid]/components/participant-button';
+import TooltipIconButton from '@/components/buttons/tooltip-icon-button';
 import {
   Card,
   CardContent,
@@ -51,8 +51,8 @@ const ApplicationWarnings = ({
       {warningParticipants && warningParticipants.length > 0 && (
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-2 pb-2">
-              <AlertTriangle className="size-5 text-yellow-600" />
+            <div className="flex items-center pb-2 gap-2">
+              <AlertTriangle className="text-yellow-600 size-5" />
               <CardTitle className="text-yellow-600">
                 Participant Warning
               </CardTitle>
@@ -81,7 +81,7 @@ const ApplicationWarnings = ({
                         <TableCell>{name}</TableCell>
                         <TableCell>{email}</TableCell>
                         <TableCell>
-                          <ParticipantButton
+                          <TooltipIconButton
                             icon={<Trash2 className="size-4" />}
                             tooltipLabel={`Remove ${email}`}
                             className="bg-red-600/80 hover:bg-red-600 size-6"
@@ -100,7 +100,7 @@ const ApplicationWarnings = ({
       {organizationError && (
         <Card className="flex items-center gap-4">
           <CardHeader>
-            <div className="flex items-center gap-2 pb-2">
+            <div className="flex items-center pb-2 gap-2">
               <ShieldAlert className="size-5" color="red" />
               <CardTitle className="text-red-600">
                 {organizationError.existingOrgName}

@@ -3,7 +3,6 @@
  * @type {string[]}
  */
 export const publicRoutes = [
-  '/',
   '/account/new-verification',
   '/api/uploadthing',
   '/api/payments',

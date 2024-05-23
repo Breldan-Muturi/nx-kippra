@@ -1,23 +1,23 @@
 'use client';
+import { login } from '@/actions/account/login.actions';
+import SocialLogin from '@/app/account/components/SocialLogin';
+import ComposableDescription from '@/components/form/ComposableDescription';
+import FormHeader from '@/components/form/FormHeader';
+import SubmitButton from '@/components/form/SubmitButton';
+import { buttonVariants } from '@/components/ui/button';
+import { Form } from '@/components/ui/form';
+import { cn } from '@/lib/utils';
+import { FormFieldType } from '@/types/form-field.types';
 import {
   LoginForm,
   loginSchema,
 } from '@/validation/account/account.validation';
-import React, { useState, useTransition } from 'react';
-import { FormFieldType } from '@/types/form-field.types';
-import ComposableDescription from '@/components/form/ComposableDescription';
-import Link from 'next/link';
-import { SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { login } from '@/actions/account/login.actions';
-import { Form } from '@/components/ui/form';
-import SubmitButton from '@/components/form/SubmitButton';
-import { toast } from 'sonner';
-import SocialLogin from '@/app/account/components/SocialLogin';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import FormHeader from '@/components/form/FormHeader';
+import { useState, useTransition } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import AccountForm from '../components/AccountForm';
 
 const loginFields: FormFieldType<LoginForm>[] = [
@@ -122,7 +122,7 @@ const LoginPage = () => {
             Login to resend 2FA code
           </Link>
         ) : (
-          <p className="col-span-2 flex items-center justify-center">
+          <p className="flex items-center justify-center col-span-2">
             <ComposableDescription label="Don't have an account">
               <Link
                 href="/account/register"

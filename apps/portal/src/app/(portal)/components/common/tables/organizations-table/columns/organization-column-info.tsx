@@ -11,7 +11,7 @@ const organizationColumnInfo: ColumnDef<SingleOrganizationDetail> = {
       <TableUserCell
         userName={name}
         userImage={image || undefined}
-        userTableOrganization={email}
+        userTableInfo={email}
       />
     );
   },

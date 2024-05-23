@@ -89,7 +89,7 @@ export const login = async (values: LoginForm, callbackUrl?: string | null) => {
     });
     return { success: 'Login successful! Welcome back 🎉' };
   } catch (error) {
-    // To Do
+    // TODO
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':

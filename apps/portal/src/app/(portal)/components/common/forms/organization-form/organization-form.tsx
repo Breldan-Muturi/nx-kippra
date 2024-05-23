@@ -1,7 +1,16 @@
 'use client';
 
+import {
+  UserNewOrganizationParams,
+  userNewOrganization,
+} from '@/actions/organization/create.organization.actions';
+import {
+  UpdateOrganizationType,
+  updateOrganization,
+} from '@/actions/organization/update.organization.actions';
 import FormHeader from '@/components/form/FormHeader';
 import ReusableForm from '@/components/form/ReusableForm';
+import SubmitButton from '@/components/form/SubmitButton';
 import { Form } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
 import {
@@ -12,21 +21,12 @@ import {
   updateOrganizationImageFileSchema,
 } from '@/validation/organization/organization.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Organization } from '@prisma/client';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
-import { organizationFields } from './organization-fields';
-import SubmitButton from '@/components/form/SubmitButton';
-import {
-  UserNewOrganizationParams,
-  userNewOrganization,
-} from '@/actions/organization/create.organization.actions';
 import { toast } from 'sonner';
-import { Organization } from '@prisma/client';
-import {
-  UpdateOrganizationType,
-  updateOrganization,
-} from '@/actions/organization/update.organization.actions';
+import { organizationFields } from './organization-fields';
 
 type OrganizationFormProps = React.ComponentPropsWithoutRef<'form'> & {
   organization?: Organization;
@@ -131,7 +131,7 @@ const OrganizationForm = ({
             !!organization ? 'Update organization' : 'Add New Organization'
           }
           isSubmitting={isPending}
-          className="my-8 w-full"
+          className="w-full my-8"
         />
       </form>
     </Form>

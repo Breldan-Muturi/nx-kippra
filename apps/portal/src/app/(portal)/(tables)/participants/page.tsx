@@ -1,48 +1,27 @@
 import { fetchParticipantsTable } from '@/actions/participants/fetch.participants.actions';
-import { currentUserId } from '@/lib/auth';
 import {
   FetchParticipantsType,
-  ParticipantsSearchParamsType,
   fetchParticipantsSchema,
 } from '@/validation/participants/participants.validation';
-import { redirect } from 'next/navigation';
 import React from 'react';
 import ParticipantsTable from '../../components/common/tables/participants-table/participants-table';
 
 const Participants = async ({
   searchParams,
 }: {
-  searchParams: ParticipantsSearchParamsType;
+  searchParams: FetchParticipantsType;
 }) => {
-  const userId = await currentUserId();
-  if (!userId) redirect('/');
-  const fetchParticipantsParams: FetchParticipantsType =
-    fetchParticipantsSchema.parse({
-      userId,
-      ...searchParams,
-    });
+  const fetchParams: FetchParticipantsType =
+    fetchParticipantsSchema.parse(searchParams);
+  const participantsInfo = await fetchParticipantsTable({ fetchParams });
 
-  const [participantsPromise] = await Promise.allSettled([
-    fetchParticipantsTable(fetchParticipantsParams),
-  ]);
-
-  if (
-    participantsPromise.status !== 'fulfilled' ||
-    'error' in participantsPromise.value
-  ) {
+  if ('error' in participantsInfo) {
     return (
       // Return an error component in this case
-      <div>{`There was an error fetching participants ${participantsPromise.status === 'fulfilled' ? participantsPromise.value : ''}`}</div>
+      <div>{`There was an error fetching participants ${participantsInfo.error}`}</div>
     );
   }
-  return (
-    <>
-      <ParticipantsTable
-        participantsInfo={participantsPromise.value}
-        tableParams={fetchParticipantsParams}
-      />
-    </>
-  );
+  return <ParticipantsTable {...participantsInfo} />;
 };
 
 export default Participants;

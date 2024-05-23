@@ -17,7 +17,7 @@ const SearchField = <T extends FieldValues>({
     <ComposableField {...searchField}>
       {({ field }) => (
         <div className="relative flex items-center">
-          <Search className="pointer-events-none absolute left-0 ml-2 h-4 w-4" />
+          <Search className="absolute left-0 w-4 h-4 ml-2 pointer-events-none" />
           <FormControl>
             <Input
               type={type}

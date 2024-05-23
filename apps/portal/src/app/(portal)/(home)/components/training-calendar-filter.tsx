@@ -63,7 +63,7 @@ const TrainingCalendarFilter = ({
   return (
     <Form {...form}>
       <form
-        className="flex flex-col space-y-2 py-2"
+        className="flex flex-col py-2 space-y-2"
         onSubmit={handleSubmit(onSubmit)}
       >
         <div
@@ -79,10 +79,10 @@ const TrainingCalendarFilter = ({
             <Button
               type="submit"
               variant="default"
-              className="gap-x-3 bg-green-600 hover:bg-green-800"
+              className="bg-green-600 gap-x-3 hover:bg-green-800"
             >
               {isPending ? (
-                <Loader2 color="white" className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 color="white" className="w-4 h-4 mr-2 animate-spin" />
               ) : (
                 <CheckCircle2 color="white" />
               )}
@@ -91,7 +91,7 @@ const TrainingCalendarFilter = ({
             <Button
               type="button"
               variant="link"
-              className="gap-x-3 text-red-600"
+              className="text-red-600 gap-x-3"
               onClick={onClear}
             >
               <Trash2 color="red" size={20} />

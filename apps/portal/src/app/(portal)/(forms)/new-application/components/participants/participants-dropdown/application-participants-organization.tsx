@@ -61,7 +61,7 @@ const ApplicationParticipantsOrganization = ({
           {btnText}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="popover-width-trigger p-0">
+      <PopoverContent align="start" className="p-0 popover-width-trigger">
         <Command>
           <CommandInput placeholder="Select organization users" />
           <CommandEmpty>No matching users</CommandEmpty>

@@ -57,14 +57,14 @@ const TableViews = ({
   const applicationActions: TableActionProps[] = [
     {
       content: 'Approve applications',
-      icon: <FileCheck2 color="green" className="h-5 w-5" />,
+      icon: <FileCheck2 color="green" className="w-5 h-5" />,
       isPending,
       tooltipContentClassName: 'text-green-600',
       className: 'mr-2',
     },
     {
       content: 'Reject applications',
-      icon: <ShieldX color="red" className="h-5 w-5" />,
+      icon: <ShieldX color="red" className="w-5 h-5" />,
       isPending,
       tooltipContentClassName: 'text-red-600',
       className: 'mr-2',
@@ -72,7 +72,7 @@ const TableViews = ({
 
     {
       content: 'Send mass emails',
-      icon: <Send className="h-5 w-5" />,
+      icon: <Send className="w-5 h-5" />,
       isPending,
     },
   ];
@@ -88,10 +88,10 @@ const TableViews = ({
           <Button
             variant="outline"
             size="sm"
-            className="ml-auto hidden h-8 lg:flex"
+            className="hidden h-8 ml-auto lg:flex"
             disabled={isPending}
           >
-            <MixerHorizontalIcon className="mr-4 h-4 w-4" />
+            <MixerHorizontalIcon className="w-4 h-4 mr-4" />
             View
           </Button>
         </DropdownMenuTrigger>

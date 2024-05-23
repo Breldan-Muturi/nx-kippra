@@ -20,7 +20,7 @@ const ProgramPage = async ({ params: { programId } }: ProgramPageProps) => {
   } else {
     summary = programSummary.summary;
   }
-  return <div className="mt-4 justify-center">{summary}</div>;
+  return <div className="justify-center mt-4">{summary}</div>;
 };
 
 export default ProgramPage;

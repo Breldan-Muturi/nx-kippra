@@ -80,9 +80,10 @@ const createNewOrganization = async ({
                 : OrganizationRole.MEMBER,
           })),
       },
-      invites: participants
-        ?.filter(({ userId }) => !userId)
-        .map(({ email }) => email),
+      // Add the other participants as Invites in this organization
+      // invites: participants
+      //   ?.filter(({ userId }) => !userId)
+      //   .map(({ email }) => email),
     },
   });
 

@@ -2,10 +2,10 @@
 
 import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { ActionReturnIdType } from '@/types/actions.types';
 import { NewOrganizationForm } from '@/validation/organization/organization.validation';
 import { OrganizationRole } from '@prisma/client';
-import { UploadImageReturn, uploadImage } from '../firebase/storage.actions';
-import {ActionReturnIdType} from '@/types/actions.types';
+import { UploadImageReturn, uploadFile } from '../firebase/storage.actions';
 
 const getExistingUser = async (userId: string) =>
   await db.user.findUnique({
@@ -50,7 +50,7 @@ export const userNewOrganization = async ({
       await Promise.all([
         getExistingUser(userId),
         getExistingOrganizations(organization),
-        uploadImage({
+        uploadFile({
           buffer: Buffer.from(await image.arrayBuffer()),
           contentType: image.type,
           fileName: image.name,

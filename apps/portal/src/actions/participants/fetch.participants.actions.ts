@@ -3,13 +3,21 @@
 import { processSearchString } from '@/helpers/filter.helpers';
 import { db } from '@/lib/db';
 import {
-  FetchParticipantsRedirectType,
   FetchParticipantsType,
-  fetchParticipantsRedirectSchema,
+  PathParticipantsType,
   fetchParticipantsSchema,
+  pathParticipantsSchema,
 } from '@/validation/participants/participants.validation';
 import { Prisma } from '@prisma/client';
 import filterRedirect from '../redirect.actions';
+import { currentUserId } from '@/lib/auth';
+
+const userPromise = async (id: string) =>
+  await db.user.findUnique({
+    where: { id },
+    select: { id: true, role: true },
+  });
+type UserPromise = Awaited<ReturnType<typeof userPromise>>;
 
 const selectParticipantsPromise = async (
   hiddenColumnsArray: string[],
@@ -57,23 +65,35 @@ export type FetchedParticipantDetails = Awaited<
 >;
 export type SingleParticipantDetail = FetchedParticipantDetails[number];
 
+export type ParticipantsTableProps = {
+  participants: FetchedParticipantDetails;
+  count: number;
+  fetchParams: FetchParticipantsType;
+};
 export type FetchParticipantsReturnType =
   | { error: string }
-  | { participants: FetchedParticipantDetails; count: number };
-export type ParticipantsTableProps = {
-  participantsInfo: Exclude<FetchParticipantsReturnType, { error: string }>;
-  tableParams: FetchParticipantsType;
+  | ParticipantsTableProps;
+
+export type FetchParticipants = {
+  organizationId?: string;
+  fetchParams: FetchParticipantsType;
 };
 
-export const fetchParticipantsTable = async (
-  params: FetchParticipantsType,
-): Promise<FetchParticipantsReturnType> => {
-  const validParams = fetchParticipantsSchema.safeParse(params);
+export const fetchParticipantsTable = async ({
+  fetchParams,
+  organizationId,
+}: FetchParticipants): Promise<FetchParticipantsReturnType> => {
+  const userId = await currentUserId();
+  if (!userId)
+    return { error: 'You must be logged in to see participants info' };
+
+  const validParams = fetchParticipantsSchema.safeParse(fetchParams);
   if (!validParams.success) {
+    console.error('Invalid participants params: ', validParams.error);
     return { error: 'Invalid participant params' };
   }
+
   const {
-    userId,
     role,
     organizationName,
     participantEmail,
@@ -83,10 +103,16 @@ export const fetchParticipantsTable = async (
     pageSize,
   } = validParams.data;
 
-  const existingUser = await db.user.findUnique({
-    where: { id: userId },
-    select: { id: true, role: true },
-  });
+  let existingUser: UserPromise;
+  try {
+    existingUser = await userPromise(userId);
+  } catch (error) {
+    console.error('Failed to validate account permissions: ', error);
+    return {
+      error:
+        'Failed to validate account permissions due to a server error. Please try again later',
+    };
+  }
 
   if (!existingUser || !existingUser.id || !existingUser.role) {
     return { error: 'We could not match your account information' };
@@ -107,7 +133,11 @@ export const fetchParticipantsTable = async (
     ? processSearchString(participantName)
     : undefined;
 
-  if (searchOrganizationName)
+  if (organizationId) {
+    filterCondition.organizations = { some: { organizationId } };
+  }
+
+  if (searchOrganizationName && !organizationId)
     filterCondition = {
       ...filterCondition,
       organizations: {
@@ -129,21 +159,30 @@ export const fetchParticipantsTable = async (
 
   const hiddenColumnsArray = hiddenColumns ? hiddenColumns.split(',') : [];
 
-  const [participants, count] = await Promise.all([
-    selectParticipantsPromise(
-      hiddenColumnsArray,
-      { ...userWhereCondition, ...filterCondition },
-      page,
-      pageSize,
-    ),
-    db.user.count({ where: userWhereCondition }),
-  ]);
-
-  return { participants, count };
+  let participants: FetchedParticipantDetails, count: number;
+  try {
+    [participants, count] = await Promise.all([
+      selectParticipantsPromise(
+        hiddenColumnsArray,
+        { ...userWhereCondition, ...filterCondition },
+        page,
+        pageSize,
+      ),
+      db.user.count({ where: userWhereCondition }),
+    ]);
+    return { participants, count, fetchParams: validParams.data };
+  } catch (error) {
+    console.error(
+      'Failed to fetch participants data due to a server error: ',
+      error,
+    );
+    return {
+      error:
+        'Failed to fetch participants data due to a server error. Please try again later',
+    };
+  }
 };
 
-export const filterParticipants = async (
-  values: FetchParticipantsRedirectType,
-) => {
-  await filterRedirect(values, fetchParticipantsRedirectSchema, values.path);
+export const filterParticipants = async (values: PathParticipantsType) => {
+  await filterRedirect(values, pathParticipantsSchema, values.path);
 };

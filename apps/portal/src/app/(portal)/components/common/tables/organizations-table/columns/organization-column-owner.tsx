@@ -15,7 +15,7 @@ const organizationColumnOwner: ColumnDef<SingleOrganizationDetail> = {
         <TableUserCell
           userName={owner.user.name}
           userImage={owner.user.image || undefined}
-          userTableOrganization={owner.user.email}
+          userTableInfo={owner.user.email}
         />
       );
     return <p className="text-red-600">Owner not found</p>;

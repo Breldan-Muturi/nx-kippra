@@ -57,11 +57,11 @@ const DialogFormConfirmation = ({
           <Button
             variant="default"
             type="submit"
-            className="col-span-2 bg-green-600"
+            className="bg-green-600 col-span-2"
             onClick={handleSubmit}
           >
             {isPending && (
-              <Loader2 color="white" className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 color="white" className="w-4 h-4 mr-2 animate-spin" />
             )}
             {label}
           </Button>

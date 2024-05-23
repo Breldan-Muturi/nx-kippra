@@ -1,7 +1,26 @@
-import React from 'react';
+import { fetchCompletedPrograms } from '@/actions/completed-programs/fetch.completed.actions';
+import CompletedTable from '@/app/(portal)/components/common/tables/completed-table/completed-table';
+import {
+  FetchCompletedSchema,
+  fetchCompletedSchema,
+} from '@/validation/completed-program/completed-program.validation';
 
-const OrganizationCompletedCourses = () => {
-  return <div>OrganizationCompletedCourses</div>;
+const OrganizationCompletedPrograms = async ({
+  params: { organizationId },
+  searchParams,
+}: {
+  params: { organizationId: string };
+  searchParams: FetchCompletedSchema;
+}) => {
+  const validSearch = fetchCompletedSchema.safeParse(searchParams);
+  if (!validSearch.success) return <div>Invalid params</div>;
+  const completedTable = await fetchCompletedPrograms({
+    ...searchParams,
+    organizationId,
+  });
+  if ('error' in completedTable) return <div>{completedTable.error}</div>;
+
+  return <CompletedTable className="mt-8" {...completedTable} />;
 };
 
-export default OrganizationCompletedCourses;
+export default OrganizationCompletedPrograms;

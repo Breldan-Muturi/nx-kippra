@@ -58,11 +58,57 @@ export const validateDateRange = <T extends ZodRawShape>(
   );
 };
 
+export const AllowedFileTypes: Blob['type'][] = [
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+];
+
+const fileSchema = z.object({
+  name: z.string(),
+  type: z.string(),
+  size: z.number(),
+  lastModified: z.number(),
+});
+type FileSchema = z.infer<typeof fileSchema>;
+
+const filePreviewSchema = z.object({
+  fileUrl: z.string(),
+  fileSize: z.number(),
+  fileType: z.string(),
+  fileName: z.string(),
+  filePath: z.string().optional(),
+});
+export type FilePreviewSchema = z.infer<typeof filePreviewSchema>;
+
+const validateFile = (file: any) => {
+  if (file instanceof File) {
+    return AllowedFileTypes.includes(file.type);
+  } else if (file.fileType && typeof file.fileType === 'string') {
+    return AllowedFileTypes.includes(file.fileType);
+  }
+  return false;
+};
+
+export const validFileUpload = (optional: boolean = false) =>
+  z.array(z.any()).refine(
+    (files: any[]) => {
+      // Start with any array and refine
+      if (optional && files.length === 0) {
+        return true; // Optionally allow empty arrays
+      }
+      return files.every(validateFile); // Validate each item in the array
+    },
+    {
+      message: `All files must be one of the following types: ${AllowedFileTypes.join(', ')}`,
+    },
+  );
+
 export const AllowedImageTypes: Blob['type'][] = ['image/png', 'image/jpeg'];
 
 export const validImageUpload = (optional: boolean = false) => {
   return z.any().refine(
-    (file: File | string) => {
+    (file: File[] | string) => {
       if (optional && !file) return true;
       if (typeof file === 'string') return true;
       return file instanceof File && AllowedImageTypes.includes(file.type);

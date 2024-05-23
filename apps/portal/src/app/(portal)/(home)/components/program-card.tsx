@@ -30,11 +30,11 @@ const ProgramCard = ({
       className="rounded-lg hover:ring-2 hover:ring-green-400 focus:ring-2 focus:ring-green-400"
     >
       <Card className={cn('flex h-28 flex-row items-center', className)}>
-        <CardHeader className="h-28 w-1/4 p-0">
+        <CardHeader className="w-1/4 p-0 h-28">
           <Image
             src={imgUrl || '/static/images/kippra_logo.png'}
             alt={`${title}'s featured image`}
-            className="h-full w-full rounded-l-md object-cover"
+            className="object-cover w-full h-full rounded-l-md"
             width={100}
             height={100}
             quality={100}

@@ -22,6 +22,7 @@ export type OrganizationTableUser = NonNullable<
 >;
 
 const organizationsPromise = async (
+  email: string,
   hiddenColumnsArray: string[],
   where: Prisma.OrganizationWhereInput,
   page: string,
@@ -46,7 +47,11 @@ const organizationsPromise = async (
       name: true,
       image: true,
       email: true,
-      invites: true,
+      invites: {
+        where: { email },
+        select: { email: true, token: true },
+        take: 1,
+      },
       contactPersonEmail: showContact,
       users: {
         select: {
@@ -113,7 +118,7 @@ export const fetchOrganizationsTable = async (
         { participants: { some: { id: existingUser.id } } },
         { users: { some: { userId: existingUser.id } } },
         { contactPersonEmail: existingUser.email },
-        { invites: { has: existingUser.email } },
+        { invites: { some: { email: existingUser.email } } },
         { contactPersonName: existingUser.name },
       ],
     };
@@ -143,7 +148,7 @@ export const fetchOrganizationsTable = async (
     filterCondition = {
       ...filterCondition,
       OR: [
-        { invites: { has: contactEmail } },
+        { invites: { some: { email: contactEmail } } },
         { participants: { some: { email: contactEmail } } },
         { contactPersonEmail: contactEmail },
         { users: { some: { user: { email: contactEmail } } } },
@@ -163,6 +168,7 @@ export const fetchOrganizationsTable = async (
   try {
     const [organizations, count] = await Promise.all([
       organizationsPromise(
+        existingUser.email,
         hiddenColumnsArray,
         {
           ...userCondition,

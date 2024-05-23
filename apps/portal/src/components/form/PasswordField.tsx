@@ -37,10 +37,10 @@ const PasswordField = <T extends FieldValues>({
               type="button"
               variant="ghost"
               size="icon"
-              className="absolute right-0 mr-2 h-5 w-5 rounded-full"
+              className="absolute right-0 w-5 h-5 mr-2 rounded-full"
               onClick={handleSetVisible}
             >
-              <Icon className="h-4 w-4" />
+              <Icon className="w-4 h-4" />
             </Button>
           </div>
         </FormControl>

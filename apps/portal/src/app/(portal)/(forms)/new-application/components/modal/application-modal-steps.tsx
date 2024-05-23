@@ -199,7 +199,7 @@ const applicationModalSteps = (
         <AlertDialogAction
           disabled={isPending || hasWarning || !applicationFee || !payee}
           onClick={handleSubmit}
-          className="gap-2 bg-green-500 hover:bg-green-600"
+          className="bg-green-500 gap-2 hover:bg-green-600"
         >
           <CheckSquare2 className="size-4" />
           Submit this application

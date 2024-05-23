@@ -12,7 +12,7 @@ const SectionWrapper = ({
 }: SectionWrapperProps) => {
   return (
     <section className={cn("w-full p-10", className)}>
-      <h2 className=" my-2 text-2xl text-red-600">{sectionLabel}</h2>
+      <h2 className="my-2 text-2xl text-red-600 ">{sectionLabel}</h2>
       {children}
     </section>
   );

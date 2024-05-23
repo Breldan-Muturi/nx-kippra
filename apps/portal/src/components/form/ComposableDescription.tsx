@@ -1,7 +1,8 @@
-import {cn} from "@/lib/utils";
-import React from "react";
+import { cn } from '@/lib/utils';
+import React from 'react';
 
-interface ComposableDescriptionProps extends React.HTMLAttributes<HTMLElement> {
+interface ComposableDescriptionProps
+  extends React.ComponentPropsWithoutRef<'span'> {
   label: string;
   children?: React.ReactNode;
 }
@@ -14,13 +15,13 @@ const ComposableDescription: React.FC<ComposableDescriptionProps> = ({
   return (
     <span
       className={cn(
-        "flex items-center justify-start text-muted-foreground text-sm",
-        className
+        'flex items-center justify-start text-muted-foreground text-sm',
+        className,
       )}
     >
       {/* Adding a non-breaking space to reliably separate the text and link */}
       {label}&nbsp;
-      {/* To Do: Add theming font and colors */}
+      {/* TODO: Add theming font and colors */}
       {children}
     </span>
   );

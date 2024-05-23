@@ -1,0 +1,31 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "Fetch completed programs",
+  "steps": [
+    {
+      "file": "apps/portal/src/actions/completed-programs/fetch.completed.actions.ts",
+      "description": "Confirm the user is logged in",
+      "line": 73
+    },
+    {
+      "file": "apps/portal/src/actions/completed-programs/fetch.completed.actions.ts",
+      "description": "Confirm the fetch params are valid",
+      "line": 77
+    },
+    {
+      "file": "apps/portal/src/actions/completed-programs/fetch.completed.actions.ts",
+      "description": "Prepare the where clause based on the params",
+      "line": 97
+    },
+    {
+      "file": "apps/portal/src/actions/completed-programs/fetch.completed.actions.ts",
+      "description": "Fetch the user details, completed programs, and count concurrently",
+      "line": 126
+    },
+    {
+      "file": "apps/portal/src/actions/completed-programs/fetch.completed.actions.ts",
+      "description": "Return the params, completed programs, and count based on whether the user is authorized",
+      "line": 161
+    }
+  ]
+}

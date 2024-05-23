@@ -92,7 +92,7 @@ const AddParticipant = ({
 
   return (
     <section className="flex flex-col items-start">
-      <div className="mb-6 flex items-center space-x-2">
+      <div className="flex items-center mb-6 space-x-2">
         <Badge>{badgeText}</Badge>
         <Badge
           variant={isRegistered ? 'default' : 'outline'}
@@ -162,12 +162,12 @@ const AddParticipant = ({
                       onClick={() => setOpen(!open)}
                     >
                       {field.value || 'Enter organization name'}{' '}
-                      <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
+                      <ChevronsUpDown className="ml-2 opacity-50 size-4 shrink-0" />
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent
-                  className="popover-width-trigger p-0"
+                  className="p-0 popover-width-trigger"
                   align="start"
                 >
                   <Command>
@@ -186,7 +186,7 @@ const AddParticipant = ({
                               type="button"
                               variant="default"
                               size="icon"
-                              className="absolute right-0 top-2 mr-2 size-6  rounded-full bg-green-600/80 hover:bg-green-600"
+                              className="absolute right-0 mr-2 rounded-full top-2 size-6  bg-green-600/80 hover:bg-green-600"
                               title="Confirm new organization"
                               onClick={() =>
                                 handleOrganizationSelect(commandInputValue)
