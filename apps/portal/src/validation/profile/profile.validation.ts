@@ -1,7 +1,12 @@
-import { z } from 'zod';
-import { characterCount, validImageUpload } from '../reusable.validation';
+import { PASSWORD_VALIDATION } from '@/constants/profile.constants';
 import { Citizenship, Identification } from '@prisma/client';
-import { accountSchema } from './account.profile.validation';
+import { z } from 'zod';
+import {
+  characterCount,
+  email,
+  validImageUpload,
+  validString,
+} from '../reusable.validation';
 
 export const profileSchema = z.object({
   id: z.string(),
@@ -18,6 +23,15 @@ export const profileSchema = z.object({
   address: characterCount(10, 80),
 });
 export type ProfileForm = z.infer<typeof profileSchema>;
+
+export const accountSchema = z.object({
+  isTwoFactorEnabled: z.boolean(),
+  email: email,
+  password: validString(PASSWORD_VALIDATION, 6).optional(),
+  newPassword: validString(PASSWORD_VALIDATION, 6).optional(),
+});
+
+export type AccountForm = z.infer<typeof accountSchema>;
 
 export const profileUpdateSchema = profileSchema.merge(accountSchema).refine(
   ({ password, newPassword }) => {

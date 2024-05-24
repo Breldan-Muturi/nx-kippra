@@ -341,7 +341,7 @@ const NewApplicationForm = ({
         <form
           onSubmit={handleSubmit(onSubmit)}
           className={cn(
-            'grid w-3/5 grid-cols-2 justify-center gap-x-4 gap-y-2',
+            'flex flex-col lg:grid w-full p-2 md:p-0 lg:w-3/5 lg:grid-cols-2 justify-center gap-x-4 gap-y-2',
             className,
           )}
           {...props}
@@ -357,7 +357,7 @@ const NewApplicationForm = ({
               <FormHeader
                 label="2. Organization details"
                 description="Select an existing organization or create a new one"
-                className="col-span-2"
+                className="col-span-2 my-2 lg:my-5"
               />
               <ReusableForm formFields={applicationOrganizationForm} />
             </>
@@ -405,7 +405,7 @@ const NewApplicationForm = ({
               className="flex flex-grow"
             />
           </div>
-          <div className="flex justify-between w-full col-span-2 mb-8 space-x-3">
+          <div className="flex flex-col w-full col-span-2 mb-8 space-y-4 lg:justify-between lg:space-x-3 lg:flex-row">
             <ReusableForm formFields={slotsFields} />
           </div>
           <SubmitButton

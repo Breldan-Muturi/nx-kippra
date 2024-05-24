@@ -63,17 +63,17 @@ const TablesPagination = ({
   }
 
   return (
-    <div className="flex items-center">
+    <div className="flex flex-col items-start w-full px-2 space-y-2 lg:space-y-0 lg:px-0 lg:items-center lg:flex-row">
       <div className="flex flex-grow space-x-2">
         <p>Total count:</p> <p className="font-semibold">{count}</p>
       </div>
-      <div className="flex items-center justify-end px-4 space-x-2">
+      <div className="flex flex-col items-center justify-end w-full space-y-2 lg:w-auto lg:px-4 lg:space-x-2 lg:space-y-0 lg:flex-row">
         <Select
           disabled={isPending || count <= 10}
           onValueChange={changePageSize}
           value={pageSize}
         >
-          <SelectTrigger className="w-full mr-4">
+          <SelectTrigger className="w-full bg-background">
             <SelectValue placeholder="Select page options" />
           </SelectTrigger>
           <SelectContent>
@@ -90,47 +90,49 @@ const TablesPagination = ({
             </SelectGroup>
           </SelectContent>
         </Select>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => changePage(1)}
-          disabled={disableStart}
-          title="first page"
-        >
-          <ChevronsLeft />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => changePage(pageInt - 1)}
-          disabled={disableStart}
-          title="previous page"
-        >
-          <ChevronLeft />
-        </Button>
-        <p>
-          <span className="font-semibold">{startIndex}</span>
-          <span className="mx-4">to</span>
-          <span className="font-semibold">{endIndex}</span>
-        </p>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => changePage(pageInt + 1)}
-          disabled={disableEnd}
-          title="next page"
-        >
-          <ChevronRight />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => changePage(totalPages)}
-          disabled={disableEnd}
-          title="last page"
-        >
-          <ChevronsRight />
-        </Button>
+        <div className="flex items-center w-full space-x-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => changePage(1)}
+            disabled={disableStart}
+            title="first page"
+          >
+            <ChevronsLeft />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => changePage(pageInt - 1)}
+            disabled={disableStart}
+            title="previous page"
+          >
+            <ChevronLeft />
+          </Button>
+          <p>
+            <span className="font-semibold">{startIndex}</span>
+            <span className="mx-4">to</span>
+            <span className="font-semibold">{endIndex}</span>
+          </p>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => changePage(pageInt + 1)}
+            disabled={disableEnd}
+            title="next page"
+          >
+            <ChevronRight />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => changePage(totalPages)}
+            disabled={disableEnd}
+            title="last page"
+          >
+            <ChevronsRight />
+          </Button>
+        </div>
       </div>
     </div>
   );

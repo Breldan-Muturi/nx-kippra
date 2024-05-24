@@ -57,7 +57,7 @@ const ApplicationParticipantForm = ({
             {!!participant?.id ? 'Registered participant' : 'New participant'}
           </Badge>
         </div>
-        <div className="grid grid-cols-2 gap-x-2 gap-y-4">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-x-2 gap-y-4">
           <ReusableForm formFields={participantFields(participant)} />
           <Button
             variant="default"

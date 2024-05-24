@@ -11,13 +11,14 @@ import {
 import { avatarFallbackName } from '@/helpers/user.helper';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { cn } from '@/lib/utils';
-import { DropDownLink } from '@/types/nav-links.types';
+import { DropDownLink, SidebarLink } from '@/types/nav-links.types';
 import { LogOut, UserCog } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 import { buttonVariants } from '../../../components/ui/button';
+import MobileNav from './sidebar/mobile-sidebar';
 
 const navLinks = [
   {
@@ -46,21 +47,11 @@ const dropDownLinks: DropDownLink[] = [
   },
 ];
 
-const kippraLogo = (
-  <Link href="/" title="Navigate to home" className="flex w-1/3 lg:w-1/12">
-    <Image
-      width={200}
-      height={100}
-      quality={100}
-      src="/kippra_logo.png"
-      alt="Kippra-logo"
-    />
-  </Link>
-);
+type NavBarProps = React.ComponentPropsWithRef<'div'> & {
+  links: SidebarLink[];
+};
 
-interface NavBarProps extends React.ComponentPropsWithRef<'div'> {}
-
-const Navbar = ({ className, ...props }: NavBarProps) => {
+const Navbar = ({ links, className, ...props }: NavBarProps) => {
   const user = useCurrentUser();
 
   return (
@@ -69,7 +60,18 @@ const Navbar = ({ className, ...props }: NavBarProps) => {
       {...props}
     >
       <div className="flex flex-row items-center justify-between w-full px-4 py-2 border border-b-gray-300">
-        {kippraLogo}
+        <div className="flex items-center w-1/2 space-x-1 md:w-1/4 lg:w-1/12">
+          <MobileNav links={links} className="flex md:hidden" />
+          <Link href="/" title="Navigate to home" className="flex flex-grow">
+            <Image
+              width={200}
+              height={100}
+              quality={100}
+              src="/kippra_logo.png"
+              alt="Kippra-logo"
+            />
+          </Link>
+        </div>
         <nav className="items-center hidden lg:flex md:space-x-2 lg:space-x-4">
           {navLinks.map(({ href, label }, i) => (
             <Link
@@ -84,7 +86,7 @@ const Navbar = ({ className, ...props }: NavBarProps) => {
         </nav>
         {user ? (
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center space-x-2">
+            <DropdownMenuTrigger className="flex items-center w-1/3 space-x-2 lg:w-auto">
               <Avatar>
                 <AvatarImage
                   src={`${user.image}`}
@@ -92,7 +94,7 @@ const Navbar = ({ className, ...props }: NavBarProps) => {
                 />
                 <AvatarFallback>{avatarFallbackName(user.name)}</AvatarFallback>
               </Avatar>
-              <p className="text-sm font-semibold text-muted-foreground">
+              <p className="text-sm font-semibold truncate text-muted-foreground">
                 {user.name}
               </p>
             </DropdownMenuTrigger>

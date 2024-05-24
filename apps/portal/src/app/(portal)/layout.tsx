@@ -9,7 +9,6 @@ import { CgOrganisation } from 'react-icons/cg';
 import { ImUsers } from 'react-icons/im';
 import { MdLibraryBooks, MdPayment, MdTask } from 'react-icons/md';
 import ContentArea from './components/content';
-import MobileNav from './components/sidebar/mobile-sidebar';
 import SideBarArea from './components/sidebar/side-bar';
 
 const navLinks: SidebarLink[] = [
@@ -79,12 +78,11 @@ const PortalLayout = async ({ children }: { children: React.ReactNode }) => {
   const links = getLinksForRole(userRole);
   return (
     <main className="flex flex-col h-screen">
-      <Navbar />
-      <section className="flex flex-1 h-full overflow-hidden">
+      <Navbar links={links} />
+      <section className="flex flex-1 h-full overflow-auto lg:overflow-hidden">
         {isLoggedIn && (
           <>
             <SideBarArea links={links} className="hidden md:flex" />
-            <MobileNav links={links} className="flex md:hidden" />
           </>
         )}
         <ContentArea>{children}</ContentArea>

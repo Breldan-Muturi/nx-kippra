@@ -60,7 +60,6 @@ export const pesaflowPayment = async (
       },
       data: validApiData.data,
     });
-
     return {
       invoiceLink: axiosResponse.data.invoice_link,
       invoiceNumber: axiosResponse.data.invoice_number,

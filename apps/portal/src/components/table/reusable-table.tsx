@@ -1,16 +1,15 @@
 'use client';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import {
-  Table as UITable,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
+  Table as UITable,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { flexRender } from '@tanstack/react-table';
-import { Table } from '@tanstack/react-table';
+import { Table, flexRender } from '@tanstack/react-table';
 import React from 'react';
 
 export type ReusableTableProps<T> = React.ComponentPropsWithoutRef<'div'> & {
@@ -26,7 +25,7 @@ const ReusableTable = <T,>({
   return (
     <ScrollArea
       className={cn(
-        'whitespace-nowrap rounded-md border md:w-[1150px]',
+        'whitespace-nowrap rounded-md border w-[calc(100vw-16px)] md:w-[calc(100vw-244px)]',
         className,
       )}
     >

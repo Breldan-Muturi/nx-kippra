@@ -13,7 +13,7 @@ import { useCurrentisOAuth } from '@/hooks/use-current-isoauth';
 import {
   ProfileUpdateForm,
   profileUpdateSchema,
-} from '@/validation/profile/update.profile.validation';
+} from '@/validation/profile/profile.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -79,12 +79,12 @@ const ProfileForm = ({ user }: { user: UserById }) => {
     <Form {...form}>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid self-center w-3/4 grid-cols-2 gap-2 px-8 space-y-3 md:px-24"
+        className="grid self-center grid-cols-2 gap-2 px-2 lg:space-y-3 lg:w-3/4 md:px-24"
       >
         <FormHeader
           label="Update"
           description="Your profile information"
-          className="col-span-2 mt-6 mb-2"
+          className="col-span-2 mt-2 lg:mb-2 lg:mt-6"
         />
         <ReusableForm formFields={profileFields} />
         <FormHeader

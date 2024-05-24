@@ -79,14 +79,14 @@ const TrainingSessionFilters = ({
       >
         <div
           className={cn(
-            'flex flex-col lg:flex-row items-center gap-y-3 gap-x-2 items-start',
+            'flex flex-col lg:flex-row items-center gap-y-3 gap-x-2 mb-1 lg:mb-0',
             className,
           )}
           {...props}
         >
           <ReusableForm formFields={filterForm} />
         </div>
-        <div className="flex items-center justify-between w-full">
+        <div className="flex flex-col items-start justify-between w-full space-y-3 lg:space-y-0 lg:items-center lg:flex-auto">
           {isAnyFieldFilled() && (
             <div className="flex items-center gap-x-3">
               <SubmitButton isSubmitting={isPending} label="Apply filter" />
@@ -101,7 +101,7 @@ const TrainingSessionFilters = ({
               </Button>
             </div>
           )}
-          <div className="flex items-center ml-auto">
+          <div className="flex items-center lg:ml-auto">
             <Button
               disabled={isPending || !pastShows}
               variant={pastShows ? 'secondary' : 'outline'}

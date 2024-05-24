@@ -140,7 +140,7 @@ const ProgramForm = ({
       <form
         onSubmit={handleSubmit(onSubmit)}
         className={cn(
-          'grid grid-cols-2 gap-x-4 gap-y-6 self-center p-8 md:w-3/4',
+          'grid grid-cols-2 gap-x-4 gap-y-3 lg:gap-y-6 self-center p-2 lg:p-8 md:w-3/4',
           isValidProgram ? 'md:pt-4' : 'md:pt-12',
           className,
         )}
@@ -149,7 +149,7 @@ const ProgramForm = ({
         <FormHeader
           label={`${isValidProgram ? 'Update this' : 'New'} program`}
           description={`Complete the form below and submit to ${isValidProgram ? 'update this program' : 'add a program'}`}
-          className="col-span-2"
+          className="col-span-2 my-2 lg:my-5"
         />
         <ReusableForm
           formFields={programFields(programOptions, moodleCourseOptions)}

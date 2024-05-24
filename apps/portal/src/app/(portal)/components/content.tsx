@@ -5,12 +5,12 @@ const ContentArea = ({ children }: { children: React.ReactNode }) => {
   return (
     <section className="flex flex-col flex-1 bg-neutral-100">
       <div className="sticky flex-1 overflow-y-auto">{children}</div>
-      <footer className="flex self-center justify-between pt-1 pb-0.5 px-4 w-full">
-        <p className="text-sm font-medium">
+      <footer className="flex flex-col lg:flex-row space-y-1 self-center items-center justify-between pt-1 pb-0.5 px-2 lg:px-4 w-full">
+        <p className="w-full text-sm font-medium text-center break-words lg:w-auto">
           Copyright @{new Date().getFullYear()} Kenya Institute of Public Policy
           Research and Analysis
         </p>
-        <div className="flex items-center text-xs space-x-1 text-muted-foreground">
+        <div className="flex items-center space-x-1 text-xs text-muted-foreground">
           <p>Developed by</p>
           <Link
             href="https://sohnandsol.com"

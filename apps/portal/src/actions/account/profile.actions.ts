@@ -7,7 +7,7 @@ import { sendVerificationEmail } from '@/mail/account.mail';
 import {
   ProfileSubmitForm,
   ProfileUpdateForm,
-} from '@/validation/profile/update.profile.validation';
+} from '@/validation/profile/profile.validation';
 import { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import {

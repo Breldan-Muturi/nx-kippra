@@ -3,8 +3,10 @@ import {
   identificationOptions,
 } from '@/helpers/enum.helpers';
 import { FormFieldType } from '@/types/form-field.types';
-import { AccountForm } from '@/validation/profile/account.profile.validation';
-import { ProfileForm } from '@/validation/profile/update.profile.validation';
+import {
+  AccountForm,
+  ProfileForm,
+} from '@/validation/profile/profile.validation';
 
 const profileFields: FormFieldType<ProfileForm>[] = [
   {
@@ -59,18 +61,21 @@ const profileFields: FormFieldType<ProfileForm>[] = [
     label: 'Occupation',
     placeholder: 'Enter your occupation',
     type: 'text',
+    className: 'col-span-2 lg:col-span-1',
   },
   {
     name: 'userOrganization',
     label: 'Organization',
     placeholder: 'Enter your organization',
     type: 'text',
+    className: 'col-span-2 lg:col-span-1',
   },
   {
     name: 'county',
     type: 'text',
     label: 'County',
     placeholder: 'Enter your county',
+    className: 'col-span-2 lg:col-span-1',
   },
   {
     name: 'address',
@@ -82,39 +87,40 @@ const profileFields: FormFieldType<ProfileForm>[] = [
   },
 ];
 
-const accountFields = (isOAuth: boolean): FormFieldType<AccountForm>[] => {
-  const commonField: FormFieldType<AccountForm> = {
+const accountFields = (isOAuth: boolean): FormFieldType<AccountForm>[] => [
+  ...(isOAuth
+    ? []
+    : ([
+        {
+          name: 'email',
+          placeholder: 'Enter your email address',
+          label: 'Email',
+          type: 'email',
+          className: 'col-span-2',
+        },
+        {
+          name: 'password',
+          label: 'Password',
+          placeholder: 'Enter your current password',
+          type: 'password',
+          className: 'col-span-2 lg:col-span-1',
+        },
+        {
+          name: 'newPassword',
+          label: 'New Password',
+          placeholder: 'Enter a new password',
+          type: 'password',
+          className: 'col-span-2 lg:col-span-1',
+        },
+      ] as FormFieldType<AccountForm>[])),
+  {
     name: 'isTwoFactorEnabled',
     type: 'switch',
     label: 'Enable Two Factor Authentication',
     description:
       'With two factor authentication, you receive a verification token when you sign in again',
     className: 'col-span-2 bg-background',
-  };
+  },
+];
 
-  const notOAuthFields: FormFieldType<AccountForm>[] = [
-    {
-      name: 'email',
-      placeholder: 'Enter your email address',
-      label: 'Email',
-      type: 'email',
-      className: 'col-span-2',
-    },
-    {
-      name: 'password',
-      label: 'Password',
-      placeholder: 'Enter your current password',
-      type: 'password',
-    },
-    {
-      name: 'newPassword',
-      label: 'New Password',
-      placeholder: 'Enter a new password',
-      type: 'password',
-    },
-    commonField,
-  ];
-  return isOAuth ? [commonField] : notOAuthFields;
-};
-
-export { profileFields, accountFields };
+export { accountFields, profileFields };

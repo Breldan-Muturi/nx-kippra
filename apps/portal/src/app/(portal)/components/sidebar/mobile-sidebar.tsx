@@ -1,47 +1,38 @@
-import { CgMenuGridR } from 'react-icons/cg';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import Link from 'next/link';
-import React from 'react';
+import MobileSidebarLink from '@/components/buttons/mobile-sidebar-link';
+import { Button } from '@/components/ui/button';
 import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
-import { MdClose } from 'react-icons/md';
+import { cn } from '@/lib/utils';
 import { SidebarProps } from '@/types/nav-links.types';
+import { CgMenuGridR } from 'react-icons/cg';
+import { MdClose } from 'react-icons/md';
 
 const MobileNav = ({ links, className, ...props }: SidebarProps) => {
   return (
     <div className={cn('justify-center', className)} {...props}>
       <Drawer>
         <DrawerTrigger>
-          <CgMenuGridR color="white" size="28" className="my-2" />
+          <CgMenuGridR color="gray" size="28" className="my-2" />
         </DrawerTrigger>
         <DrawerContent>
-          <DrawerTitle>
-            {links.map(({ href, label, icon }, i) => (
-              <Link
-                key={`${i}-${href}-${label}`}
-                href={href}
-                title={`Access the ${label} page`}
-                className={cn(
-                  buttonVariants({ variant: 'link' }),
-                  'md:hidden flex flex-col justify-center text-green-600',
-                )}
-              >
-                <section className="flex flex-row items-center my-2 ">
-                  <div className="flex ml-8 mr-2">{icon}</div>
-                  <div className="w-1/2 text-xl font-semibold">{label}</div>
-                </section>
-              </Link>
-            ))}
-          </DrawerTitle>
+          {/* <DrawerTitle> */}
+          {links.map(({ href, label, icon }, i) => (
+            <MobileSidebarLink
+              {...{ key: `${i}${href}${label}`, href, label, icon }}
+            />
+          ))}
+          {/* </DrawerTitle> */}
           <DrawerClose>
-            <Button variant="destructive">
-              <MdClose size="18" color="white" />
+            <Button
+              variant="outline"
+              className="justify-start w-full text-red-600 border-0 rounded-none gap-x-2"
+            >
+              <MdClose size="18" color="red" />
+              Dismiss modal
             </Button>
           </DrawerClose>
         </DrawerContent>

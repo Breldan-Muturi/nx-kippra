@@ -261,9 +261,9 @@ const CompletedTable = ({
           clearFilters={clearFilters}
         />
         <div className="pb-4 space-y-2">
-          <div className="flex items-center justify-between w-full">
+          <div className="flex flex-col-reverse items-start justify-between w-full md:space-y-0 md:items-center md:flex-row">
             {!!completedActions && (
-              <div className="flex justify-start space-x-2">
+              <div className="flex mt-3 md:mt-0 justify-start space-x-2">
                 {completedActions.map((action) => (
                   <TableAction key={action.content} {...action} />
                 ))}
@@ -271,7 +271,7 @@ const CompletedTable = ({
             )}
             <Button
               variant="outline"
-              className="text-green-600 border-green-600 gap-x-2"
+              className="w-full text-green-600 border-green-600 lg:w-auto gap-x-2"
               disabled={isPending}
               onClick={handleNew}
             >

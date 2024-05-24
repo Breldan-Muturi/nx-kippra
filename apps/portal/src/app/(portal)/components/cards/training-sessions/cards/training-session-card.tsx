@@ -137,20 +137,20 @@ const TrainingSessionCard = ({
           )}
         </ul>
       </CardContent>
-      <CardFooter className="flex items-center justify-between">
+      <CardFooter className="flex flex-col items-center justify-between space-y-3 md:space-y-0 md:flex-row">
         {!isShowPast && (
           <Link
             href={`/${programId}/training-sessions/${id}`}
             title="Apply for session"
             className={cn(
               buttonVariants(),
-              'bg-green-600 rounded-full hover:bg-green-500',
+              'bg-green-600 rounded-full hover:bg-green-500 w-full md:w-auto',
             )}
           >
             Apply for session
           </Link>
         )}
-        <div className="flex ml-auto items-center space-x-1">
+        <div className="flex items-center justify-center w-full space-x-4 md:justify-normal md:w-auto md:space-x-1 md:ml-auto">
           {actionButtons.map((action) => (
             <TableAction {...action} />
           ))}

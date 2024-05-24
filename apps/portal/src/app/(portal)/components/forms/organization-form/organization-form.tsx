@@ -117,7 +117,7 @@ const OrganizationForm = ({
       <form
         onSubmit={handleSubmit(onSubmit)}
         className={cn(
-          'grid grid-cols-2 w-full  gap-x-4 gap-y-2 self-center p-8 md:w-3/4',
+          'flex flex-col lg:grid grid-cols-2 w-full p-2 gap-x-4 gap-y-2 self-center lg:p-8 md:w-3/4',
           className,
         )}
         {...props}
