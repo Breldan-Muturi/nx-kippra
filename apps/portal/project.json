@@ -22,6 +22,18 @@
           ]
         }
       }
+    },
+    "debug": {
+      "executor": "@nx/next:server",
+      "options": {
+        "buildTarget": "portal:build",
+        "dev": true
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "portal:build:production"
+        }
+      }
     }
   }
 }

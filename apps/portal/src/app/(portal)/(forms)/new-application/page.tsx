@@ -1,5 +1,5 @@
 import { formApplication } from '@/actions/applications/form.applications.actions';
-import NewApplicationForm from '../../components/forms/application-form/new-application-form';
+import ApplicationForm from '../../components/forms/application-form/application-form';
 
 const NewApplicationPage = async () => {
   const adminApplicationForm = await formApplication();
@@ -12,7 +12,7 @@ const NewApplicationPage = async () => {
     );
   }
 
-  return <NewApplicationForm {...adminApplicationForm} />;
+  return <ApplicationForm {...adminApplicationForm} />;
 };
 
 export default NewApplicationPage;

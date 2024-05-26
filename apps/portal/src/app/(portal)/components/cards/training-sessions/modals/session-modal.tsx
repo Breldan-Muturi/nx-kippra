@@ -12,7 +12,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 import {
   NewTrainingSessionForm,
   UpdateTrainingSessionForm,
@@ -184,7 +186,10 @@ const SessionModal = ({
 
   return (
     <Dialog open onOpenChange={dismissModal}>
-      <DialogContent className={className} {...props}>
+      <DialogContent
+        className={cn('max-h-fit flex flex-col', className)}
+        {...props}
+      >
         <DialogHeader>
           <DialogTitle>{`${newSession ? 'New' : 'Update'} training session`}</DialogTitle>
           <DialogDescription className="text-green-600">
@@ -192,37 +197,37 @@ const SessionModal = ({
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="grid grid-cols-2 gap-2"
-          >
-            <ReusableForm
-              formFields={sessionFields({
-                usingDifferentFees,
-                usingUsd,
-                mode,
-              })}
-            />
-            {usingUsd && (
-              <Tabs defaultValue="ksh" className="col-span-2">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="ksh">Ksh Fees</TabsTrigger>
-                  <TabsTrigger value="usd">USD Fees</TabsTrigger>
-                </TabsList>
-                <TabsContent value="ksh" className="grid grid-cols-2 gap-2">
-                  <ReusableForm
-                    formFields={kshFeesFields(usingDifferentFees, mode)}
-                  />
-                </TabsContent>
-                <TabsContent value="usd" className="grid grid-cols-2 gap-2">
-                  <ReusableForm
-                    formFields={usdFeesFields(usingDifferentFees, mode)}
-                  />
-                </TabsContent>
-              </Tabs>
-            )}
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
+            <ScrollArea className="w-full h-[calc(100vh-360px)]">
+              <div className="grid gap-2 mb-4 md:grid-cols-2">
+                <ReusableForm
+                  formFields={sessionFields({
+                    usingDifferentFees,
+                    usingUsd,
+                    mode,
+                  })}
+                />
+                {usingUsd && (
+                  <Tabs defaultValue="ksh" className="col-span-2">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="ksh">Ksh Fees</TabsTrigger>
+                      <TabsTrigger value="usd">USD Fees</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="ksh" className="grid grid-cols-2 gap-2">
+                      <ReusableForm
+                        formFields={kshFeesFields(usingDifferentFees, mode)}
+                      />
+                    </TabsContent>
+                    <TabsContent value="usd" className="grid grid-cols-2 gap-2">
+                      <ReusableForm
+                        formFields={usdFeesFields(usingDifferentFees, mode)}
+                      />
+                    </TabsContent>
+                  </Tabs>
+                )}
+              </div>
+            </ScrollArea>
             <SubmitButton
-              className="my-4"
               label={`${newSession ? 'New' : 'Update'} session`}
               isSubmitting={isPending}
             />

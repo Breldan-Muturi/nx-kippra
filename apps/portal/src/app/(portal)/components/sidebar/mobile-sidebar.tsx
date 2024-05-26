@@ -1,5 +1,5 @@
 import MobileSidebarLink from '@/components/buttons/mobile-sidebar-link';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import {
   Drawer,
   DrawerClose,
@@ -26,14 +26,14 @@ const MobileNav = ({ links, className, ...props }: SidebarProps) => {
             />
           ))}
           {/* </DrawerTitle> */}
-          <DrawerClose>
-            <Button
-              variant="outline"
-              className="justify-start w-full text-red-600 border-0 rounded-none gap-x-2"
-            >
-              <MdClose size="18" color="red" />
-              Dismiss modal
-            </Button>
+          <DrawerClose
+            className={cn(
+              buttonVariants({ variant: 'outline' }),
+              'justify-start w-full text-red-600 border-0 rounded-none gap-x-2',
+            )}
+          >
+            <MdClose size="18" color="red" />
+            Dismiss modal
           </DrawerClose>
         </DrawerContent>
       </Drawer>

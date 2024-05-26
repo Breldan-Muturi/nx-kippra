@@ -1,11 +1,8 @@
-import { Badge } from '@/components/ui/badge';
-import {
-  deliveryModeOptions,
-  formatDeliveryMode,
-} from '@/helpers/enum.helpers';
-import { cn } from '@/lib/utils';
-import { Delivery, UserRole } from '@prisma/client';
-import { ApplicationModalProps } from './application-modal-steps';
+import {Badge} from '@/components/ui/badge';
+import {formatDeliveryMode} from '@/helpers/enum.helpers';
+import {cn} from '@/lib/utils';
+import {Delivery,UserRole} from '@prisma/client';
+import {ApplicationModalProps} from './application-modal-steps';
 
 const ApplicationInfo = ({
   data,
@@ -34,26 +31,15 @@ const ApplicationInfo = ({
   const availableSlotsOnpremise = onPremiseSlots
     ? onPremiseSlots - (onPremiseSlotsTaken || 0)
     : 0;
-  const deliveryModeNotSelected =
-    mode === Delivery.BOTH_MODES
-      ? deliveryModeOptions
-          .filter(
-            ({ value }) => value !== delivery && value !== Delivery.BOTH_MODES,
-          )
-          .map(({ optionLabel }) => optionLabel)[0]
-      : undefined;
   const isAdmin = role === UserRole.ADMIN;
   return (
     <ul className="space-y-2">
       <li>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2 sm:items-center sm:flex-row">
           <p>Mode of delivery:</p>
           <Badge variant="default" className="bg-green-600">
             {formatDeliveryMode(delivery)}
           </Badge>
-          {deliveryModeNotSelected && (
-            <Badge variant="outline">{deliveryModeNotSelected}</Badge>
-          )}
         </div>
       </li>
       <li>

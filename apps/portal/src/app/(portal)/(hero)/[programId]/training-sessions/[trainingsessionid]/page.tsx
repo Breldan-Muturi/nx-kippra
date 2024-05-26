@@ -1,5 +1,5 @@
 import { formApplication } from '@/actions/applications/form.applications.actions';
-import NewApplicationForm from '@/app/(portal)/components/forms/application-form/new-application-form';
+import ApplicationForm from '@/app/(portal)/components/forms/application-form/application-form';
 
 interface ApplicationPageProps {
   params: {
@@ -21,7 +21,7 @@ const ApplicationPage = async ({
       </div>
     );
 
-  return <NewApplicationForm {...applicationForm} />;
+  return <ApplicationForm {...applicationForm} />;
 };
 
 export default ApplicationPage;

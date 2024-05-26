@@ -49,19 +49,19 @@ import ApplicationParticipantForm from './participants/participants-form/applica
 import ParticipantApplicationSheet from './participants/participants-sheet/participant-application-sheet';
 import ParticipantApplicationsTable from './participants/participants-table/participants-application-table';
 
-type NewApplicationFormProps = React.ComponentPropsWithoutRef<'form'> & {
+type ApplicationFormProps = React.ComponentPropsWithoutRef<'form'> & {
   trainingSessionInfo?: TrainingSessionInfo;
   programOptions?: ProgramsOption[];
   orgOptions: OrgOption[];
 };
 
-const NewApplicationForm = ({
+const ApplicationForm = ({
   trainingSessionInfo,
   programOptions,
   orgOptions,
   className,
   ...props
-}: NewApplicationFormProps) => {
+}: ApplicationFormProps) => {
   const isAdmin = useCurrentRole() === UserRole.ADMIN;
   const [isPending, startTransition] = useTransition();
   const [trainingSessionOptions, setTrainingSessionOptions] = useState<
@@ -224,7 +224,7 @@ const NewApplicationForm = ({
     const validParticipant = applicationParticipantSchema.safeParse({
       ...participant,
       userId: participant.id,
-      isOwner: !updatesOwner,
+      isOwner: updatesOwner,
     });
     if (!validParticipant.success) {
       toast.error('Complete the participant form to add this participant');
@@ -246,7 +246,7 @@ const NewApplicationForm = ({
   const participantSubmit: SubmitHandler<FormApplicationParticipant> = (
     values,
   ) => {
-    append({ ...values, isOwner: !updatesOwner });
+    append({ ...values, isOwner: updatesOwner });
     setFormComponents((prev) => false);
     toast.success(`${values.name} added as a participant`);
   };
@@ -341,7 +341,7 @@ const NewApplicationForm = ({
         <form
           onSubmit={handleSubmit(onSubmit)}
           className={cn(
-            'flex flex-col lg:grid w-full p-2 md:p-0 lg:w-3/5 lg:grid-cols-2 justify-center gap-x-4 gap-y-2',
+            'flex flex-col lg:grid w-full p-2 md:p-4 lg:p-0 lg:w-3/5 lg:grid-cols-2 justify-center gap-x-4 gap-y-2',
             className,
           )}
           {...props}
@@ -389,7 +389,8 @@ const NewApplicationForm = ({
             />
           )}
           <p className="text-sm font-medium text-black">Add participant info</p>
-          <div className="flex col-span-2 mb-8 space-x-2">
+          {/* <div className="flex col-span-2 mb-8 space-x-2"> */}
+          <div className="flex mb-8 space-x-2 md:col-span-2">
             <TooltipIconButton
               icon={<PlusIcon />}
               type="button"
@@ -405,7 +406,7 @@ const NewApplicationForm = ({
               className="flex flex-grow"
             />
           </div>
-          <div className="flex flex-col w-full col-span-2 mb-8 space-y-4 lg:justify-between lg:space-x-3 lg:flex-row">
+          <div className="flex flex-col w-full col-span-2 mb-8 space-y-4 lg:justify-between lg:space-y-0 lg:space-x-3 lg:flex-row">
             <ReusableForm formFields={slotsFields} />
           </div>
           <SubmitButton
@@ -433,4 +434,4 @@ const NewApplicationForm = ({
   );
 };
 
-export default NewApplicationForm;
+export default ApplicationForm;

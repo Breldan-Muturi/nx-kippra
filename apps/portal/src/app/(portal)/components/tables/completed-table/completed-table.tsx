@@ -263,7 +263,7 @@ const CompletedTable = ({
         <div className="pb-4 space-y-2">
           <div className="flex flex-col-reverse items-start justify-between w-full md:space-y-0 md:items-center md:flex-row">
             {!!completedActions && (
-              <div className="flex mt-3 md:mt-0 justify-start space-x-2">
+              <div className="flex justify-start mt-3 space-x-2 md:mt-0">
                 {completedActions.map((action) => (
                   <TableAction key={action.content} {...action} />
                 ))}

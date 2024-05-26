@@ -50,8 +50,8 @@ const ComboboxField = <T extends FieldValues>({
                     !value && 'text-muted-foreground',
                   )}
                 >
-                  {comboboxTrigger(value)}
-                  <ChevronsUpDown className="w-4 h-4 ml-2 opacity-50 shrink-0" />
+                  <span className="truncate">{comboboxTrigger(value)}</span>
+                  <ChevronsUpDown className="ml-2 opacity-50 size-4 shrink-0" />
                 </Button>
               </FormControl>
             </PopoverTrigger>

@@ -42,7 +42,6 @@ const applicationDetailsFields = ({
               optionLabel: title,
               render: (value) => {
                 const isSelected = value === id;
-                console.log('Program title: ', title);
                 return (
                   <DropDownImage
                     key={`${i}${id}`}

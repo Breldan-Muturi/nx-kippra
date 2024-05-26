@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import {
   Table,
@@ -63,37 +64,44 @@ const ApplicationWarnings = ({
               the same training session based on the provided emails
             </CardDescription>
             <CardContent className="p-0">
-              <Table>
-                <TableCaption>
-                  Optionally remove the participants, your slots will remain
-                  unchanged
-                </TableCaption>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Participant Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Remove</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {warningParticipants.map(({ email, name }, i) => {
-                    return (
-                      <TableRow key={`${i}${name}`}>
-                        <TableCell>{name}</TableCell>
-                        <TableCell>{email}</TableCell>
-                        <TableCell>
-                          <TooltipIconButton
-                            icon={<Trash2 className="size-4" />}
-                            tooltipLabel={`Remove ${email}`}
-                            className="bg-red-600/80 hover:bg-red-600 size-6"
-                            onClick={() => handleParticipants(email)}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+              <ScrollArea className="w-[calc(100vw-100px)] sm:w-auto">
+                <Table>
+                  <TableCaption>
+                    Optionally remove the participants, your slots will remain
+                    unchanged
+                  </TableCaption>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-48 whitespace-nowrap sm:w-auto sm:whitespace-normal">
+                        Participant Name
+                      </TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Remove</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {warningParticipants.map(({ email, name }, i) => {
+                      return (
+                        <TableRow key={`${i}${name}`}>
+                          <TableCell className="w-48 whitespace-nowrap sm:w-auto sm:whitespace-normal">
+                            {name}
+                          </TableCell>
+                          <TableCell>{email}</TableCell>
+                          <TableCell>
+                            <TooltipIconButton
+                              icon={<Trash2 className="size-4" />}
+                              tooltipLabel={`Remove ${email}`}
+                              className="bg-red-600/80 hover:bg-red-600 size-6"
+                              onClick={() => handleParticipants(email)}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
             </CardContent>
           </CardHeader>
         </Card>

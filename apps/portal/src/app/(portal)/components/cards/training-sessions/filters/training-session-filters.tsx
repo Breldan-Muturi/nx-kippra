@@ -79,6 +79,7 @@ const TrainingSessionFilters = ({
       >
         <div
           className={cn(
+            // 'flex flex-col md:grid md:grid-cols-2 lg:flex-row items-center gap-y-3 gap-x-2 mb-1 lg:mb-0',
             'flex flex-col lg:flex-row items-center gap-y-3 gap-x-2 mb-1 lg:mb-0',
             className,
           )}
@@ -101,11 +102,11 @@ const TrainingSessionFilters = ({
               </Button>
             </div>
           )}
-          <div className="flex items-center lg:ml-auto">
+          <div className="flex items-center w-full lg:w-auto lg:ml-auto">
             <Button
               disabled={isPending || !pastShows}
               variant={pastShows ? 'secondary' : 'outline'}
-              className="rounded-r-none disabled:text-green-600 disabled:opacity-100"
+              className="w-full rounded-r-none disabled:text-green-600 disabled:opacity-100 lg:w-auto"
               onClick={() => updateViews('false')}
             >
               Upcoming sessions
@@ -113,7 +114,7 @@ const TrainingSessionFilters = ({
             <Button
               disabled={isPending || pastShows}
               variant={!pastShows ? 'secondary' : 'outline'}
-              className="rounded-l-none disabled:text-green-600 disabled:opacity-100"
+              className="w-full rounded-l-none disabled:text-green-600 disabled:opacity-100 lg:w-auto"
               onClick={() => updateViews('true')}
             >
               Past sessions

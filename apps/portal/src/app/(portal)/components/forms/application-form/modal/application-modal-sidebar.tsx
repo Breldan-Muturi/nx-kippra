@@ -17,26 +17,47 @@ export default function ApplicationModalSidebar({
 }: ApplicationModalSidebarProps) {
   return (
     <div
-      className={cn('flex md:flex-col gap-y-6 items-start', className)}
+      className={cn(
+        'flex w-full justify-evenly md:justify-normal md:w-auto md:flex-col gap-y-6 items-start',
+        className,
+      )}
       {...props}
     >
-      {buttons.map(({ label, children, className, ...props }, i) => (
-        <Button
-          variant="ghost"
-          onClick={() => setFormStep(i)}
-          className={cn(
-            activeStep === i
-              ? 'text-green-600 border border-green-600  bg-muted hover:bg-muted'
-              : 'hover:bg-transparent hover:underline',
-            'justify-start w-full',
-            className,
-          )}
-          {...props}
-        >
-          {children}
-          {label}
-        </Button>
-      ))}
+      {buttons.map(
+        ({ label, children, disabled = false, className, ...props }, i) => (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setFormStep(i)}
+              className={cn(
+                'flex md:hidden rounded-full border-2',
+                activeStep === i
+                  ? 'text-green-600 border-green-600 bg-muted hover:bg-muted'
+                  : 'hover:bg-transparent',
+              )}
+            >
+              {children}
+            </Button>
+            <Button
+              variant="ghost"
+              disabled
+              onClick={() => setFormStep(i)}
+              className={cn(
+                activeStep === i
+                  ? 'text-green-600 border border-green-600  bg-muted hover:bg-muted'
+                  : 'hover:bg-transparent hover:underline',
+                'hidden md:flex justify-start w-full',
+                className,
+              )}
+              {...props}
+            >
+              {children}
+              {label}
+            </Button>
+          </>
+        ),
+      )}
     </div>
   );
 }

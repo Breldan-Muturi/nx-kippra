@@ -23,17 +23,18 @@ export default auth((req) => {
 
   // Check for puppeteer access on specific routes
   if (isTemplateRoute) {
-    const puppeteerToken = req.headers.get('x-puppeteer-secret');
-    if (
-      puppeteerToken === process.env.PUPPETEER_SECRET ||
-      process.env.NODE_ENV !== 'production'
-    ) {
-      // Allow Puppetter request
-      return NextResponse.next();
-    } else {
-      // Block unauthorized access by returning a 403 forbidden response
-      return new NextResponse('Access Denied', { status: 403 });
-    }
+    // const puppeteerToken = req.headers.get('x-puppeteer-secret');
+    // if (
+    //   puppeteerToken === process.env.PUPPETEER_SECRET ||
+    //   process.env.NODE_ENV !== 'production'
+    // ) {
+    //   // Allow Puppetter request
+    //   return NextResponse.next();
+    // } else {
+    //   // Block unauthorized access by returning a 403 forbidden response
+    //   return new NextResponse('Access Denied', { status: 403 });
+    // }
+    return NextResponse.next();
   }
 
   if (isApiAuthRoute) {

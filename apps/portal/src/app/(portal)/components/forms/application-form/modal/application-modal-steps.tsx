@@ -52,7 +52,7 @@ const StepButton: React.FC<StepButtonProps> = ({
   className,
   ...props
 }) => (
-  <Button className={cn('gap-2', className)} {...props}>
+  <Button className={cn('w-full sm:w-auto gap-2', className)} {...props}>
     {children}
     {btnLabel}
   </Button>
@@ -62,6 +62,7 @@ const applicationModalSteps = (
   modalStepsProps: ApplicationModalProps,
 ): ApplicationModalStepType[] => {
   const {
+    hasError,
     hasWarning,
     applicationFee,
     isPending,
@@ -187,7 +188,8 @@ const applicationModalSteps = (
             ),
             next: (
               <StepButton
-                disabled={isPending || hasWarning}
+                disabled={isPending || hasError}
+                // disabled={isPending || hasWarning}
                 className="bg-green-500 hover:bg-green-600"
                 onClick={() => handleStep(1)}
                 children={<ChevronRight className="size-4" />}
@@ -256,7 +258,7 @@ const applicationModalSteps = (
       next:
         role === UserRole.ADMIN ? (
           <StepButton
-            disabled={isPending || hasWarning || !applicationFee}
+            disabled={isPending || hasError || !applicationFee}
             className="bg-green-500 hover:bg-green-600"
             onClick={() => handleStep(showWarning ? 3 : 2)}
             children={<ChevronRight className="size-4" />}
@@ -264,9 +266,9 @@ const applicationModalSteps = (
           />
         ) : (
           <Button
-            disabled={isPending || hasWarning || usingUsd === undefined}
+            disabled={isPending || hasError || usingUsd === undefined}
             onClick={handleSubmit}
-            className="gap-2 bg-green-500 hover:bg-green-600"
+            className="w-full sm:w-auto gap-2 bg-green-500 hover:bg-green-600"
           >
             {isPending ? (
               <Loader2 color="white" className="mr-2 size-4 animate-spin" />
@@ -305,9 +307,9 @@ const applicationModalSteps = (
             ),
             next: (
               <Button
-                disabled={isPending || hasWarning || !applicationFee || !payee}
+                disabled={isPending || hasError || !applicationFee || !payee}
                 onClick={handleSubmit}
-                className="gap-2 bg-green-500 hover:bg-green-600"
+                className="w-full sm:w-auto gap-2 bg-green-500 hover:bg-green-600"
               >
                 {isPending ? (
                   <Loader2 color="white" className="mr-2 size-4 animate-spin" />

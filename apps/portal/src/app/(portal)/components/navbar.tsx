@@ -86,7 +86,7 @@ const Navbar = ({ links, className, ...props }: NavBarProps) => {
         </nav>
         {user ? (
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center w-1/3 space-x-2 lg:w-auto">
+            <DropdownMenuTrigger className="flex items-center w-1/3 space-x-2 md:w-auto">
               <Avatar>
                 <AvatarImage
                   src={`${user.image}`}

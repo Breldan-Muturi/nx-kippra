@@ -51,6 +51,7 @@ const feesFields = ({
             placeholder: 'eg. Ksh 100000',
             type: 'number',
             disabled: !isAdmin,
+            className: 'col-span-2 md:col-span-1',
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -62,6 +63,7 @@ const feesFields = ({
             placeholder: 'eg. Ksh 100000',
             type: 'number',
             disabled: !isAdmin,
+            className: 'col-span-2 md:col-span-1',
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -73,6 +75,7 @@ const feesFields = ({
             placeholder: 'eg. Ksh 100000',
             type: 'number',
             disabled: !isAdmin,
+            className: 'col-span-2 md:col-span-1',
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -84,6 +87,7 @@ const feesFields = ({
             placeholder: 'eg. Ksh 100000',
             type: 'number',
             disabled: !isAdmin,
+            className: 'col-span-2 md:col-span-1',
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -95,6 +99,7 @@ const feesFields = ({
             placeholder: 'eg. Ksh 100000',
             type: 'number',
             disabled: !isAdmin,
+            className: 'col-span-2 md:col-span-1',
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -106,6 +111,7 @@ const feesFields = ({
             placeholder: 'eg. Ksh 100000',
             type: 'number',
             disabled: !isAdmin,
+            className: 'col-span-2 md:col-span-1',
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -117,6 +123,7 @@ const feesFields = ({
             placeholder: 'eg. USD 1000',
             type: 'number',
             disabled: !isAdmin,
+            className: 'col-span-2 md:col-span-1',
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -128,6 +135,7 @@ const feesFields = ({
             placeholder: 'eg. USD 1000',
             type: 'number',
             disabled: !isAdmin,
+            className: 'col-span-2 md:col-span-1',
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -139,6 +147,7 @@ const feesFields = ({
             placeholder: 'eg. USD 1000',
             type: 'number',
             disabled: !isAdmin,
+            className: 'col-span-2 md:col-span-1',
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -150,6 +159,7 @@ const feesFields = ({
             placeholder: 'eg. USD 1000',
             type: 'number',
             disabled: !isAdmin,
+            className: 'col-span-2 md:col-span-1',
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -161,6 +171,7 @@ const feesFields = ({
             placeholder: 'eg. USD 1000',
             type: 'number',
             disabled: !isAdmin,
+            className: 'col-span-2 md:col-span-1',
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -172,6 +183,7 @@ const feesFields = ({
             placeholder: 'eg. USD 1000',
             type: 'number',
             disabled: !isAdmin,
+            className: 'col-span-2 md:col-span-1',
           },
         ] as FormFieldType<TrainingSessionFeesForm>[])
       : []),
@@ -335,7 +347,7 @@ const ApplicationConfirmationFees = ({
         <div className="flex flex-col col-span-2 ">
           <Separator className="my-6" />
           {!!formApplicationFees && (
-            <div className="flex items-start w-full gap-x-2">
+            <div className="flex flex-col items-start w-full md:flex-row gap-x-2">
               <p className="font-medium">Total Application Fee:</p>{' '}
               <p className="font-medium text-red-600">{`${watch('usingUsd') ? 'USD' : 'KES'} ${formApplicationFees.toLocaleString('en-US')}`}</p>
             </div>

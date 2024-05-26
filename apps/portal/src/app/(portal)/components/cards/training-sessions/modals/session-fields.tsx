@@ -10,9 +10,9 @@ type SessionFieldsArgs = {
 };
 
 const expandFieldsOnPremise = (mode?: Delivery) =>
-  mode === Delivery.ON_PREMISE ? 'col-span-2' : undefined;
+  mode === Delivery.ON_PREMISE ? 'md:col-span-2' : 'col-span-2 md:col-span-1';
 const expandFieldsOnline = (mode?: Delivery) =>
-  mode === Delivery.ONLINE ? 'col-span-2' : undefined;
+  mode === Delivery.ONLINE ? 'md:col-span-2' : 'col-span-2 md:col-span-1';
 
 const kshFeesFields = (
   usingDifferentFees: boolean,
@@ -169,12 +169,14 @@ const sessionFields = ({
       label: 'Session Start Date',
       placeholder: '1/24/2024',
       type: 'date',
+      className: 'col-span-2 md:col-span-1',
     },
     {
       name: 'endDate',
       label: 'Session End Date',
       placeholder: '1/24/2024',
       type: 'date',
+      className: 'col-span-2 md:col-span-1',
     },
     {
       name: 'mode',
@@ -194,6 +196,7 @@ const sessionFields = ({
             type: 'select',
             selectLabel: 'Available venues',
             options: venueOptions,
+            className: 'col-span-2 md:col-span-1',
           },
         ] as FormFieldType<NewTrainingSessionForm>[])
       : []),
@@ -239,4 +242,4 @@ const sessionFields = ({
   ];
 };
 
-export { sessionFields, kshFeesFields, usdFeesFields };
+export { kshFeesFields, sessionFields, usdFeesFields };

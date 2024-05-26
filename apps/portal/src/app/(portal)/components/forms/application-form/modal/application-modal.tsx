@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentRole } from '@/hooks/use-current-role';
 import { cn } from '@/lib/utils';
@@ -123,12 +124,6 @@ const ApplicationModal = ({
       hasError: !!organizationError,
     });
 
-  console.log('Application fee: ', applicationConfirmation.applicationFee);
-  console.log(
-    'Application currency (Using Usd): ',
-    applicationConfirmation.usingUsd,
-  );
-
   const handleStep = (step: number) =>
     setApplicationConfirmation((prev) => ({ ...prev, formStep: step }));
 
@@ -181,7 +176,9 @@ const ApplicationModal = ({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="w-full max-w-[900px]">
+      <AlertDialogContent className="flex flex-col w-full md:h-auto max-w-[900px]">
+        {/* <AlertDialogContent className="w-full max-w-[900px]"> */}
+        {/* <div className="flex flex-col w-full h-5/6 md:h-auto"> */}
         <AlertDialogHeader>
           <AlertDialogTitle>{`Application for ${title} from ${format(startDate, 'PPP')} to ${format(endDate, 'PPP')}`}</AlertDialogTitle>
           <AlertDialogDescription>
@@ -189,7 +186,7 @@ const ApplicationModal = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <Separator className="mb-2" />
-        <div className="flex mb-6">
+        <div className="flex flex-col mb-6 space-y-4 md:space-y-0 md:flex-row">
           <ApplicationModalSidebar
             buttons={steps.map(({ button }) => button)}
             activeStep={applicationConfirmation.formStep}
@@ -204,21 +201,25 @@ const ApplicationModal = ({
               <p className="text-sm text-muted-foreground">{subtitle}</p>
             </div>
             <Separator />
-            {content}
+            <ScrollArea className="h-[120px] md:h-auto">
+              {content}
+              <ScrollBar orientation="vertical" />
+            </ScrollArea>
           </div>
         </div>
-        <AlertDialogFooter className="md:justify-between md:mt-auto">
+        <AlertDialogFooter className="mt-2 md:justify-between md:mt-auto">
           <AlertDialogCancel
             disabled={isPending}
             className="text-red-600 border-red-600 hover:bg-red-600 hover:text-gray-50"
           >
             Cancel
           </AlertDialogCancel>
-          <div className="flex items-center justify-center gap-6">
+          <div className="flex flex-col items-center justify-center w-full gap-2 sm:gap-6 sm:flex-row sm:w-auto">
             {previous}
             {next}
           </div>
         </AlertDialogFooter>
+        {/* </div> */}
       </AlertDialogContent>
     </AlertDialog>
   );
