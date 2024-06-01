@@ -1,12 +1,6 @@
 'use server';
 
-import {
-  LoginForm,
-  loginSchema,
-} from '@/validation/account/account.validation';
 import { signIn } from '@/auth';
-import { DEFAULT_LOGIN_REDIRECT } from '@/routes';
-import { AuthError } from 'next-auth';
 import { getUserByEmail } from '@/helpers/user.helper';
 import {
   generateTwoFactorToken,
@@ -16,11 +10,25 @@ import {
   sendTwoFactorTokenEmail,
   sendVerificationEmail,
 } from '@/mail/account.mail';
+import { DEFAULT_LOGIN_REDIRECT } from '@/routes';
+import {
+  LoginForm,
+  loginSchema,
+} from '@/validation/account/account.validation';
+import { AuthError } from 'next-auth';
+import { getTwoFactorConfirmationByUserId } from '../../helpers/two-factor-confirmation.helper';
 import { getTwoFactorTokenByEmail } from '../../helpers/two-factor.token';
 import { db } from '../../lib/db';
-import { getTwoFactorConfirmationByUserId } from '../../helpers/two-factor-confirmation.helper';
 
-export const login = async (values: LoginForm, callbackUrl?: string | null) => {
+export type LoginReturn =
+  | { error: string }
+  | { success: string }
+  | { twoFactor: boolean };
+
+export const login = async (
+  values: LoginForm,
+  callbackUrl?: string | null,
+): Promise<LoginReturn> => {
   const validatedFields = loginSchema.safeParse(values);
   if (!validatedFields.success) return { error: 'Invalid fields' };
   const { email, password, code } = validatedFields.data;

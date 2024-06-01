@@ -1,6 +1,4 @@
-import React from "react";
-
-const DividerWithText = ({dividerText}: {dividerText: string}) => {
+const DividerWithText = ({ dividerText }: { dividerText: string }) => {
   return (
     <div className="relative flex items-center justify-center w-full">
       <div className="absolute inset-0 flex items-center justify-center">

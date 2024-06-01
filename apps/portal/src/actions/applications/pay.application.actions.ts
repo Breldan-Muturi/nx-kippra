@@ -1,9 +1,9 @@
 'use server';
-import { currentUserId } from '@/lib/auth';
+import { currentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 
 import { ApplicationPaymentDetails } from '@/validation/payment/payment.validation';
-import { Delivery, InvoiceStatus } from '@prisma/client';
+import { Delivery, InvoiceStatus, UserRole } from '@prisma/client';
 import { format } from 'date-fns';
 
 const applicationPromise = async (id: string) =>
@@ -63,8 +63,8 @@ export type PayeeApplicationModal = {
 export const getPaymentApplicationPromise = async (
   id: string,
 ): Promise<{ error: string } | PayeeApplicationModal> => {
-  const userId = await currentUserId();
-  if (!userId)
+  const user = await currentUser();
+  if (!user)
     return { error: 'You need to be logged in to submit this application' };
   let existingApplication: ApplicationPromise;
   try {
@@ -82,9 +82,14 @@ export const getPaymentApplicationPromise = async (
 
   if (!existingApplication) {
     return { error: 'This application no-longer exists' };
+  } else if (user.role !== UserRole.ADMIN && !existingApplication.owner.id) {
+    return {
+      error:
+        'Could not initiate this payment because this application does not have an owner',
+    };
   } else if (
-    !existingApplication.owner.id ||
-    existingApplication.owner.id !== userId
+    existingApplication.owner.id !== user.id &&
+    user.role !== UserRole.ADMIN
   ) {
     return {
       error:

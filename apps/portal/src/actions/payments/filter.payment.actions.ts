@@ -30,6 +30,7 @@ const selectPaymentsPromise = async (
       id: true,
       application: {
         select: {
+          id: true,
           owner: {
             select: { image: { select: { fileUrl: true } }, name: true },
           },

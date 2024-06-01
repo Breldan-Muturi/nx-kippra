@@ -16,6 +16,7 @@ export const fetchApplicationsSchema = filterApplicationSchema
   .extend({
     hiddenColumns: z.string().optional(),
   });
+
 export type FetchApplicationType = z.infer<typeof fetchApplicationsSchema>;
 
 export const pathApplicationSchema = fetchApplicationsSchema.extend({

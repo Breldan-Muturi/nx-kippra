@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import {
-  email,
   characterCount,
-  requiredField,
-  requiredCheck,
+  email,
   matchingPasswords,
+  requiredCheck,
+  requiredField,
 } from '../reusable.validation';
 
 export const loginSchema = z.object({
@@ -14,18 +14,20 @@ export const loginSchema = z.object({
 });
 export type LoginForm = z.infer<typeof loginSchema>;
 
+export const registerFormSchema = z.object({
+  firstName: characterCount(3, 12),
+  lastName: characterCount(3, 12),
+  email,
+  password: characterCount(6, 16),
+  confirmPassword: requiredField,
+  termsConditons: requiredCheck(
+    'You may not proceed before accepting the terms and conditions',
+  ),
+  orgInviteToken: z.string().optional(),
+});
+
 export const registerSchema = matchingPasswords(
-  z.object({
-    firstName: characterCount(3, 12),
-    lastName: characterCount(3, 12),
-    email,
-    password: characterCount(6, 16),
-    confirmPassword: requiredField,
-    termsConditons: requiredCheck(
-      'You may not proceed before accepting the terms and conditions',
-    ),
-    orgInviteToken: z.string().optional(),
-  }),
+  registerFormSchema,
   'password',
   'confirmPassword',
 );

@@ -1,4 +1,3 @@
-import ComposableDescription from '@/components/form/ComposableDescription';
 import { FormFieldType } from '@/types/form-field.types';
 import { RegisterForm } from '@/validation/account/account.validation';
 import Link from 'next/link';
@@ -15,12 +14,14 @@ const registerFields = ({
     label: 'First name',
     placeholder: 'eg. Anne',
     disabled,
+    className: 'col-span-full sm:col-span-1',
   },
   {
     name: 'lastName',
     label: 'Last name',
     placeholder: 'eg. Wanjiku',
     disabled,
+    className: 'col-span-full sm:col-span-1',
   },
   // TODO: Add a utility for common fields.
   {
@@ -28,7 +29,7 @@ const registerFields = ({
     label: 'Email',
     placeholder: 'eg. annewanjiku@email.com',
     type: 'email',
-    className: 'col-span-2',
+    className: 'col-span-full',
     disabled: disabled || hasEmail,
   },
   {
@@ -37,6 +38,7 @@ const registerFields = ({
     placeholder: 'Enter a strong password',
     type: 'password',
     disabled,
+    className: 'col-span-full sm:col-span-1',
   },
   {
     name: 'confirmPassword',
@@ -44,6 +46,7 @@ const registerFields = ({
     placeholder: 'Repeat password to confirm',
     type: 'password',
     disabled,
+    className: 'col-span-full sm:col-span-1',
   },
   {
     name: 'termsConditons',
@@ -51,21 +54,24 @@ const registerFields = ({
     className: 'items-start py-2',
     disabled,
     description: (
-      <ComposableDescription label="I agree with KIPPRA's">
+      <span className="text-sm text-muted-foreground col-span-full">
+        I agree with KIPPRA's{' '}
         <Link
           href="https://kippra.or.ke"
-          className="text-sm font-semibold text-green-600 hover:underline"
+          target="_blank"
+          className="font-semibold text-green-600 hover:underline"
         >
           {"T&C's"}
-        </Link>
-        &nbsp;and&nbsp;
+        </Link>{' '}
+        and{' '}
         <Link
           href="https://kippra.or.ke"
-          className="text-sm font-semibold text-green-600 hover:underline"
+          target="_blank"
+          className="font-semibold text-green-600 hover:underline"
         >
           Privacy policy
         </Link>
-      </ComposableDescription>
+      </span>
     ),
   },
 ];

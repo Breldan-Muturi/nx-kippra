@@ -5,37 +5,30 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { TooltipActionsType } from '@/types/tooltip.types';
 import React from 'react';
 
-export type TableActionsType = {
-  isVisible?: boolean;
-  content: string;
-  icon: React.ReactNode;
-  tooltipContentClassName?: string;
-  isPending: boolean;
-};
+export type TooltipActionButtonProps =
+  React.ComponentPropsWithoutRef<'button'> & TooltipActionsType;
 
-export type TableActionProps = React.ComponentPropsWithoutRef<'button'> &
-  TableActionsType;
-
-const TableAction = ({
+const TooltipActionButton = ({
   isVisible = true,
-  content,
+  title,
   icon,
   tooltipContentClassName,
-  isPending,
+  disabled,
   className,
   ...props
-}: TableActionProps) => {
+}: TooltipActionButtonProps) => {
   if (!isVisible) return null;
   return (
     <Tooltip>
-      <TooltipTrigger asChild disabled={isPending}>
+      <TooltipTrigger asChild disabled={disabled}>
         <Button
           variant="outline"
           size="icon"
-          className={cn('h-8 w-8 rounded-full', className)}
-          title={content}
+          className={cn('size-8 rounded-full', className)}
+          title={title}
           {...props}
         >
           {icon}
@@ -47,10 +40,10 @@ const TableAction = ({
           tooltipContentClassName,
         )}
       >
-        {content}
+        {title}
       </TooltipContent>
     </Tooltip>
   );
 };
 
-export default TableAction;
+export default TooltipActionButton;

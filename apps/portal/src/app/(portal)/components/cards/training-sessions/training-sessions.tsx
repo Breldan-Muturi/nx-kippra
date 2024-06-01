@@ -3,23 +3,25 @@ import {
   FetchTrainingSessionsReturn,
   filterTrainingSessions,
 } from '@/actions/training-session/fetch.training-sessions.actions';
+import useTrainingSessionModals from '@/app/(portal)/hooks/use-training-session-modals';
 import ResponsiveGrid from '@/components/layouts/responsive-grid';
 import TablesPagination from '@/components/table/table-pagination';
-import { useCurrentUser } from '@/hooks/use-current-user';
 import { cn } from '@/lib/utils';
 import { FilterSessionsSchema } from '@/validation/training-session/fetch.sessions.validations';
-import { TrainingSession, UserRole } from '@prisma/client';
-import { usePathname } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useEffect } from 'react';
 import { SubmitHandler } from 'react-hook-form';
 import TrainingSessionCard from './cards/training-session-card';
 import trainingFilterFields from './filters/training-session-fields';
 import TrainingSessionFilters from './filters/training-session-filters';
 import DeleteSession from './modals/delete-session';
 import SessionModal from './modals/session-modal';
+import ViewSession from './sheets/view-session';
 
 type TrainingSessionsProps = React.ComponentPropsWithoutRef<'section'> &
-  FetchTrainingSessionsReturn & { programId?: string };
+  FetchTrainingSessionsReturn & {
+    programId?: string;
+    trainingSessionId?: string;
+  };
 
 const TrainingSessions = ({
   trainingSessions,
@@ -32,20 +34,31 @@ const TrainingSessions = ({
   venueOptions,
   showProgram,
   programId,
+  trainingSessionId,
   params,
   className,
   ...props
 }: TrainingSessionsProps) => {
-  const user = useCurrentUser();
-  const isAdmin = user?.role === UserRole.ADMIN;
-  const path = usePathname();
-  const [isPending, startTransition] = useTransition();
-  const [modal, setModal] = useState<
-    | { type: 'update'; data: TrainingSession }
-    | { type: 'delete'; id: string }
-    | { type: 'new'; programId: string }
-    | undefined
-  >();
+  const {
+    isPending,
+    startTransition,
+    dismissModal,
+    sessionUpdate,
+    updateSession,
+    updateData,
+    viewSession,
+    viewData,
+    deleteSession,
+    deleteId,
+    newSession,
+    newProgramId,
+    path,
+    user,
+  } = useTrainingSessionModals({
+    trainingSessionIds: trainingSessions.map(({ id }) => id),
+    programId,
+    selectedSessionId: trainingSessionId,
+  });
 
   const { pageSize, page, showPast } = params;
   const changePage = (pageInt: number) => {
@@ -97,27 +110,9 @@ const TrainingSessions = ({
       });
     });
 
-  const updateSession = (data: TrainingSession) =>
-    setModal((prev) => ({ type: 'update', data }));
-  const isUpdate =
-    !!modal &&
-    modal.type === 'update' &&
-    typeof modal.data === 'object' &&
-    isAdmin;
-
-  const deleteSession = (id: string) =>
-    setModal((prev) => ({ type: 'delete', id }));
-  const isDelete =
-    !!modal &&
-    modal.type === 'delete' &&
-    typeof modal.id === 'string' &&
-    isAdmin;
-
-  const newSession = (programId: string) =>
-    setModal((prev) => ({ type: 'new', programId }));
-  const isNew = !!modal && modal.type === 'new' && !!modal.programId && isAdmin;
-
-  const dismissModal = () => setModal(undefined);
+  useEffect(() => {
+    if (trainingSessionId) viewSession(trainingSessionId);
+  }, [trainingSessionId]);
 
   return (
     <>
@@ -149,12 +144,14 @@ const TrainingSessions = ({
         <ResponsiveGrid>
           {trainingSessions.map((data) => (
             <TrainingSessionCard
+              key={data.id}
               {...{
                 data,
                 isPending,
                 user,
-                updateSession,
+                sessionUpdate,
                 deleteSession,
+                viewSession,
                 showProgram,
                 showPast,
               }}
@@ -170,13 +167,25 @@ const TrainingSessions = ({
           pageSizeSteps={12}
         />
       </section>
-      {isUpdate && (
-        <SessionModal {...{ trainingSession: modal.data, dismissModal }} />
+      {updateData && (
+        <SessionModal {...{ trainingSession: updateData, dismissModal }} />
       )}
-      {isNew && (
-        <SessionModal {...{ programId: modal.programId, dismissModal }} />
+      {newProgramId && (
+        <SessionModal {...{ programId: newProgramId, dismissModal }} />
       )}
-      {isDelete && <DeleteSession {...{ id: modal.id, dismissModal }} />}
+      {deleteId && <DeleteSession {...{ id: deleteId, dismissModal }} />}
+      {viewData && (
+        <ViewSession
+          {...{
+            ...viewData,
+            dismissModal,
+            viewSession,
+            updateSession,
+            isPending,
+            user,
+          }}
+        />
+      )}
     </>
   );
 };

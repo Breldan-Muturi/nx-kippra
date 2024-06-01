@@ -138,33 +138,6 @@ const FileUploader: React.FC<FileUploaderProps> = ({
     }
   }, [value]);
 
-  // useEffect(() => {
-  //   const newFilePreviews = (value || [])
-  //     .map((item) => {
-  //       if (item instanceof File) {
-  //         // Handle file object: convert to URL and map to FilePreviewSchema
-  //         return {
-  //           fileName: item.name,
-  //           fileSize: item.size,
-  //           fileType: item.type,
-  //           fileUrl: URL.createObjectURL(item),
-  //         };
-  //       } else if (typeof item === 'object' && 'fileUrl' in item) {
-  //         return item;
-  //       }
-  //       return null;
-  //     })
-  //     .filter((item) => item !== null);
-  //   setPreview(newFilePreviews as FilePreviewSchema[]);
-  //   return () => {
-  //     newFilePreviews.forEach((preview) => {
-  //       if (preview?.fileUrl && preview.fileUrl.startsWith('blob:')) {
-  //         URL.revokeObjectURL(preview.fileUrl);
-  //       }
-  //     });
-  //   };
-  // }, [value]);
-
   const handleDivClick = () => {
     fileInputRef.current?.click();
   };

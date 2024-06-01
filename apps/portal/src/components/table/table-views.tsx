@@ -2,24 +2,26 @@
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-  DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { MixerHorizontalIcon } from '@radix-ui/react-icons';
 import { FileCheck2, Send, ShieldX } from 'lucide-react';
-import React, { useState } from 'react';
-import TableAction, { TableActionProps } from './table-action';
+import { useState } from 'react';
+import TooltipActionButton, {
+  TooltipActionButtonProps,
+} from '../buttons/tooltip-action-button';
 
-interface TableViewsProps {
+type TableViewsProps = {
   columnIds: string[];
   hiddenColumnArray: string[];
   isPending: boolean;
   updateViews: (hideColumns?: string) => void;
-  actions?: TableActionProps[];
-}
+  actions?: TooltipActionButtonProps[];
+};
 
 const TableViews = ({
   isPending,
@@ -54,26 +56,26 @@ const TableViews = ({
     updateViews();
   };
 
-  const applicationActions: TableActionProps[] = [
+  const applicationActions: TooltipActionButtonProps[] = [
     {
-      content: 'Approve applications',
+      title: 'Approve applications',
       icon: <FileCheck2 color="green" className="w-5 h-5" />,
-      isPending,
+      disabled: isPending,
       tooltipContentClassName: 'text-green-600',
       className: 'mr-2',
     },
     {
-      content: 'Reject applications',
+      title: 'Reject applications',
       icon: <ShieldX color="red" className="w-5 h-5" />,
-      isPending,
+      disabled: isPending,
       tooltipContentClassName: 'text-red-600',
       className: 'mr-2',
     },
 
     {
-      content: 'Send mass emails',
+      title: 'Send mass emails',
       icon: <Send className="w-5 h-5" />,
-      isPending,
+      disabled: isPending,
     },
   ];
 
@@ -81,7 +83,7 @@ const TableViews = ({
     <div className="flex items-center">
       {actions &&
         applicationActions.map((action) => (
-          <TableAction key={action.content} {...action} />
+          <TooltipActionButton key={action.title} {...action} />
         ))}
       <DropdownMenu>
         <DropdownMenuTrigger asChild disabled={isPending}>

@@ -35,7 +35,16 @@ const trainingSessionsPromise = async ({
     skip: (parseInt(page) - 1) * parseInt(pageSize),
     take: parseInt(pageSize),
     orderBy: { startDate: pastShow ? 'desc' : 'asc' },
-    include: {
+    select: {
+      id: true,
+      venue: true,
+      startDate: true,
+      endDate: true,
+      mode: true,
+      onPremiseSlots: true,
+      onPremiseSlotsTaken: true,
+      onlineSlots: true,
+      onlineSlotsTaken: true,
       program: {
         select: {
           id: true,

@@ -1,5 +1,7 @@
 import { SingleInviteDetail } from '@/actions/invites/fetch.invites.actions';
-import TableAction, { TableActionProps } from '@/components/table/table-action';
+import TooltipActionButton, {
+  TooltipActionButtonProps,
+} from '@/components/buttons/tooltip-action-button';
 import { ColumnDef } from '@tanstack/react-table';
 import { ClipboardX, RefreshCcw } from 'lucide-react';
 
@@ -18,18 +20,18 @@ const inviteColumnActions = ({
   header: 'Actions',
   cell: ({ row }) => {
     const inviteId = row.original.id;
-    const inviteActions: TableActionProps[] = [
+    const inviteActions: TooltipActionButtonProps[] = [
       {
-        content: `Revoke invitation`,
+        title: `Revoke invitation`,
         icon: <ClipboardX color="red" className="size-5" />,
-        isPending,
+        disabled: isPending,
         tooltipContentClassName: 'text-red-600',
         onClick: () => revokeInvites([inviteId]),
       },
       {
-        content: 'Resend invite',
+        title: 'Resend invite',
         icon: <RefreshCcw color="green" className="size-5" />,
-        isPending,
+        disabled: isPending,
         tooltipContentClassName: 'text-green-600',
         onClick: () => resendInvites([inviteId]),
       },
@@ -37,7 +39,7 @@ const inviteColumnActions = ({
     return (
       <div className="flex items-center space-x-2">
         {inviteActions.map((action) => (
-          <TableAction key={action.content} {...action} />
+          <TooltipActionButton key={action.title} {...action} />
         ))}
       </div>
     );

@@ -1,6 +1,11 @@
 'use client';
 import { TrainingCardSession } from '@/actions/training-session/fetch.training-sessions.actions';
-import TableAction, { TableActionProps } from '@/components/table/table-action';
+import TooltipActionButton, {
+  TooltipActionButtonProps,
+} from '@/components/buttons/tooltip-action-button';
+import TooltipLinkButton, {
+  TooltipLinkButtonProps,
+} from '@/components/buttons/tooltip-link-button';
 import { buttonVariants } from '@/components/ui/button';
 import {
   Card,
@@ -14,18 +19,18 @@ import { Separator } from '@/components/ui/separator';
 import { formatDeliveryMode, formatVenues } from '@/helpers/enum.helpers';
 import { cn } from '@/lib/utils';
 import { ExtendedUser } from '@/types/next-auth';
-import { TrainingSession, UserRole } from '@prisma/client';
+import { Delivery, UserRole } from '@prisma/client';
 import { format } from 'date-fns';
 import { Eye, MousePointerSquare, Pencil, Trash2 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 type TrainingSessionCardProps = React.ComponentPropsWithoutRef<'div'> & {
   data: TrainingCardSession;
   isPending: boolean;
   user?: ExtendedUser;
-  updateSession: (data: TrainingSession) => void;
+  sessionUpdate: (id: string) => void;
   deleteSession: (id: string) => void;
+  viewSession: (id: string) => void;
   showProgram: boolean;
   showPast?: 'true' | 'false';
 };
@@ -34,14 +39,14 @@ const TrainingSessionCard = ({
   data,
   isPending,
   user,
-  updateSession,
+  sessionUpdate,
   deleteSession,
+  viewSession,
   showProgram,
   showPast,
 }: TrainingSessionCardProps) => {
   const {
-    program: { title, code },
-    programId,
+    program: { id: programId, title, code },
     venue,
     mode,
     startDate,
@@ -52,43 +57,50 @@ const TrainingSessionCard = ({
     onlineSlotsTaken,
     id,
   } = data;
-  const router = useRouter();
   const isShowPast = showPast === 'true';
   const isAdmin = user?.role === UserRole.ADMIN;
+  const slotsOnline =
+    onlineSlots - onlineSlotsTaken > 0 && mode !== Delivery.ON_PREMISE
+      ? onlineSlots - onlineSlotsTaken
+      : undefined;
+  const slotsOnPremise =
+    onPremiseSlots - onPremiseSlotsTaken > 0 && mode !== Delivery.ONLINE
+      ? onPremiseSlots - onPremiseSlotsTaken
+      : undefined;
 
-  const actionButtons: TableActionProps[] = [
+  const actionButtons: (TooltipLinkButtonProps | TooltipActionButtonProps)[] = [
     {
-      content: `View session details`,
+      title: `View session details`,
       icon: <Eye color="green" className="size-5" />,
       tooltipContentClassName: 'text-green-600',
-      isPending,
-      onClick: () => {},
+      disabled: isPending,
+      onClick: () => viewSession(id),
     },
     ...(isAdmin
       ? [
           {
-            content: `Update training session`,
+            title: `Update training session`,
             icon: <Pencil className="size-5" />,
-            isPending,
-            onClick: () => updateSession(data as TrainingSession),
+            disabled: isPending,
+            onClick: () => sessionUpdate(id),
           },
           {
-            content: 'Delete this application',
+            title: 'Delete this application',
             icon: <Trash2 color="red" className="size-5" />,
-            isPending,
+            disabled: isPending,
             isVisible: isAdmin,
             tooltipContentClassName: 'text-red-600',
-            onClick: () => deleteSession(data.id),
+            onClick: () => deleteSession(id),
           },
         ]
       : []),
     ...(!showProgram
       ? [
           {
-            content: `Go to program page`,
+            title: `Go to program page`,
             icon: <MousePointerSquare className="size-5" />,
-            isPending,
-            onClick: () => router.push(`/${programId}`),
+            disabled: isPending,
+            href: `/${programId}`,
           },
         ]
       : []),
@@ -119,41 +131,43 @@ const TrainingSessionCard = ({
           <li>
             Mode: <strong>{formatDeliveryMode(mode)}</strong>
           </li>
-          {onPremiseSlots && (
+          {slotsOnPremise && (
             <li>
               On Premises Slots:{' '}
-              <strong>
-                {onPremiseSlotsTaken ?? 0}/{onPremiseSlots}
-              </strong>
+              <strong className="text-green-600">{slotsOnPremise}</strong>
             </li>
           )}
-          {onlineSlots && (
+          {slotsOnline && (
             <li>
               Online Slots:{' '}
-              <strong>
-                {onlineSlotsTaken ?? 0}/{onlineSlots}
-              </strong>
+              <strong className="text-green-600">{slotsOnline}</strong>
             </li>
           )}
         </ul>
       </CardContent>
-      <CardFooter className="flex flex-col items-center justify-between space-y-3 lg:space-y-0 lg:flex-row">
+      <CardFooter className="flex flex-col items-center justify-between space-y-3 xl:space-y-0 xl:flex-row">
         {!isShowPast && (
           <Link
             href={`/${programId}/training-sessions/${id}`}
             title="Apply for session"
             className={cn(
               buttonVariants(),
-              'bg-green-600 rounded-full hover:bg-green-500 w-full lg:w-auto',
+              'bg-green-600 rounded-full hover:bg-green-500 w-full xl:w-auto',
             )}
           >
             Apply for session
           </Link>
         )}
-        <div className="flex items-center justify-center w-full space-x-4 lg:justify-normal lg:w-auto lg:space-x-1 lg:ml-auto">
-          {actionButtons.map((action) => (
-            <TableAction {...action} />
-          ))}
+        <div className="flex items-center justify-center w-full space-x-4 xl:justify-normal xl:w-auto xl:space-x-1 xl:ml-auto">
+          {actionButtons.map((action) => {
+            if ('href' in action) {
+              return <TooltipLinkButton key={action.title} {...action} />;
+            } else {
+              return (
+                <TooltipActionButton key={`${action.title}`} {...action} />
+              );
+            }
+          })}
         </div>
       </CardFooter>
     </Card>

@@ -5,15 +5,18 @@ import TrainingSessions from '../components/cards/training-sessions/training-ses
 const HomePage = async ({
   searchParams,
 }: {
-  searchParams: FetchSessionsSchema;
+  searchParams: FetchSessionsSchema & { trainingSessionId?: string };
 }) => {
-  const fetchSessionsReturn = await fetchTrainingSessions(searchParams);
+  const { trainingSessionId, ...fetchParams } = searchParams;
+  const fetchSessionsReturn = await fetchTrainingSessions(fetchParams);
 
   if ('error' in fetchSessionsReturn)
     return (
       <div>{`There was an error fetching organizations: ${fetchSessionsReturn.error}`}</div>
     );
-  return <TrainingSessions {...fetchSessionsReturn} />;
+  return (
+    <TrainingSessions {...{ ...fetchSessionsReturn, trainingSessionId }} />
+  );
 };
 
 export default HomePage;

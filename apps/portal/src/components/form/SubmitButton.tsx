@@ -26,7 +26,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       {...props}
     >
       {isSubmitting && (
-        <Loader2 color="white" className="w-4 h-4 mr-2 animate-spin" />
+        <Loader2 color="white" className="mr-2 size-4 animate-spin" />
       )}
       {label}
     </Button>

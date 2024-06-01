@@ -1,12 +1,11 @@
-"use client";
-import { useSearchParams } from "next/navigation";
-import React, { useCallback, useEffect, useState } from "react";
-import { newVerification } from "@/actions/account/new-verification.actions";
-import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, LogIn, LogOut, XCircle } from "lucide-react";
-import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+'use client';
+import { buttonVariants } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
+import { CheckCircle2, LogIn, LogOut, XCircle } from 'lucide-react';
+import Link from 'next/link';
+import React from 'react';
+import useNewVerification from '../hooks/use-new-verification';
 
 interface ButtonRedirectProps extends React.HTMLAttributes<HTMLElement> {
   label: string;
@@ -21,8 +20,8 @@ const ButtonRedirect: React.FC<ButtonRedirectProps> = ({
   <Link
     href="/account"
     className={cn(
-      buttonVariants({ variant: "default" }),
-      "gap-x-2 bg-green-600",
+      buttonVariants({ variant: 'default' }),
+      'gap-x-2 bg-green-600',
       className,
     )}
   >
@@ -32,31 +31,7 @@ const ButtonRedirect: React.FC<ButtonRedirectProps> = ({
 );
 
 const NewVerification = () => {
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
-  const [error, setError] = useState<string | undefined>();
-  const [success, setSuccess] = useState<string | undefined>();
-
-  const onSubmit = useCallback(() => {
-    if (success || error) return;
-    if (!token) {
-      setError("Missing token!");
-      return;
-    }
-    newVerification(token)
-      .then((data) => {
-        setSuccess(data.success);
-        setError(data.error);
-      })
-      .catch(() => {
-        setError("Something went wrong. Please try again later");
-      });
-  }, [token, success, error]);
-
-  useEffect(() => {
-    onSubmit();
-  }, [onSubmit]);
-
+  const { error, success } = useNewVerification();
   return (
     <div className="flex flex-col w-3/5 space-y-4">
       {!success && !error && (

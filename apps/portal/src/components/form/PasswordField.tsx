@@ -1,12 +1,12 @@
-"use client";
-import React, { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
-import { PasswordFieldType } from "@/types/form-field.types";
-import ComposableField from "./ComposableField";
-import { FormControl } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { FieldValues } from "react-hook-form";
+'use client';
+import { Button } from '@/components/ui/button';
+import { FormControl } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { PasswordFieldType } from '@/types/form-field.types';
+import { Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
+import { FieldValues } from 'react-hook-form';
+import ComposableField from './ComposableField';
 
 interface PasswordFieldProps<T extends FieldValues>
   extends PasswordFieldType<T> {}
@@ -16,7 +16,7 @@ const PasswordField = <T extends FieldValues>({
 }: PasswordFieldProps<T>) => {
   const [visible, setVisible] = useState(false);
   const { placeholder } = passwordField;
-  const type = visible ? "text" : "password";
+  const type = visible ? 'text' : 'password';
   const Icon = visible ? Eye : EyeOff;
 
   const handleSetVisible = () => {
@@ -25,25 +25,25 @@ const PasswordField = <T extends FieldValues>({
   return (
     <ComposableField {...passwordField}>
       {({ field }) => (
-        <FormControl>
-          <div className="relative flex items-center">
+        <div className="relative flex items-center">
+          <FormControl>
             <Input
               type={type}
               placeholder={placeholder}
               {...field}
               className="pr-8"
             />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="absolute right-0 w-5 h-5 mr-2 rounded-full"
-              onClick={handleSetVisible}
-            >
-              <Icon className="w-4 h-4" />
-            </Button>
-          </div>
-        </FormControl>
+          </FormControl>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="absolute right-0 w-5 h-5 mr-2 rounded-full"
+            onClick={handleSetVisible}
+          >
+            <Icon className="w-4 h-4" />
+          </Button>
+        </div>
       )}
     </ComposableField>
   );

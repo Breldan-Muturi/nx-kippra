@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
-import Image from "next/image";
-import React from "react";
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import React from 'react';
 
 interface SliderProps extends React.HTMLAttributes<HTMLDivElement> {
   imageAlt?: string;
@@ -8,15 +8,11 @@ interface SliderProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const MobileSliders: React.FC<SliderProps> = ({ className }) => {
   return (
-    <div
-      className={cn(
-        "flex flex-row items-center",
-        className
-      )}
-    >
+    <div className={cn('flex flex-row items-center', className)}>
       <Image
         src="/KIPPRA-logo.png"
         alt="KIPPRA Logo"
+        priority
         width={400}
         height={200}
       />

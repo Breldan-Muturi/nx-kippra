@@ -1,37 +1,27 @@
 'use client';
 
 import {
-  ApplicationApproval,
-  fetchApprovalApplication,
-} from '@/actions/applications/admin/fetch-approval.applications.actions';
-import {
   FilterApplicationTableType,
   SingleTableApplication,
   filterApplications,
 } from '@/actions/applications/filter.applications.actions';
-import {
-  PayeeApplicationModal,
-  getPaymentApplicationPromise,
-} from '@/actions/applications/pay.application.actions';
-import {
-  ViewApplicationSheet,
-  getApplicationByIdPromise,
-} from '@/actions/applications/single.application.action';
+import { ViewApplicationSheet } from '@/actions/applications/single.application.action';
 import { cn } from '@/lib/utils';
-import { FilterApplicationType } from '@/validation/applications/table.application.validation';
-import { UserRole } from '@prisma/client';
+import {
+  FilterApplicationType,
+  fetchApplicationsSchema,
+} from '@/validation/applications/table.application.validation';
 import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { FileCheck2, Send, ShieldX } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
-import React, { useEffect, useMemo, useState, useTransition } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { SubmitHandler } from 'react-hook-form';
-import { toast } from 'sonner';
+import { TooltipActionButtonProps } from '../../../../../components/buttons/tooltip-action-button';
 import handleTableColumns from '../../../../../components/table/handle-table-columns';
 import ReusableTable from '../../../../../components/table/reusable-table';
-import { TableActionProps } from '../../../../../components/table/table-action';
 import TablesPagination from '../../../../../components/table/table-pagination';
 import tableSelectColumn from '../../../../../components/table/table-select-column';
 import TableViews from '../../../../../components/table/table-views';
+import useApplicationModals from '../../../hooks/use-application-modals';
 import applicationActionsColumn from './columns/application-column-action';
 import applicantColumn from './columns/application-column-applicant';
 import applicationColumnCurrency from './columns/application-column-currency';
@@ -58,10 +48,15 @@ export type ApplicationModalType = {
 type ApplicationTableProps = React.ComponentPropsWithoutRef<'div'> &
   FilterApplicationTableType & { applicationId?: string };
 
+export type ApplicationViewSheet = {
+  data: ViewApplicationSheet;
+  nextId?: string;
+  prevId?: string;
+};
+
 const ApplicationsTable = ({
-  existingUser,
   applications,
-  fetchParams,
+  fetchParams: rawFetchParams,
   count,
   filterSponsorType,
   filterStatus,
@@ -69,20 +64,32 @@ const ApplicationsTable = ({
   className,
   ...props
 }: ApplicationTableProps) => {
-  const router = useRouter();
-  const path = usePathname();
+  const {
+    isPending,
+    startTransition,
+    path,
+    user,
+    viewApplication,
+    viewData,
+    approveApplication,
+    approveData,
+    rejectApplication,
+    rejectId,
+    sendEmail,
+    emailId,
+    payApplication,
+    payData,
+    removeApplication,
+    removeId,
+    deleteApplication,
+    deleteId,
+    dismissModal,
+  } = useApplicationModals({
+    applicationIds: applications.map(({ id }) => id),
+    selectedApplicationId: applicationId,
+  });
+  const fetchParams = fetchApplicationsSchema.parse(rawFetchParams);
   const { hiddenColumns, pageSize, page, ...filterParams } = fetchParams;
-  const [isPending, startTransition] = useTransition();
-  const [modal, setModal] = useState<
-    | undefined
-    | { type: 'view'; data: ViewApplicationSheet }
-    | { type: 'pay'; data: PayeeApplicationModal }
-    | { type: 'approve'; data: ApplicationApproval }
-    | { type: 'email'; id: string }
-    | { type: 'reject'; id: string }
-    | { type: 'remove'; id: string }
-    | { type: 'delete'; id: string }
-  >();
 
   const changePage = (pageInt: number) => {
     startTransition(() => {
@@ -98,7 +105,7 @@ const ApplicationsTable = ({
     startTransition(() => {
       filterApplications({
         ...fetchParams,
-        page: '1', // Reset to page 1 to avoid out of bounds error
+        page: '1',
         pageSize: newPageSize,
         path,
       });
@@ -110,6 +117,7 @@ const ApplicationsTable = ({
       filterApplications({
         ...fetchParams,
         ...values,
+        page: '1',
         path,
       });
     });
@@ -130,77 +138,12 @@ const ApplicationsTable = ({
       });
     });
 
-  const viewApplication = (applicationId: string) =>
-    startTransition(() => {
-      getApplicationByIdPromise(applicationId).then((data) => {
-        if ('error' in data) {
-          toast.error(data.error);
-        } else {
-          setModal((prev) => ({ type: 'view', data }));
-        }
-      });
-    });
-  const isView =
-    !!modal && modal.type === 'view' && 'isApplicationAdmin' in modal.data;
-
   useEffect(() => {
     if (applicationId) {
       viewApplication(applicationId);
     }
   }, [applicationId]);
 
-  const approveApplication = (applicationId: string) => {
-    if (existingUser.role === UserRole.USER) {
-      toast.error('Only admin users can approve applications');
-    } else {
-      startTransition(() => {
-        fetchApprovalApplication(applicationId).then((data) => {
-          if ('error' in data) {
-            toast.error(data.error);
-          } else {
-            setModal((prev) => ({ type: 'approve', data }));
-          }
-        });
-      });
-    }
-  };
-  const isApprove = !!modal && modal.type === 'approve' && 'id' in modal.data;
-
-  const rejectApplication = (applicationId: string) => {
-    if (existingUser.role === UserRole.USER) {
-      toast.error('Only admin users can reject applications');
-    } else {
-      setModal((prev) => ({ type: 'reject', id: applicationId }));
-    }
-  };
-  const isReject = !!modal && modal.type === 'reject' && 'id' in modal;
-
-  const sendEmail = (applicationId: string) =>
-    setModal((prev) => ({ type: 'email', id: applicationId }));
-  const isEmail = !!modal && modal.type === 'email' && 'id' in modal;
-
-  const payApplication = (applicationId: string) =>
-    startTransition(() => {
-      getPaymentApplicationPromise(applicationId).then((data) => {
-        if ('error' in data) {
-          toast.error(data.error);
-        } else {
-          setModal((prev) => ({ type: 'pay', data }));
-        }
-      });
-    });
-  const isPay =
-    !!modal && modal.type === 'pay' && 'paymentDetails' in modal.data;
-
-  const removeApplication = (applicationId: string) =>
-    setModal((prev) => ({ type: 'remove', id: applicationId }));
-  const isRemove = !!modal && modal.type === 'remove' && 'id' in modal;
-
-  const deleteApplication = (applicationId: string) =>
-    setModal((prev) => ({ type: 'delete', id: applicationId }));
-  const isDelete = !!modal && modal.type === 'delete' && 'id' in modal;
-
-  // Parse hiddenColumns from a comma-separated string to an array
   const hiddenColumnsArray = useMemo(
     () => (hiddenColumns ? hiddenColumns.split(',') : []),
     [hiddenColumns],
@@ -214,7 +157,7 @@ const ApplicationsTable = ({
         applicantColumn,
         applicationStatusColumn,
         applicationActionsColumn({
-          existingUser,
+          user,
           isPending,
           viewApplication,
           approveApplication,
@@ -239,37 +182,39 @@ const ApplicationsTable = ({
   });
 
   const someSelected = Object.keys(table.getState().rowSelection).length > 0;
-  const applicationActions: TableActionProps[] | undefined = someSelected
-    ? [
-        {
-          content: 'Approve applications',
-          icon: <FileCheck2 color="green" className="w-5 h-5" />,
-          isPending,
-          tooltipContentClassName: 'text-green-600',
-          className: 'mr-2',
-        },
-        {
-          content: 'Reject applications',
-          icon: <ShieldX color="red" className="w-5 h-5" />,
-          isPending,
-          tooltipContentClassName: 'text-red-600',
-          className: 'mr-2',
-        },
+  const applicationActions: TooltipActionButtonProps[] | undefined =
+    someSelected
+      ? [
+          {
+            title: 'Approve applications',
+            icon: <FileCheck2 color="green" className="w-5 h-5" />,
+            disabled: isPending,
+            tooltipContentClassName: 'text-green-600',
+            className: 'mr-2',
+          },
+          {
+            title: 'Reject applications',
+            icon: <ShieldX color="red" className="w-5 h-5" />,
+            disabled: isPending,
+            tooltipContentClassName: 'text-red-600',
+            className: 'mr-2',
+          },
 
-        {
-          content: 'Send mass emails',
-          icon: <Send className="w-5 h-5" />,
-          isPending,
-        },
-      ]
-    : undefined;
+          {
+            title: 'Send mass emails',
+            icon: <Send className="w-5 h-5" />,
+            disabled: isPending,
+          },
+        ]
+      : undefined;
 
   const handleDismiss = () => {
-    if (someSelected) {
-      table.resetRowSelection();
+    if (!isPending) {
+      if (someSelected) {
+        table.resetRowSelection();
+      }
+      dismissModal();
     }
-    setModal((prev) => undefined);
-    router.refresh();
   };
 
   return (
@@ -304,30 +249,33 @@ const ApplicationsTable = ({
           count={count}
         />
       </div>
-      {isView && (
+      {viewData && (
         <ApplicationSheet
-          handleDismiss={handleDismiss}
-          application={modal.data}
+          {...{
+            handleDismiss,
+            application: viewData,
+            viewApplication,
+            payApplication,
+            isPending,
+            user,
+          }}
         />
       )}
-      {isApprove && (
-        <ApproveApplication handleDismiss={handleDismiss} data={modal.data} />
+      {approveData && (
+        <ApproveApplication handleDismiss={handleDismiss} data={approveData} />
       )}
-      {isReject && (
-        <RejectApplication handleDismiss={handleDismiss} id={modal.id} />
+      {rejectId && (
+        <RejectApplication handleDismiss={handleDismiss} id={rejectId} />
       )}
-      {isEmail && <SendEmail handleDismiss={handleDismiss} id={modal.id} />}
-      {isPay && (
-        <PayApplication
-          handleDismiss={handleDismiss}
-          paymentInfo={modal.data}
-        />
+      {emailId && <SendEmail handleDismiss={handleDismiss} id={emailId} />}
+      {payData && (
+        <PayApplication handleDismiss={handleDismiss} paymentInfo={payData} />
       )}
-      {isRemove && (
-        <RemoveApplication handleDismiss={handleDismiss} id={modal.id} />
+      {removeId && (
+        <RemoveApplication handleDismiss={handleDismiss} id={removeId} />
       )}
-      {isDelete && (
-        <DeleteApplication handleDismiss={handleDismiss} id={modal.id} />
+      {deleteId && (
+        <DeleteApplication handleDismiss={handleDismiss} id={deleteId} />
       )}
     </>
   );

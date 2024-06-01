@@ -3,7 +3,9 @@ import {
   CompletedProgramsUser,
   SingleCompletedProgram,
 } from '@/actions/completed-programs/fetch.completed.actions';
-import TableAction, { TableActionProps } from '@/components/table/table-action';
+import TooltipActionButton, {
+  TooltipActionButtonProps,
+} from '@/components/buttons/tooltip-action-button';
 import { ActionTriggerType } from '@/types/actions.types';
 import { CompletionStatus, UserRole } from '@prisma/client';
 import { ColumnDef } from '@tanstack/react-table';
@@ -60,41 +62,41 @@ const completedColumnActions = ({
 
     const allowedUserOrAdmin = allowedUser || adminOnly;
 
-    const rowActions: TableActionProps[] = [
+    const rowActions: TooltipActionButtonProps[] = [
       {
-        content: `View ${name} completed program`,
+        title: `View ${name} completed program`,
         icon: <MousePointerSquare className="size-5" />,
-        isPending,
+        disabled: isPending,
         isVisible: allowedUserOrAdmin,
         onClick: () => handleView({ id, organizationIds }),
       },
       {
-        content: `Approve ${name} completed program`,
+        title: `Approve ${name} completed program`,
         icon: <BadgeCheck color="green" className="size-5" />,
-        isPending,
+        disabled: isPending,
         tooltipContentClassName: 'text-green-600',
         isVisible: adminOnly && status !== CompletionStatus.APPROVED,
         onClick: () => handleApprove([id]),
       },
       {
-        content: `Update ${name} completed program`,
+        title: `Update ${name} completed program`,
         icon: <Pencil className="size-5" />,
-        isPending,
+        disabled: isPending,
         isVisible: allowedUserOrAdmin,
         onClick: () => handleUpdate(id),
       },
       {
-        content: `Reject ${name} completed program`,
+        title: `Reject ${name} completed program`,
         icon: <FileX2 color="red" className="size-5" />,
-        isPending,
+        disabled: isPending,
         tooltipContentClassName: 'text-red-600',
         isVisible: adminOnly && status !== CompletionStatus.REJECTED,
         onClick: () => handleReject([id]),
       },
       {
-        content: `Delete ${name} completed program`,
+        title: `Delete ${name} completed program`,
         icon: <Trash2 color="red" className="size-5" />,
-        isPending,
+        disabled: isPending,
         tooltipContentClassName: 'text-red-600',
         isVisible: allowedUserOrAdmin,
         onClick: () => handleDelete([id]),
@@ -103,7 +105,7 @@ const completedColumnActions = ({
     return (
       <div className="flex items-center space-x-2">
         {rowActions.map((action) => (
-          <TableAction key={action.content} {...action} />
+          <TooltipActionButton key={action.title} {...action} />
         ))}
       </div>
     );

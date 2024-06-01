@@ -61,12 +61,13 @@ const Navbar = ({ links, className, ...props }: NavBarProps) => {
     >
       <div className="flex flex-row items-center justify-between w-full px-4 py-2 border border-b-gray-300">
         <div className="flex items-center w-1/2 space-x-1 md:w-1/4 lg:w-1/12">
-          <MobileNav links={links} className="flex md:hidden" />
+          {user && <MobileNav links={links} className="flex md:hidden" />}
           <Link href="/" title="Navigate to home" className="flex flex-grow">
             <Image
               width={200}
               height={100}
               quality={100}
+              priority={true}
               src="/kippra_logo.png"
               alt="Kippra-logo"
             />
@@ -120,9 +121,9 @@ const Navbar = ({ links, className, ...props }: NavBarProps) => {
           <Link
             href="/account"
             title="Sign up or login"
-            className={buttonVariants({ variant: 'custom' })}
+            className={cn(buttonVariants({ variant: 'custom' }), 'uppercase')}
           >
-            SIGNUP OR LOGIN
+            Sign in
           </Link>
         )}
       </div>

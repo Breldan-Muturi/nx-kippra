@@ -3,135 +3,9 @@ import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { UserRole } from '@prisma/client';
 
-const applicationParticipantPromise = async (id: string) => {
-  return await db.application.findUnique({
+const userPromise = async (id: string) =>
+  await db.user.findUnique({
     where: { id },
-    select: {
-      id: true,
-      delivery: true,
-      sponsorType: true,
-      trainingSession: {
-        select: {
-          id: true,
-          startDate: true,
-          endDate: true,
-          venue: true,
-          program: {
-            select: {
-              id: true,
-              title: true,
-            },
-          },
-        },
-      },
-      organization: {
-        select: {
-          id: true,
-          name: true,
-          phone: true,
-          email: true,
-          address: true,
-        },
-      },
-      participants: {
-        select: {
-          name: true,
-          user: { select: { image: true } },
-        },
-      },
-      owner: {
-        select: {
-          name: true,
-          email: true,
-          image: true,
-        },
-      },
-    },
-  });
-};
-export type ApplicationParticipantReturn = NonNullable<
-  Awaited<ReturnType<typeof applicationParticipantPromise>>
->;
-
-const applicationAdminPromise = async (id: string) => {
-  return await db.application.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      delivery: true,
-      sponsorType: true,
-      applicationFee: true,
-      offerLetter: true,
-      status: true,
-      proformaInvoice: true,
-      slotsCitizen: true,
-      slotsEastAfrican: true,
-      slotsGlobal: true,
-      trainingSession: {
-        select: {
-          id: true,
-          startDate: true,
-          endDate: true,
-          venue: true,
-          program: {
-            select: {
-              id: true,
-              title: true,
-            },
-          },
-        },
-      },
-      organization: {
-        select: {
-          id: true,
-          name: true,
-          phone: true,
-          email: true,
-          address: true,
-          contactPersonName: true,
-          contactPersonEmail: true,
-        },
-      },
-      participants: {
-        select: {
-          name: true,
-          user: { select: { image: true, id: true } },
-          nationalId: true,
-          attendanceConfirmed: true,
-          email: true,
-          organizationName: true,
-          citizenship: true,
-        },
-      },
-      owner: {
-        select: {
-          name: true,
-          email: true,
-          image: true,
-        },
-      },
-    },
-  });
-};
-export type ApplicationAdminReturn = NonNullable<
-  Awaited<ReturnType<typeof applicationAdminPromise>>
->;
-
-export type ViewApplicationSheet =
-  | {
-      isApplicationAdmin: false;
-      applicationParticipant: ApplicationParticipantReturn;
-    }
-  | { isApplicationAdmin: true; applicationAdmin: ApplicationAdminReturn };
-
-export const getApplicationByIdPromise = async (
-  id: string,
-): Promise<{ error: string } | ViewApplicationSheet> => {
-  const userId = await currentUserId();
-  if (!userId) return { error: 'You must be logged in to view applications' };
-
-  const user = await db.user.findUnique({
-    where: { id: userId },
     select: {
       id: true,
       name: true,
@@ -140,51 +14,122 @@ export const getApplicationByIdPromise = async (
       ownedApplications: { select: { id: true } },
     },
   });
+type UserPromise = Awaited<ReturnType<typeof userPromise>>;
 
-  if (!user || !user.id) {
-    return { error: 'Only registered users can view applications' };
-  }
-
-  const isApplicationAdmin =
-    user.ownedApplications.map(({ id }) => id).includes(id) ||
-    user.role === UserRole.ADMIN;
-
-  if (isApplicationAdmin) {
-    const applicationAdmin = await applicationAdminPromise(id);
-    if (!applicationAdmin || !applicationAdmin.id) {
-      return {
-        error:
-          'Error retrieving application information, please try again later',
-      };
-    } else {
-      return { isApplicationAdmin, applicationAdmin };
-    }
-  }
-
-  const applicationParticipant = await db.applicationParticipant.findFirst({
-    where: {
-      applicationId: id,
-      OR: [{ userId: user.id }, { email: user.email }, { name: user.name }],
+const applicationPromise = async (id: string) =>
+  await db.application.findUnique({
+    where: { id },
+    include: {
+      participants: {
+        include: {
+          user: { select: { id: true, image: { select: { fileUrl: true } } } },
+        },
+      },
+      organization: {
+        select: {
+          id: true,
+          image: { select: { fileUrl: true } },
+          name: true,
+          email: true,
+          phone: true,
+        },
+      },
+      trainingSession: {
+        select: {
+          id: true,
+          startDate: true,
+          endDate: true,
+          program: { select: { title: true, code: true } },
+        },
+      },
+      owner: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+          phoneNumber: true,
+        },
+      },
     },
-    select: { id: true },
   });
+type ApplicationPromise = Awaited<ReturnType<typeof applicationPromise>>;
+export type ViewColumnParticipant =
+  NonNullable<ApplicationPromise>['participants'][number];
 
-  if (!!applicationParticipant) {
-    const applicationParticipant = await applicationParticipantPromise(id);
-    if (!applicationParticipant || !applicationParticipant.id) {
-      return {
-        error:
-          'Error retrieving application information. Please try again later',
-      };
-    } else {
-      return { isApplicationAdmin, applicationParticipant };
-    }
+const applicationDetailsPromise = async (id: string) =>
+  await db.application.findUnique({
+    where: { id },
+    select: {
+      proformaInvoice: true,
+      offerLetter: true,
+      payment: {
+        include: {
+          payment_references: true,
+          paymentReceipt: true,
+        },
+      },
+      invoice: true,
+    },
+  });
+type ApplicationDetailsPromise = Awaited<
+  ReturnType<typeof applicationDetailsPromise>
+>;
+
+export type ViewApplicationSheet = NonNullable<ApplicationPromise> & {
+  authorizedInfo?: ApplicationDetailsPromise;
+};
+
+export const getApplicationByIdPromise = async (
+  id: string,
+): Promise<{ error: string } | ViewApplicationSheet> => {
+  const userId = await currentUserId();
+  if (!userId) return { error: 'You must be logged in to view applications' };
+
+  let user: UserPromise;
+  try {
+    user = await userPromise(userId);
+  } catch (e) {
+    console.error('Failed to fetch user info due to a server error: ', e);
+    return {
+      error:
+        'Failed to authorize request due to a server error. Please try again later',
+    };
   }
-  console.log(
-    'Server action error: Only admins or application participants and owners can view details',
-  );
-  return {
-    error:
-      'Only admins or application participants and owners can view details',
-  };
+
+  if (!user)
+    return {
+      error:
+        'Failed to authorize request due to a server error. Please try again later',
+    };
+
+  const isAuthorized =
+    user.role === UserRole.ADMIN ||
+    user.ownedApplications.map(({ id }) => id).includes(id);
+
+  let application: ApplicationPromise,
+    authorizedInfo: ApplicationDetailsPromise | undefined;
+  try {
+    [application, authorizedInfo] = await Promise.all([
+      applicationPromise(id),
+      isAuthorized ? applicationDetailsPromise(id) : Promise.resolve(undefined),
+    ]);
+  } catch (e) {
+    console.error(
+      'Failed to retrieve application info due to a server error: ',
+      e,
+    );
+    return {
+      error:
+        'Failed to retrieve application info due to a server error. Please try again later',
+    };
+  }
+
+  if (!application || (isAuthorized && !authorizedInfo))
+    return {
+      error:
+        'This application no longer exists, please refresh your page and try again',
+    };
+
+  return { ...application, authorizedInfo };
 };

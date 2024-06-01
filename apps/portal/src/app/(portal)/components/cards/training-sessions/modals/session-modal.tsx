@@ -22,7 +22,7 @@ import {
 } from '@/validation/training-session/training-session.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Delivery, TrainingSession } from '@prisma/client';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -42,9 +42,10 @@ const SessionModal = ({
   ...props
 }: SessionModalProps) => {
   const router = useRouter();
+  const path = usePathname();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const newSession = trainingSession === undefined;
-  console.log('Training session: ', JSON.stringify(trainingSession, null, 2));
 
   const form = useForm<NewTrainingSessionForm | UpdateTrainingSessionForm>({
     resolver: zodResolver(trainingSessionSchema),
@@ -158,25 +159,28 @@ const SessionModal = ({
     data: NewTrainingSessionForm | UpdateTrainingSessionForm,
   ) => {
     startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString());
       if (newSession) {
         newTrainingSession(data as NewTrainingSessionForm)
           .then((data) => {
-            if (data.error) {
+            if ('error' in data) {
               toast.error(data.error);
             } else if (data.success) {
               toast.success(data.success);
-              router.refresh();
+              params.set('trainingSessionId', data.id);
+              router.push(`${path}/?${params.toString()}`);
             }
           })
           .finally(dismissModal);
       } else {
         updateTrainingSession(data as UpdateTrainingSessionForm)
           .then((data) => {
-            if (data.error) {
+            if ('error' in data) {
               toast.error(data.error);
             } else if (data.success) {
               toast.success(data.success);
-              router.refresh();
+              params.set('trainingSessionId', data.id);
+              router.push(`${path}/?${params.toString()}`);
             }
           })
           .finally(dismissModal);

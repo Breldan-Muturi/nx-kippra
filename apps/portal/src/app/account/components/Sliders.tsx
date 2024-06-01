@@ -1,18 +1,18 @@
-import {cn} from "@/lib/utils";
-import Image from "next/image";
-import React from "react";
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import React from 'react';
 
 interface SliderProps extends React.HTMLAttributes<HTMLDivElement> {
   message: string;
   imageAlt?: string;
 }
 
-const Sliders: React.FC<SliderProps> = ({message, className}) => {
+const Sliders: React.FC<SliderProps> = ({ message, className }) => {
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center space-y-10 bg-green-600 p-4",
-        className
+        'flex flex-col items-center justify-center space-y-10 bg-green-600 p-4',
+        className,
       )}
     >
       <Image
@@ -20,6 +20,7 @@ const Sliders: React.FC<SliderProps> = ({message, className}) => {
         alt="KIPPRA Logo"
         width={400}
         height={200}
+        priority
       />
       <p className="font-bold text-center text-white">{message}</p>
     </div>

@@ -7,10 +7,11 @@ const ProgramSessions = async ({
   searchParams,
 }: {
   params: { programId: string };
-  searchParams: FetchSessionsSchema;
+  searchParams: FetchSessionsSchema & { trainingSessionId?: string };
 }) => {
+  const { trainingSessionId, ...fetchParams } = searchParams;
   const fetchSessionsReturn = await fetchTrainingSessions({
-    ...searchParams,
+    ...fetchParams,
     programId,
   });
 
@@ -18,7 +19,11 @@ const ProgramSessions = async ({
     return (
       <div>{`There was an error fetching organizations: ${fetchSessionsReturn.error}`}</div>
     );
-  return <TrainingSessions {...{ ...fetchSessionsReturn, programId }} />;
+  return (
+    <TrainingSessions
+      {...{ ...fetchSessionsReturn, programId, trainingSessionId }}
+    />
+  );
 };
 
 export default ProgramSessions;

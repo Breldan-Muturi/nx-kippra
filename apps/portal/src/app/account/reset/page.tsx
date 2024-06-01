@@ -3,19 +3,12 @@ import FormHeader from '@/components/form/FormHeader';
 import SubmitButton from '@/components/form/SubmitButton';
 import { buttonVariants } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
-import { reset } from '@/actions/account/reset.actions';
-import { FormFieldType } from '@/types/form-field.types';
 import { cn } from '@/lib/utils';
-import {
-  EmailValidationType,
-  emailValidation,
-} from '@/validation/account/account.validation';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { FormFieldType } from '@/types/form-field.types';
+import { EmailValidationType } from '@/validation/account/account.validation';
 import Link from 'next/link';
-import React, { useTransition } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import AccountForm from '../components/AccountForm';
+import useResetPassword from '../hooks/use-reset-password';
 
 const resetFields: FormFieldType<EmailValidationType>[] = [
   {
@@ -28,32 +21,12 @@ const resetFields: FormFieldType<EmailValidationType>[] = [
 ];
 
 const ResetPage = () => {
-  const [isPending, startTransition] = useTransition();
-  const form = useForm<EmailValidationType>({
-    resolver: zodResolver(emailValidation),
-    mode: 'onChange',
-    defaultValues: {
-      email: '',
-    },
-  });
-
-  const onSubmit: SubmitHandler<EmailValidationType> = (values) => {
-    startTransition(() => {
-      reset(values).then((data) => {
-        if (data.error) {
-          toast.error(data.error);
-        }
-        if (data.success) {
-          toast.success(data.success);
-        }
-      });
-    });
-  };
+  const { form, isPending, onSubmit } = useResetPassword();
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col w-4/5 space-y-4 md:w-3/5"
+        className="flex flex-col w-full space-y-4 sm:w-3/5 lg:w-1/2"
       >
         <FormHeader
           label="Enter your email"

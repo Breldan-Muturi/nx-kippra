@@ -1,8 +1,6 @@
-import {
-  AppTableUser,
-  SingleTableApplication,
-} from '@/actions/applications/filter.applications.actions';
+import { SingleTableApplication } from '@/actions/applications/filter.applications.actions';
 import { ActionTriggerType } from '@/types/actions.types';
+import { ExtendedUser } from '@/types/next-auth';
 import { ApplicationStatus, UserRole } from '@prisma/client';
 import { ColumnDef } from '@tanstack/react-table';
 import {
@@ -14,12 +12,12 @@ import {
   ShieldX,
   Trash2,
 } from 'lucide-react';
-import TableAction, {
-  TableActionProps,
-} from '../../../../../../components/table/table-action';
+import TooltipActionButton, {
+  TooltipActionButtonProps,
+} from '../../../../../../components/buttons/tooltip-action-button';
 
 interface ApplicationActionColumnProps {
-  existingUser: AppTableUser;
+  user: ExtendedUser;
   isPending: boolean;
   viewApplication: ActionTriggerType;
   approveApplication: ActionTriggerType;
@@ -31,7 +29,7 @@ interface ApplicationActionColumnProps {
 }
 
 const applicationActionsColumn = ({
-  existingUser: { id: userId, name: userName, email: userEmail, role },
+  user: { id: userId, name: userName, email: userEmail, role },
   isPending,
   viewApplication,
   approveApplication,
@@ -58,67 +56,64 @@ const applicationActionsColumn = ({
         ({ email, name }) => email === userEmail || name === userName,
       );
 
-      const applicationActions: TableActionProps[] = [
+      const applicationActions: TooltipActionButtonProps[] = [
         {
-          content: `View ${isAdmin ? `${name}'s` : ''} application`,
+          title: `View ${isAdmin ? `${name}'s` : ''} application`,
           icon: <MousePointerSquare className="size-5" />,
-          isPending,
+          disabled: isPending,
           onClick: () => viewApplication(id),
         },
         {
-          content: `Approve ${name} application`,
-          isVisible:
-            status !== ApplicationStatus.APPROVED &&
-            status !== ApplicationStatus.COMPLETED &&
-            isAdmin,
+          title: `Approve ${name} application`,
+          isVisible: status === ApplicationStatus.PENDING && isAdmin,
           icon: <FileCheck2 color="green" className="size-5" />,
-          isPending,
+          disabled: isPending,
           tooltipContentClassName: 'text-green-600',
           onClick: () => approveApplication(id),
         },
         {
-          content: `Reject ${name}'s application`,
+          title: `Reject ${name}'s application`,
           isVisible: status !== ApplicationStatus.COMPLETED && isAdmin,
           icon: <ShieldX color="red" className="size-5" />,
-          isPending,
+          disabled: isPending,
           tooltipContentClassName: 'text-red-600',
           onClick: () => rejectApplication(id),
         },
         {
-          content: 'Initiate payment for this application',
+          title: 'Initiate payment for this application',
           isVisible: isOwner && status === ApplicationStatus.APPROVED,
           icon: <Banknote color="green" className="size-5" />,
-          isPending,
+          disabled: isPending,
           tooltipContentClassName: 'text-green-600',
           onClick: () => payApplication(id),
         },
         {
-          content: 'Delete this application',
+          title: 'Delete this application',
           isVisible: isOwner || isAdmin,
           icon: <Trash2 color="red" className="size-5" />,
-          isPending,
+          disabled: isPending,
           tooltipContentClassName: 'text-red-600',
           onClick: () => deleteApplication(id),
         },
         {
-          content: 'Remove me from this application',
+          title: 'Remove me from this application',
           isVisible: !!isParticipant,
           icon: <ClipboardX color="red" className="size-5" />,
-          isPending,
+          disabled: isPending,
           tooltipContentClassName: 'text-red-600',
           onClick: () => removeApplication(id),
         },
         {
-          content: `Send an email to ${isAdmin ? name : 'the portal admin'}`,
-          icon: <Send className="w-5 h-5" />,
-          isPending,
+          title: `Send an email to ${isAdmin ? name : 'the portal admin'}`,
+          icon: <Send className="size-5" />,
+          disabled: isPending,
           onClick: () => sendEmail(id),
         },
       ];
       return (
         <div className="flex items-center space-x-2">
           {applicationActions.map((action) => (
-            <TableAction key={action.content} {...action} />
+            <TooltipActionButton key={action.title} {...action} />
           ))}
         </div>
       );

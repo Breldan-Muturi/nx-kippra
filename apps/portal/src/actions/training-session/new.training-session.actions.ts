@@ -9,7 +9,7 @@ import { UserRole } from '@prisma/client';
 
 export const newTrainingSession = async (
   trainingSessionData: NewTrainingSessionForm,
-): Promise<{ error?: string; success?: string }> => {
+): Promise<{ error: string } | { id: string; success: string }> => {
   const role = await currentRole();
   if (role !== UserRole.ADMIN) {
     return { error: 'You are not permited to create courses' };
@@ -22,10 +22,13 @@ export const newTrainingSession = async (
   const { usingDifferentFees, usingUsd, ...sessionData } =
     validTrainingSession.data;
   try {
-    await db.trainingSession.create({
+    const trainingSession = await db.trainingSession.create({
       data: sessionData,
     });
-    return { success: 'New training session created successfully' };
+    return {
+      id: trainingSession.id,
+      success: 'New training session created successfully',
+    };
   } catch (error) {
     console.log('Error saving the new session: ', error);
     return { error: 'Something went wrong. Please try again later' };

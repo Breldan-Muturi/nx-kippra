@@ -2,7 +2,9 @@ import {
   OrganizationTableUser,
   SingleOrganizationDetail,
 } from '@/actions/organization/filter.organization.actions';
-import TableAction, { TableActionProps } from '@/components/table/table-action';
+import TooltipActionButton, {
+  TooltipActionButtonProps,
+} from '@/components/buttons/tooltip-action-button';
 import { ActionTriggerType } from '@/types/actions.types';
 import { OrganizationRole, UserRole } from '@prisma/client';
 import { ColumnDef } from '@tanstack/react-table';
@@ -47,35 +49,35 @@ const organizationColumnActions = ({
       users.map(({ user: { id } }) => id).includes(existingUser.id),
       invites.map(({ email }) => email).includes(existingUser.email),
     ].some(Boolean);
-    const organizationActions: TableActionProps[] = [
+    const organizationActions: TooltipActionButtonProps[] = [
       {
-        content: `Go to ${name}'s page`,
+        title: `Go to ${name}'s page`,
         icon: <MousePointerSquare className="size-5" />,
         isVisible: isAuthorized,
-        isPending,
+        disabled: isPending,
         onClick: () => handleView(id),
       },
       {
-        content: `Delete ${name}`,
+        title: `Delete ${name}`,
         isVisible: isAuthorized,
         icon: <Trash2 color="red" className="size-5" />,
-        isPending,
+        disabled: isPending,
         tooltipContentClassName: 'text-red-600',
         onClick: () => handleDelete(id),
       },
       {
-        content: `Remove me from ${name}`,
+        title: `Remove me from ${name}`,
         isVisible: isInOrg,
         icon: <ClipboardX color="red" className="size-5" />,
-        isPending,
+        disabled: isPending,
         tooltipContentClassName: 'text-red-600',
         onClick: () => handleRemove(id),
       },
       {
-        content: `See invite from ${name}`,
+        title: `See invite from ${name}`,
         isVisible: isInvited,
         icon: <MailCheck color="green" className="size-5" />,
-        isPending,
+        disabled: isPending,
         tooltipContentClassName: 'text-green-600',
         onClick: () => handleInvite(invites[0].token),
       },
@@ -83,7 +85,7 @@ const organizationColumnActions = ({
     return (
       <div className="flex items-center space-x-2">
         {organizationActions.map((action) => (
-          <TableAction key={action.content} {...action} />
+          <TooltipActionButton key={action.title} {...action} />
         ))}
       </div>
     );

@@ -1,3 +1,4 @@
+import { TooltipActionButtonProps } from '@/components/buttons/tooltip-action-button';
 import TooltipIconButton from '@/components/buttons/tooltip-icon-button';
 import ReusableForm from '@/components/form/ReusableForm';
 import SubmitButton from '@/components/form/SubmitButton';
@@ -52,6 +53,14 @@ const InvitesSearchAdd = ({
       email: undefined,
     });
     if (defaultValues) clearForm();
+  };
+
+  const actionButton: TooltipActionButtonProps = {
+    title: `Clear email field`,
+    disabled: isPending,
+    icon: <X className="text-white size-6" />,
+    tooltipContentClassName: 'text-red-600',
+    onClick: onClear,
   };
 
   return (

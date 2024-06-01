@@ -10,15 +10,6 @@ const Pie = ({ data }: { data: PieData[] }) => {
   const restValue = restOfData.reduce((acc, item) => acc + item.value, 0);
   if (restOfData.length > 0)
     topFiveData.push({ id: 'Other', label: 'Others', value: restValue });
-  // Define custom green shades from darkest to lightest
-  const customColors = [
-    '#008000',
-    '#009900',
-    '#00b300',
-    '#00cc00', // Lightest green
-    '#00e600',
-    '#00ff00', // Lightest green
-  ];
   return (
     <ResponsivePie
       data={topFiveData}

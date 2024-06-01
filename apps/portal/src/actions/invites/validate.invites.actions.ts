@@ -26,9 +26,11 @@ const invitePromise = async (token: string) =>
   });
 type InvitePromise = Awaited<ReturnType<typeof invitePromise>>;
 
+export type OrgInvite = NonNullable<InvitePromise>;
+
 export type ValidateInvite =
   | { error: string }
-  | { invite: InvitePromise }
+  | { invite: OrgInvite }
   | { invalid: true };
 
 export const validateInvite = async (

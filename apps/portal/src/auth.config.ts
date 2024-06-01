@@ -1,10 +1,9 @@
+import { getUserByEmail } from '@/helpers/user.helper';
+import { loginSchema } from '@/validation/account/account.validation';
+import bcrypt from 'bcryptjs';
 import type { NextAuthConfig } from 'next-auth';
 import credentials from 'next-auth/providers/credentials';
-import { loginSchema } from '@/validation/account/account.validation';
-import { getUserByEmail } from '@/helpers/user.helper';
-import bcrypt from 'bcryptjs';
 import Google from 'next-auth/providers/google';
-import Facebook from 'next-auth/providers/facebook';
 
 export default {
   trustHost: true,
@@ -13,10 +12,6 @@ export default {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
-    Facebook({
-      clientId: process.env.FACEBOOK_CLIENT_ID,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
     }),
     credentials({
       authorize: async (credentials) => {

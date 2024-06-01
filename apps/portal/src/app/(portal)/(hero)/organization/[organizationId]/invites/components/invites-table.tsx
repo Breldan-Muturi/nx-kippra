@@ -7,8 +7,10 @@ import {
 } from '@/actions/invites/fetch.invites.actions';
 import { revokeInvite } from '@/actions/invites/revoke.invites.actions';
 import { sendInvite } from '@/actions/invites/send.invites.actions';
+import TooltipActionButton, {
+  TooltipActionButtonProps,
+} from '@/components/buttons/tooltip-action-button';
 import ReusableTable from '@/components/table/reusable-table';
-import TableAction, { TableActionProps } from '@/components/table/table-action';
 import TablesPagination from '@/components/table/table-pagination';
 import tableSelectColumn from '@/components/table/table-select-column';
 import { getOrganizationInvite } from '@/helpers/invites.helpers';
@@ -154,20 +156,20 @@ const InvitesTable = ({
       : [];
   const someSelected = selectedIds.length > 0;
 
-  const inviteActions: TableActionProps[] | undefined = someSelected
+  const inviteActions: TooltipActionButtonProps[] | undefined = someSelected
     ? [
         {
-          content: `Revoke invitation`,
+          title: `Revoke invitation`,
           icon: <ClipboardX color="red" className="size-5" />,
-          isPending,
+          disabled: isPending,
           tooltipContentClassName: 'text-red-600',
           isVisible: someSelected,
           onClick: () => revokeInvites(selectedIds),
         },
         {
-          content: 'Resend invites',
+          title: 'Resend invites',
           icon: <RefreshCcw color="green" className="size-5" />,
-          isPending,
+          disabled: isPending,
           tooltipContentClassName: 'text-green-600',
           isVisible: someSelected,
           onClick: () => resendInvites(selectedIds),
@@ -187,7 +189,7 @@ const InvitesTable = ({
         {!!inviteActions && (
           <div className="flex justify-start w-full space-x-2">
             {inviteActions.map((action) => (
-              <TableAction key={action.content} {...action} />
+              <TooltipActionButton key={action.title} {...action} />
             ))}
           </div>
         )}

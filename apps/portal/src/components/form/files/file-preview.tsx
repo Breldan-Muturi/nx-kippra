@@ -13,7 +13,7 @@ import Link from 'next/link';
 
 type FilePreviewProps = React.ComponentPropsWithoutRef<'div'> &
   FilePreviewSchema & {
-    handleRemove: ActionTriggerType;
+    handleRemove?: ActionTriggerType;
   };
 
 const FilePreview = ({
@@ -60,13 +60,15 @@ const FilePreview = ({
           <span className="font-medium text-red-600">{fileType}</span>
         </p>
       </div>
-      <TooltipIconButton
-        icon={<Trash2 className="size-4" />}
-        tooltipLabel="Remove file"
-        title="Remove file"
-        className="bg-red-600/80 hover:bg-red-600 size-6"
-        onClick={() => handleRemove(fileName)}
-      />
+      {!!handleRemove && (
+        <TooltipIconButton
+          icon={<Trash2 className="size-4" />}
+          tooltipLabel="Remove file"
+          title="Remove file"
+          className="bg-red-600/80 hover:bg-red-600 size-6"
+          onClick={() => handleRemove(fileName)}
+        />
+      )}
     </div>
   );
 };

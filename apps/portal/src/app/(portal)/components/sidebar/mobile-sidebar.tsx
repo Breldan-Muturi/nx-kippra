@@ -22,7 +22,8 @@ const MobileNav = ({ links, className, ...props }: SidebarProps) => {
           {/* <DrawerTitle> */}
           {links.map(({ href, label, icon }, i) => (
             <MobileSidebarLink
-              {...{ key: `${i}${href}${label}`, href, label, icon }}
+              key={`${i}${href}${label}`}
+              {...{ href, label, icon }}
             />
           ))}
           {/* </DrawerTitle> */}

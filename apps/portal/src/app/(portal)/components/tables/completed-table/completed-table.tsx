@@ -15,8 +15,10 @@ import {
   ViewCompletedProgram,
   singleCompletedProgram,
 } from '@/actions/completed-programs/single.completed.actions';
+import TooltipActionButton, {
+  TooltipActionButtonProps,
+} from '@/components/buttons/tooltip-action-button';
 import ReusableTable from '@/components/table/reusable-table';
-import TableAction, { TableActionProps } from '@/components/table/table-action';
 import TablesPagination from '@/components/table/table-pagination';
 import tableSelectColumn from '@/components/table/table-select-column';
 import { Button } from '@/components/ui/button';
@@ -214,28 +216,28 @@ const CompletedTable = ({
 
   const someSelected = selectedIds.length > 0;
 
-  const completedActions: TableActionProps[] | undefined = someSelected
+  const completedActions: TooltipActionButtonProps[] | undefined = someSelected
     ? [
         {
-          content: `Approve completed programs`,
+          title: `Approve completed programs`,
           icon: <BadgeCheck color="green" className="size-5" />,
-          isPending,
+          disabled: isPending,
           tooltipContentClassName: 'text-green-600',
           isVisible: someSelected,
           onClick: () => handleApprove(selectedIds),
         },
         {
-          content: `Reject completed programs`,
+          title: `Reject completed programs`,
           icon: <FileX2 color="red" className="size-5" />,
-          isPending,
+          disabled: isPending,
           tooltipContentClassName: 'text-red-600',
           isVisible: someSelected,
           onClick: () => handleReject(selectedIds),
         },
         {
-          content: `Delete completed programs`,
+          title: `Delete completed programs`,
           icon: <Trash2 color="red" className="size-5" />,
-          isPending,
+          disabled: isPending,
           tooltipContentClassName: 'text-red-600',
           isVisible: someSelected,
           onClick: () => handleDelete(selectedIds),
@@ -265,7 +267,7 @@ const CompletedTable = ({
             {!!completedActions && (
               <div className="flex justify-start mt-3 space-x-2 md:mt-0">
                 {completedActions.map((action) => (
-                  <TableAction key={action.content} {...action} />
+                  <TooltipActionButton key={action.title} {...action} />
                 ))}
               </div>
             )}

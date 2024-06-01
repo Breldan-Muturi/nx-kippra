@@ -7,6 +7,7 @@ const HomeLayout = ({ children }: { children: React.ReactNode }) => {
         <Image
           src="/newhero.jpg"
           alt="KIPPRA hero image"
+          priority={true}
           fill
           className="object-cover object-bottom"
         />

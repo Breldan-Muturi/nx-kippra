@@ -132,7 +132,6 @@ type ApplicationsSponsorPromise = Awaited<
   ReturnType<typeof applicationsSponsorPromise>
 >;
 export type FilterApplicationTableType = {
-  existingUser: AppTableUser;
   applications: SingleTableApplication[];
   count: number;
   fetchParams: FetchApplicationType;
@@ -263,7 +262,6 @@ export const filterApplicationsTable = async (
   );
 
   return {
-    existingUser,
     applications,
     count,
     fetchParams,
