@@ -42,11 +42,11 @@ const OrganizationHero = async ({ id }: { id: string }) => {
 
   return (
     <div className="flex flex-col w-full">
-      <div className="relative w-full p-0 m-0 h-52">
+      <div className="relative w-full p-0 m-0 h-36 md:h-52">
         <Image src="/newhero.jpg" fill alt="KIPPRA hero image" />
         <div className="absolute inset-0 z-10 bg-gray-900/60" />
-        <div className="absolute z-20 flex items-center space-x-4 bottom-8 left-4 right-4">
-          <Avatar className="size-20 ring-4 ring-green-600/60">
+        <div className="absolute z-20 flex items-center space-x-2 md:space-x-4 bottom-8 left-4 right-4">
+          <Avatar className="size-12 md:size-20 ring-4 ring-green-600/60">
             <AvatarImage
               src={heroImage || undefined}
               alt={`${heroTitle || 'Organization'}'s profile image`}
@@ -56,11 +56,13 @@ const OrganizationHero = async ({ id }: { id: string }) => {
             </AvatarFallback>
           </Avatar>
           {heroTitle && (
-            <p className="text-4xl font-bold text-background">{heroTitle}</p>
+            <p className="text-lg font-bold md:text-4xl text-background">
+              {heroTitle}
+            </p>
           )}
         </div>
       </div>
-      <div className="flex items-center w-full bg-gray-200 border-b-2 shadow-md border-b-gray-200">
+      <div className="flex flex-col items-start w-full bg-gray-200 border-b-2 shadow-md lg:items-center lg:flex-row border-b-gray-200">
         {organizationRoutes.map(({ href, label }) => (
           <PageNavButton key={`${href}${label}`} {...{ href, label }} />
         ))}

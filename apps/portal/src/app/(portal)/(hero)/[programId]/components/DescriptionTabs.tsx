@@ -48,14 +48,14 @@ const DescriptionTabs = async ({ programId }: { programId: string }) => {
   const heroTitle = programTitle.title;
   return (
     <div className="flex flex-col w-full">
-      <div className="relative m-0 h-[200px] w-full p-0">
+      <div className="relative m-0 h-36 lg:h-[200px] w-full p-0">
         <Image src="/newhero.jpg" fill alt="Hero image" />
         <div className="absolute inset-0 opacity-60 bg-gray-900 z-[8]" />
-        <p className="absolute bottom-8 left-4 right-4 z-[10] text-4xl text-gray-100 font-bold">
+        <p className="absolute bottom-8 left-4 right-4 z-[10] text-lg md:text-2xl lg:text-4xl text-gray-100 font-bold">
           {heroTitle}
         </p>
       </div>
-      <div className="flex items-center w-full bg-gray-200 border-b-2 shadom-md border-b-gray-200">
+      <div className="flex flex-col items-start w-full bg-gray-200 border-b-2 lg:flex-row lg:items-center shadom-md border-b-gray-200">
         {programRoutes.map(({ href, label }, i) => (
           <PageNavButton key={`${i}${href}${label}`} {...{ href, label }} />
         ))}

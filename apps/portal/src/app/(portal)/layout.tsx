@@ -1,6 +1,6 @@
 import Navbar from '@/app/(portal)/components/navbar';
 import { currentRole } from '@/lib/auth';
-import { SidebarLink } from '@/types/nav-links.types';
+import { ExternalNav, SidebarLink } from '@/types/nav-links.types';
 import { UserRole } from '@prisma/client';
 import { FilePlus2, FolderPlus, GraduationCap } from 'lucide-react';
 import React from 'react';
@@ -11,7 +11,7 @@ import { MdLibraryBooks, MdPayment, MdTask } from 'react-icons/md';
 import ContentArea from './components/content';
 import SideBarArea from './components/sidebar/side-bar';
 
-const navLinks: SidebarLink[] = [
+const sideLinks: SidebarLink[] = [
   {
     href: '/',
     label: 'Programs',
@@ -68,8 +68,27 @@ const navLinks: SidebarLink[] = [
   },
 ];
 
+const navLinks: ExternalNav[] = [
+  {
+    label: 'About us',
+    href: 'https://kippra.or.ke',
+  },
+  {
+    label: 'Contact us',
+    href: 'https://kippra.or.ke',
+  },
+  {
+    label: 'Portal User Guide',
+    href: 'https://kippra.or.ke',
+  },
+  {
+    label: 'eLearning',
+    href: 'https://kippra.or.ke',
+  },
+];
+
 const getLinksForRole = (userRole?: UserRole): SidebarLink[] => {
-  return navLinks.filter(({ role }) => !role || role === userRole);
+  return sideLinks.filter(({ role }) => !role || role === userRole);
 };
 
 const PortalLayout = async ({ children }: { children: React.ReactNode }) => {
@@ -78,11 +97,15 @@ const PortalLayout = async ({ children }: { children: React.ReactNode }) => {
   const links = getLinksForRole(userRole);
   return (
     <main className="flex flex-col h-screen">
-      <Navbar links={links} />
+      <Navbar links={links} navLinks={navLinks} />
       <section className="flex flex-1 h-full overflow-auto lg:overflow-hidden">
         {isLoggedIn && (
           <>
-            <SideBarArea links={links} className="hidden md:flex" />
+            <SideBarArea
+              links={links}
+              navLinks={navLinks}
+              className="hidden md:flex"
+            />
           </>
         )}
         <ContentArea>{children}</ContentArea>

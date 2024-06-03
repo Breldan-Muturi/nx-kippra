@@ -3,28 +3,18 @@
 import {
   InvitesTableProps,
   SingleInviteDetail,
-  filterInvites,
 } from '@/actions/invites/fetch.invites.actions';
-import { revokeInvite } from '@/actions/invites/revoke.invites.actions';
-import { sendInvite } from '@/actions/invites/send.invites.actions';
 import TooltipActionButton, {
   TooltipActionButtonProps,
 } from '@/components/buttons/tooltip-action-button';
 import ReusableTable from '@/components/table/reusable-table';
 import TablesPagination from '@/components/table/table-pagination';
 import tableSelectColumn from '@/components/table/table-select-column';
-import { getOrganizationInvite } from '@/helpers/invites.helpers';
 import { cn } from '@/lib/utils';
-import {
-  FilterInvitesSchema,
-  pathInvitesSchema,
-} from '@/validation/organization/organization.invites.validation';
 import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { ClipboardX, RefreshCcw } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
-import React, { useTransition } from 'react';
-import { SubmitHandler } from 'react-hook-form';
-import { toast } from 'sonner';
+import React from 'react';
+import useInviteTable from '../hooks/use-invite-table';
 import inviteColumnActions from './columns/invites-column-actions';
 import invitesColumnCreatedAt from './columns/invites-column-createdat';
 import invitesColumnEmail from './columns/invites-column-email';
@@ -42,94 +32,16 @@ const InvitesTable = ({
   className,
   ...props
 }: TableInvitesProps) => {
-  const router = useRouter();
-  const path = usePathname();
-  const [isPending, startTransition] = useTransition();
-  //   const [modal, setModal] = useState<{action: string; inviteIds: string[]} | boolean | undefined>();
-  const pathParams = pathInvitesSchema.parse({
-    ...fetchParams,
-    path,
-  });
-  const { page, pageSize } = pathParams;
-
-  const changePage = (pageInt: number) =>
-    startTransition(() => {
-      filterInvites({
-        ...pathParams,
-        page: pageInt.toString(),
-      });
-    });
-
-  const changePageSize = (newPageSize: string) =>
-    startTransition(() => {
-      filterInvites({
-        ...pathParams,
-        page: '1',
-        pageSize: newPageSize,
-      });
-    });
-
-  const clearForm = () =>
-    startTransition(() => {
-      filterInvites({
-        path,
-        page: '1',
-        pageSize,
-      });
-    });
-
-  const onSubmit: SubmitHandler<FilterInvitesSchema> = (values) => {
-    if (!!values.email)
-      startTransition(() => {
-        getOrganizationInvite({
-          email: values.email as string,
-          organizationId,
-        }).then((data) => {
-          if (!data || !data.id) {
-            sendInvite({ email: values.email as string, organizationId }).then(
-              (data) => {
-                if (data.error) {
-                  toast.error(data.error);
-                } else if (data.success) {
-                  toast.success(data.success);
-                  router.refresh();
-                }
-              },
-            );
-          } else {
-            filterInvites({
-              ...pathParams,
-              email: values.email,
-            });
-          }
-        });
-      });
-  };
-
-  const resendInvites = (inviteIds: string[]) =>
-    startTransition(() => {
-      // filterInvites({
-      //   path,
-      //   page: '1',
-      //   pageSize,
-      // })
-    });
-  // const isResend = !!modal && "action" in modal && modal.action === "resend";
-
-  const revokeInvites = (inviteIds: string[]) =>
-    startTransition(() => {
-      revokeInvite({ ids: inviteIds, organizationId }).then((data) => {
-        if (data.error) {
-          toast.error(data.error);
-        } else if (data.success) {
-          toast.success(data.success);
-          router.refresh();
-        }
-      });
-    });
-  // const isRevoke = !!modal && "action" in modal && modal.action === "revoke";
-
-  // const isAdd = !!modal && typeof modal === "boolean" &&  modal === true;
+  const {
+    isPending,
+    pathParams,
+    changePage,
+    changePageSize,
+    clearForm,
+    onSubmit,
+    resendInvites,
+    revokeInvites,
+  } = useInviteTable({ organizationId, fetchParams });
 
   const table = useReactTable({
     data: orgInvites,
@@ -202,7 +114,7 @@ const InvitesTable = ({
         changePage={changePage}
         changePageSize={changePageSize}
         isPending={isPending}
-        pagination={{ page, pageSize }}
+        pagination={{ page: pathParams.page, pageSize: pathParams.pageSize }}
         count={count}
       />
     </div>

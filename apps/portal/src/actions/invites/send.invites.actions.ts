@@ -2,10 +2,10 @@
 
 import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { v4 as uuidv4 } from 'uuid';
-import { InviteOrganization, OrganizationRole, UserRole } from '@prisma/client';
 import { inviteOrgTokenEmail } from '@/mail/organization.mail';
 import { ActionReturnType } from '@/types/actions.types';
+import { InviteOrganization, OrganizationRole, UserRole } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
 
 const userPromise = async ({
   id,
@@ -56,7 +56,7 @@ const organizationPromise = async ({
       users: {
         where: { user: { email } },
         select: { user: { select: { email: true } } },
-        take: 1,
+        // take: 1,
       },
     },
   });
@@ -115,7 +115,10 @@ export const sendInvite = async ({
         'Failed because a matching organization was not found. Please try again later',
     };
 
-  if (organization.users[0].user.email === email)
+  if (
+    organization.users.length > 0 &&
+    organization.users[0].user.email === email
+  )
     return {
       error: `There is an existing member with email ${email}. Please use a different invite email`,
     };

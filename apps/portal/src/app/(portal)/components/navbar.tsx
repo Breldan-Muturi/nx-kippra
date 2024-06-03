@@ -11,7 +11,11 @@ import {
 import { avatarFallbackName } from '@/helpers/user.helper';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { cn } from '@/lib/utils';
-import { DropDownLink, SidebarLink } from '@/types/nav-links.types';
+import {
+  DropDownLink,
+  ExternalNav,
+  SidebarLink,
+} from '@/types/nav-links.types';
 import { LogOut, UserCog } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import Image from 'next/image';
@@ -19,25 +23,6 @@ import Link from 'next/link';
 import React from 'react';
 import { buttonVariants } from '../../../components/ui/button';
 import MobileNav from './sidebar/mobile-sidebar';
-
-const navLinks = [
-  {
-    label: 'About us',
-    href: 'https://kippra.or.ke',
-  },
-  {
-    label: 'Contact us',
-    href: 'https://kippra.or.ke',
-  },
-  {
-    label: 'Portal User Guide',
-    href: 'https://kippra.or.ke',
-  },
-  {
-    label: 'eLearning',
-    href: 'https://kippra.or.ke',
-  },
-];
 
 const dropDownLinks: DropDownLink[] = [
   {
@@ -49,9 +34,10 @@ const dropDownLinks: DropDownLink[] = [
 
 type NavBarProps = React.ComponentPropsWithRef<'div'> & {
   links: SidebarLink[];
+  navLinks: ExternalNav[];
 };
 
-const Navbar = ({ links, className, ...props }: NavBarProps) => {
+const Navbar = ({ links, navLinks, className, ...props }: NavBarProps) => {
   const user = useCurrentUser();
 
   return (
@@ -61,7 +47,13 @@ const Navbar = ({ links, className, ...props }: NavBarProps) => {
     >
       <div className="flex flex-row items-center justify-between w-full px-4 py-2 border border-b-gray-300">
         <div className="flex items-center w-1/2 space-x-1 md:w-1/4 lg:w-1/12">
-          {user && <MobileNav links={links} className="flex md:hidden" />}
+          {user && (
+            <MobileNav
+              links={links}
+              navLinks={navLinks}
+              className="flex md:hidden"
+            />
+          )}
           <Link href="/" title="Navigate to home" className="flex flex-grow">
             <Image
               width={200}

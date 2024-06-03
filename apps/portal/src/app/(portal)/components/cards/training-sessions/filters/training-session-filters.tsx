@@ -87,9 +87,9 @@ const TrainingSessionFilters = ({
         >
           <ReusableForm formFields={filterForm} />
         </div>
-        <div className="flex flex-col items-start justify-between w-full space-y-3 lg:space-y-0 lg:items-center lg:flex-auto">
+        <div className="flex flex-col items-start justify-between w-full space-y-3 lg:space-y-0 lg:items-center lg:flex-row">
           {isAnyFieldFilled() && (
-            <div className="flex items-center gap-x-3">
+            <div className="flex items-center sm:items-start gap-x-3">
               <SubmitButton isSubmitting={isPending} label="Apply filter" />
               <Button
                 type="button"

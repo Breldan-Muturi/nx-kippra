@@ -1,4 +1,10 @@
 'use client';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { SidebarProps } from '@/types/nav-links.types';
@@ -7,7 +13,12 @@ import { signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const SideBarArea = ({ links, className, ...props }: SidebarProps) => {
+const SideBarArea = ({
+  links,
+  navLinks,
+  className,
+  ...props
+}: SidebarProps) => {
   const path = usePathname();
   return (
     <aside
@@ -35,6 +46,32 @@ const SideBarArea = ({ links, className, ...props }: SidebarProps) => {
           {label}
         </Link>
       ))}
+      <Accordion
+        type="single"
+        collapsible
+        className="hidden w-full p-4 lg:hidden md:block"
+      >
+        <AccordionItem value="navlinks">
+          <AccordionTrigger className="w-full p-2 text-gray-100">
+            External links
+          </AccordionTrigger>
+          <AccordionContent className="flex flex-col items-start space-y-1">
+            {navLinks.map(({ href, label }) => (
+              <Link
+                href={href}
+                key={href}
+                target="_blank"
+                className={cn(
+                  buttonVariants({ variant: 'ghost' }),
+                  'h-8 justify-start w-full text-gray-100',
+                )}
+              >
+                {label}
+              </Link>
+            ))}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
       <div className="mx-4 mt-auto mb-2 space-y-3">
         <Link
           href="/settings"

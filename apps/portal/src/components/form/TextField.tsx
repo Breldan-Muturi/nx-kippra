@@ -45,7 +45,7 @@ const TextField = <T extends FieldValues>({
             <Component
               type={type}
               placeholder={placeholder}
-              value={value ?? ''}
+              value={value || ''}
               onChange={handleChange}
               {...field}
               className="bg-background"
