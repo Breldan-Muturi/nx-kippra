@@ -19,7 +19,7 @@ const searchInvites: FormFieldType<FilterInvitesSchema>[] = [
     type: 'email',
     label: `Enter invite's email`,
     placeholder: 'eg. invite@email.com',
-    className: 'flex-grow mr-2',
+    className: 'w-full md:flex-grow md:mr-2',
     description: 'Search or add a new invite',
   },
 ];
@@ -63,22 +63,27 @@ const InvitesSearchAdd = ({
     <Form {...form}>
       <form
         onSubmit={handleSubmit(submitForm)}
-        className={cn('flex w-full items-center space-x-2', className)}
+        className={cn(
+          'flex flex-col md:flex-row w-full justify-start items-start md:items-center md:space-x-2',
+          className,
+        )}
         {...props}
       >
         <ReusableForm formFields={searchInvites} />
-        <SubmitButton
-          label="Search or add invite"
-          isSubmitting={isPending}
-          className="mt-1"
-        />
-        <TooltipIconButton
-          icon={<X className="size-6" />}
-          type="button"
-          tooltipLabel="Clear email field"
-          className="mt-1 bg-red-600/80 hover:bg-red-600 size-8"
-          onClick={onClear}
-        />
+        <div className="flex items-center space-x-2">
+          <SubmitButton
+            label="Search or add invite"
+            isSubmitting={isPending}
+            className="mt-1"
+          />
+          <TooltipIconButton
+            icon={<X className="size-6" />}
+            type="button"
+            tooltipLabel="Clear email field"
+            className="mt-1 bg-red-600/80 hover:bg-red-600 size-8"
+            onClick={onClear}
+          />
+        </div>
       </form>
     </Form>
   );

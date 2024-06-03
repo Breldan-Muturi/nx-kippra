@@ -47,7 +47,7 @@ const MobileNav = ({ links, navLinks, className, ...props }: SidebarProps) => {
                 {navLinks.map(({ href, label }) => (
                   <Link
                     href={href}
-                    key={href}
+                    key={`${label}${href}`}
                     target="_blank"
                     className={cn(
                       buttonVariants({ variant: 'ghost' }),
