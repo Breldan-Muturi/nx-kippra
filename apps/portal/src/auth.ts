@@ -13,10 +13,6 @@ export const {
   signOut,
   unstable_update,
 } = NextAuth({
-  basePath:
-    process.env.NODE_ENV === 'production'
-      ? 'https://nxportal.sohnandsol.com'
-      : 'http://localhost:3000',
   pages: {
     signIn: '/account',
     error: '/account/error',
