@@ -23,7 +23,7 @@ export const paymentDescriptionSchema = z.object({
 export const payeeFormSchema = z.object({
   clientName: characterCount(
     6,
-    24,
+    50,
     'Full name should be between 6 and 20 characters',
   ),
   clientIDNumber: characterCount(5, 12, 'Enter a valid ID Number'),
@@ -31,7 +31,7 @@ export const payeeFormSchema = z.object({
     .number()
     .int()
     .gte(254000000000, 'Enter a valid phone number')
-    .lte(254999999999, 'Enter a valid phone number'),
+    .lte(256999999999, 'Enter a valid phone number'),
   clientEmail: email,
   pictureURL: z.string().url().optional(),
 });
