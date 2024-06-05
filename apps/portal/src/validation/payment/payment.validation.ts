@@ -27,23 +27,11 @@ export const payeeFormSchema = z.object({
     'Full name should be between 6 and 20 characters',
   ),
   clientIDNumber: characterCount(5, 12, 'Enter a valid ID Number'),
-  // clientMSISDN: z
-  //   .number()
-  //   .int()
-  //   .gte(254000000000, 'Enter a valid phone number')
-  //   .lte(256999999999, 'Enter a valid phone number'),
   clientMSISDN: z
-    .string()
-    .refine((value) => {
-      // Check if the string can be parsed as a number
-      const parsedValue = parseInt(value, 10);
-      return !isNaN(parsedValue);
-    }, 'Enter a valid phone number')
-    .refine((value) => {
-      // Check if the parsed number is within the specified range
-      const parsedValue = parseInt(value, 10);
-      return parsedValue >= 254000000000 && parsedValue <= 256999999999;
-    }, 'Enter a valid phone number'),
+    .number()
+    .int()
+    .gte(254000000000, 'Enter a valid phone number')
+    .lte(256999999999, 'Enter a valid phone number'),
   clientEmail: email,
   pictureURL: z.string().url().optional(),
 });
@@ -81,10 +69,22 @@ export const pesaflowCheckoutApiSchema = pesaflowActionSchema
     format: z.enum(['json', 'iframe']).default('json'),
     clientMSISDN: z
       .string()
-      .regex(
-        /^254[17]\d{8}$/,
-        'Enter a valid Kenyan phone number starting with 2541 or 2547',
-      ),
+      .refine((value) => {
+        // Check if the string can be parsed as a number
+        const parsedValue = parseInt(value, 10);
+        return !isNaN(parsedValue);
+      }, 'Enter a valid phone number')
+      .refine((value) => {
+        // Check if the parsed number is within the specified range
+        const parsedValue = parseInt(value, 10);
+        return parsedValue >= 254000000000 && parsedValue <= 256999999999;
+      }, 'Enter a valid phone number'),
+    // clientMSISDN: z
+    //   .string()
+    //   .regex(
+    //     /^254[17]\d{8}$/,
+    //     'Enter a valid Kenyan phone number starting with 2541 or 2547',
+    //   ),
   });
 export type PesaFlowCheckoutApiType = z.infer<typeof pesaflowCheckoutApiSchema>;
 
