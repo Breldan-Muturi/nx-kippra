@@ -350,11 +350,7 @@ export const submitAdminApplication = async (
         ),
         pesaflowPayment({
           amountExpected:
-            process.env.NODE_ENV === 'production'
-              ? usingUsd
-                ? applicationFee + 1
-                : applicationFee + 50
-              : 1,
+            process.env.NODE_ENV === 'production' ? applicationFee : 1,
           applicationId: newApplication.id,
           billDesc: `Invoice for ${title} from ${format(startDate, 'PPP')} to ${format(endDate, 'PPP')} ${isOnPremise && venue ? formatVenues(venue) : ''}`,
           billRefNumber: `${new Date().toISOString()}_${newApplication.id}_admin_initiated`,
