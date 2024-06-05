@@ -95,12 +95,7 @@ export const initiatePayment = async (
 
   const pesaflow = await pesaflowPayment({
     ...validPayment.data,
-    amountExpected:
-      process.env.NODE_ENV === 'production'
-        ? usingUsd
-          ? applicationFee + 1
-          : applicationFee + 50
-        : 1,
+    amountExpected: process.env.NODE_ENV === 'production' ? applicationFee : 1,
     applicationId: id,
     billDesc,
     billRefNumber: `${new Date().toISOString()}_${applicationId}_${paymentApplication.invoice.length}`,
