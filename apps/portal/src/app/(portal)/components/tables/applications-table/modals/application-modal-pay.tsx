@@ -123,9 +123,6 @@ const PayApplication = ({
   );
 
   const usingUsd = currency === 'KES';
-  const amountToShow = usingUsd
-    ? paymentDetails.amountExpected + 50
-    : paymentDetails.amountExpected + 1;
 
   return (
     <Dialog open onOpenChange={handleDismiss}>
@@ -137,7 +134,7 @@ const PayApplication = ({
         <div className="flex flex-col flex-grow space-y-2">
           <div className="flex flex-col flex-grow px-4 py-2 border-2 border-green-200 rounded-md">
             <p className="text-3xl font-semibold text-green-600 font">
-              {currency} {amountToShow.toLocaleString('en-US')}
+              {currency} {paymentDetails.amountExpected.toLocaleString('en-US')}
             </p>
           </div>
           <p className="text-xs">
