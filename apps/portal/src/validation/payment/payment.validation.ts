@@ -27,11 +27,23 @@ export const payeeFormSchema = z.object({
     'Full name should be between 6 and 20 characters',
   ),
   clientIDNumber: characterCount(5, 12, 'Enter a valid ID Number'),
+  // clientMSISDN: z
+  //   .number()
+  //   .int()
+  //   .gte(254000000000, 'Enter a valid phone number')
+  //   .lte(256999999999, 'Enter a valid phone number'),
   clientMSISDN: z
-    .number()
-    .int()
-    .gte(254000000000, 'Enter a valid phone number')
-    .lte(256999999999, 'Enter a valid phone number'),
+    .string()
+    .refine((value) => {
+      // Check if the string can be parsed as a number
+      const parsedValue = parseInt(value, 10);
+      return !isNaN(parsedValue);
+    }, 'Enter a valid phone number')
+    .refine((value) => {
+      // Check if the parsed number is within the specified range
+      const parsedValue = parseInt(value, 10);
+      return parsedValue >= 254000000000 && parsedValue <= 256999999999;
+    }, 'Enter a valid phone number'),
   clientEmail: email,
   pictureURL: z.string().url().optional(),
 });
