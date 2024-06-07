@@ -66,7 +66,7 @@ export const deleteApplication = async (
     await db.application.delete({ where: { id: applicationId } });
     return { success: 'Application deleted successfully' };
   } catch (error) {
-    console.log('Error deleting application: ', error);
+    console.log('Error with deleting application: ', error);
     return {
       error:
         'Something went wrong deleting this application. Please try again later',

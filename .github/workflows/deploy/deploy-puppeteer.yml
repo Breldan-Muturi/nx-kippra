@@ -1,0 +1,38 @@
+name: Deploy Puppeteer Image to Droplet
+on:
+  workflow_call:
+    secrets:
+      host:
+        required: true
+      username:
+        required: true
+      password:
+        required: true
+      port:
+        required: true
+
+jobs:
+  deploy-puppeteer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install SSH client
+        run: sudo apt-get install -y openssh-client
+
+      - name: SSH into Droplet, pull image, and run container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.host }}
+          username: ${{ secrets.username }}
+          password: ${{ secrets.password }}
+          port: ${{ secrets.port }}
+          script: |
+            docker pull breldan/nx-kipprapuppeteer
+            docker stop nx-puppeteer || true
+            docker rm nx-puppeteer || true
+            docker run -d --name nx-puppeteer -p 3333:3333 \
+              --env-file /root/nxkippra/secrets \
+              breldan/nx-kipprapuppeteer
+            docker image prune -a --force

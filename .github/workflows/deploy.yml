@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       nginx: ${{steps.filter.outputs.nginx }}
+      portal: ${{ steps.filter.outputs.portal }}
+      puppeteer: ${{ steps.filter.outputs.puppeteer }}
     steps:
       - uses: actions/checkout@v3
       - uses: dorny/paths-filter@v2
@@ -17,19 +19,40 @@ jobs:
           filters: |
             nginx:
               - 'nginx.conf'
+            portal:
+              - 'apps/portal/**'
+            puppeteer:
+              - 'apps/puppeteer/**'
 
-  build-and-push:
-    if: contains(github.event.head_commit.modified_files, 'nginx.conf')
-    uses: ./.github/workflows/build-and-push.yml
+  build-and-push-portal:
+    needs: changes
+    if: ${{ needs.changes.outputs.portal == 'true' }}
+    uses: ./.github/workflows/build/build-portal.yml
     secrets:
       username: ${{ secrets.DOCKERHUB_USERNAME }}
       password: ${{ secrets.DOCKERHUB_TOKEN }}
       resend: ${{ secrets.NEXT_PUBLIC_RESEND_API_KEY}}
 
-  deploy-to-droplet:
-    needs: build-and-push
-    if: contains(github.event.head_commit.modified_files, 'nginx.conf')
-    uses: ./.github/workflows/deploy-to-droplet.yml
+  build-and-push-puppeteer:
+    needs: changes
+    if: ${{ needs.changes.outputs.puppeteer == 'true' }}
+    uses: ./.github/workflows/build/build-puppeteer.yml
+    secrets:
+      username: ${{ secrets.DOCKERHUB_USERNAME }}
+      password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  deploy-portal:
+    needs: build-and-push-portal
+    uses: ./.github/workflows/deploy/deploy-portal.yml
+    secrets:
+      host: ${{ secrets.DROPLET_SSH_HOST }}
+      username: ${{ secrets.DROPLET_SSH_USERNAME }}
+      password: ${{ secrets.DROPLET_SSH_PASSWORD }}
+      port: ${{ secrets.DROPLET_SSH_PORT }}
+
+  deploy-puppeteer:
+    needs: build-and-push-puppeteer
+    uses: ./.github/workflows/deploy/deploy-puppeteer.yml
     secrets:
       host: ${{ secrets.DROPLET_SSH_HOST }}
       username: ${{ secrets.DROPLET_SSH_USERNAME }}
