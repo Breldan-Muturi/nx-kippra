@@ -6,8 +6,8 @@ on:
 
 jobs:
   build-and-push:
-    uses: .github/workflows/build-and-push.yml@main
+    uses: ./.github/workflows/build-and-push.yml
 
   deploy-to-droplet:
     needs: build-and-push
-    uses: .github/workflows/deploy-to-droplet.yml
+    uses: ./.github/workflows/deploy-to-droplet.yml
