@@ -18,12 +18,6 @@ jobs:
   updates-nginx:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: List repository files
-        run: ls -al
-
       - name: Copy Nginx Configuration to remote server
         uses: appleboy/scp-action@master
         with:
