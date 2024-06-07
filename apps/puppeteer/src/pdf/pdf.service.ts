@@ -60,7 +60,7 @@ export class PdfService {
         );
       }
 
-      // Ensure all images are loaded
+      // Ensure all images are properly loaded
       const imageHandles = await page.$$('img');
       for (const imageHandle of imageHandles) {
         const isLoaded = await this.isImageLoaded(page, imageHandle);
