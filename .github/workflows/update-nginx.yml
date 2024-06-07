@@ -10,14 +10,14 @@ on:
         required: true
       port:
         required: true
-  push:
-    paths:
-      - 'nginx.conf'
 
 jobs:
   updates-nginx:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Copy Nginx Configuration to remote server
         uses: appleboy/scp-action@master
         with:
