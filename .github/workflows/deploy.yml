@@ -24,7 +24,7 @@ jobs:
       port: ${{ secrets.DROPLET_SSH_PORT }}
 
   updates-nginx:
-    needs: deploy-to-droplet
+    # needs: deploy-to-droplet
     uses: ./.github/workflows/update-nginx.yml
     secrets:
       host: ${{ secrets.DROPLET_SSH_HOST }}
