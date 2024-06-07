@@ -29,12 +29,10 @@ jobs:
           password: ${{ secrets.password }}
           port: ${{ secrets.port }}
           source: 'nginx.conf'
-          target: '/etc/nginx/sites-available/nx-portal'
+          target: '/etc/nginx/sites-available'
           timeout: '180s'
           command_timeout: '120s'
           rm: true
-          script: |
-            sudo true
 
       - name: Test and Restart Nginx
         uses: appleboy/ssh-action@master
