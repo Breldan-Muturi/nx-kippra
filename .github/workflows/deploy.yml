@@ -10,6 +10,7 @@ jobs:
     secrets:
       username: ${{ secrets.DOCKERHUB_USERNAME }}
       password: ${{ secrets.DOCKERHUB_TOKEN }}
+      resend: ${{ secrets.NEXT_PUBLIC_RESEND_API_KEY}}
 
   deploy-to-droplet:
     needs: build-and-push

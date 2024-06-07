@@ -6,6 +6,8 @@ on:
         required: true
       password:
         required: true
+      resend:
+        required: true
 
 jobs:
   build-and-push:
@@ -25,7 +27,7 @@ jobs:
 
       - name: Create .env fiile
         run: |
-          echo "NEXT_PUBLIC_RESEND_API_KEY=${{ secrets.NEXT_PUBLIC_RESEND_API_KEY}}" > .env
+          echo "NEXT_PUBLIC_RESEND_API_KEY=${{ secrets.resend}}" > .env
 
       - name: Build and Push Docker Image using Docker Compose
         run: |
