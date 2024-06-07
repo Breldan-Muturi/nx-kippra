@@ -54,7 +54,10 @@ export default auth((req) => {
 
     const encodedCallbackUrl = encodeURIComponent(callbackUrl);
     return NextResponse.redirect(
-      new URL(`/account?callbackUrl=${encodedCallbackUrl}`, nextUrl),
+      new URL(
+        `/account?callbackUrl=${encodedCallbackUrl}`,
+        process.env.NEXT_PUBLIC_APP_URL,
+      ),
     );
   }
 
