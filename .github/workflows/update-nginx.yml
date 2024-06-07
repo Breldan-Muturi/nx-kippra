@@ -32,6 +32,9 @@ jobs:
           target: '/etc/nginx/sites-available/nx-portal'
           timeout: '180s'
           command_timeout: '120s'
+          rm: true
+          script: |
+            sudo true
 
       - name: Test and Restart Nginx
         uses: appleboy/ssh-action@master
