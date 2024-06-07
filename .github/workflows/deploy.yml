@@ -12,18 +12,18 @@ jobs:
       password: ${{ secrets.DOCKERHUB_TOKEN }}
       resend: ${{ secrets.NEXT_PUBLIC_RESEND_API_KEY}}
 
-  updates-nginx:
+  deploy-to-droplet:
     needs: build-and-push
-    uses: ./.github/workflows/update-nginx.yml
+    uses: ./.github/workflows/deploy-to-droplet.yml
     secrets:
       host: ${{ secrets.DROPLET_SSH_HOST }}
       username: ${{ secrets.DROPLET_SSH_USERNAME }}
       password: ${{ secrets.DROPLET_SSH_PASSWORD }}
       port: ${{ secrets.DROPLET_SSH_PORT }}
 
-  deploy-to-droplet:
-    needs: build-and-push
-    uses: ./.github/workflows/deploy-to-droplet.yml
+  updates-nginx:
+    needs: deploy-to-droplet
+    uses: ./.github/workflows/update-nginx.yml
     secrets:
       host: ${{ secrets.DROPLET_SSH_HOST }}
       username: ${{ secrets.DROPLET_SSH_USERNAME }}

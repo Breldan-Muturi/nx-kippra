@@ -32,7 +32,7 @@ jobs:
             docker pull breldan/nx-kippraportal
             docker stop nx-portal || true
             docker rm nx-portal || true
-            docker run -d --name nx-portal -p 4000:4000 \
+            docker run -d --name nx-portal -p 3000:3000 \
               --env-file /root/nxkippra/secrets \
               breldan/nx-kippraportal
             docker pull breldan/nx-kipprapuppeteer
