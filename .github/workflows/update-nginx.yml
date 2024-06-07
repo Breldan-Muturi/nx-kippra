@@ -15,7 +15,7 @@ jobs:
   updates-nginx:
     runs-on: ubuntu-latest
     steps:
-      = name: List repository files
+      - name: List repository files
         uses: ls -a
 
       - name: Copy Nginx Configuration
