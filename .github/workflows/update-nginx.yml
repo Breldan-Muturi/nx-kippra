@@ -29,9 +29,11 @@ jobs:
           password: ${{ secrets.password }}
           port: ${{ secrets.port }}
           source: 'nginx.conf'
-          target: '/tmp/nginx.conf'
+          target: '/etc/nginx/sites-available/nx-portal'
+          timeout: 180
+          command_timeout: 120
 
-      - name: Update and restart Nginx
+      - name: Test and Restart Nginx
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.host }}
@@ -40,8 +42,6 @@ jobs:
           port: ${{ secrets.port }}
           script: |
             set -e
-            echo "Copying nginx.conf to /etc/nginx/sites-available/nx-portal"
-            sudo cp /tmp/nginx.conf /etc/nginx/sites-available/nx-portal
             echo "Testing nginx configuration"
             sudo nginx -t
             echo "Restarting nginx"
