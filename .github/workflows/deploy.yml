@@ -23,6 +23,7 @@ jobs:
 
   updates-nginx:
     needs: deploy-to-droplet
+    if: contains(github.event.head_commit.modified_files, 'nginx.conf')
     uses: ./.github/workflows/update-nginx.yml
     secrets:
       host: ${{ secrets.DROPLET_SSH_HOST }}

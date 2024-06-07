@@ -23,6 +23,6 @@ jobs:
           password: ${{ secrets.password }}
           port: ${{ secrets.port }}
           script: |
-            sudo cp /path/to/your/project/nginx.conf /etc/nginx/sites-available/nx-portal
+            sudo cp nginx.conf /etc/nginx/sites-available/nx-portal
             sudo nginx -t
             sudo systemctl restart nginx
