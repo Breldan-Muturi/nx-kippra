@@ -1,0 +1,28 @@
+name: Update Nginx
+on:
+  workflow_call:
+    secrets:
+      host:
+        required: true
+      username:
+        required: true
+      password:
+        required: true
+      port:
+        required: true
+
+jobs:
+  updates-nginx:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Copy Nginx Configuration
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.host }}
+          username: ${{ secrets.username }}
+          password: ${{ secrets.password }}
+          port: ${{ secrets.port }}
+          script: |
+            sudo cp /path/to/your/project/nginx.conf /etc/nginx/sites-available/nx-portal
+            sudo nginx -t
+            sudo systemctl restart nginx
