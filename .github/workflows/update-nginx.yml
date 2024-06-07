@@ -29,9 +29,9 @@ jobs:
           password: ${{ secrets.password }}
           port: ${{ secrets.port }}
           source: 'nginx.conf'
-          target: '/etc/nginx/sites-available/nx-portal'
+          target: '/tmp/nginx.conf'
 
-      - name: Copy Nginx Configuration
+      - name: Update and restart Nginx
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.host }}
@@ -40,7 +40,9 @@ jobs:
           port: ${{ secrets.port }}
           script: |
             set -e
+            echo "Copying nginx.conf to /etc/nginx/sites-available/nx-portal"
+            sudo cp /tmp/nginx.conf /etc/nginx/sites-available/nx-portal
             echo "Testing nginx configuration"
             sudo nginx -t
             echo "Restarting nginx"
-            sudo service nginx restart
+            sudo systemctl restart nginx
