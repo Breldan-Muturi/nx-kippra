@@ -25,7 +25,7 @@ jobs:
           script: |
             set e
             echo "Copying nginx.conf to /etc/nginx/sites-available/nx-portal"
-            sudo cp nginx.conf /etc/nginx/sites-available/nx-portal
+            sudo cp ./nginx.conf /etc/nginx/sites-available/nx-portal
             echo "Testing nginx configuration"
             sudo nginx -t
             echo "Restarting nginx"
