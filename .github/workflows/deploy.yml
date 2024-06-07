@@ -1,0 +1,13 @@
+name: Build and Deploy Project
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    uses: .github/workflows/build-and-push.yml
+
+  deploy-to-droplet:
+    needs: build-and-push
+    uses: .github/workflows/deploy-to-droplet.yml
