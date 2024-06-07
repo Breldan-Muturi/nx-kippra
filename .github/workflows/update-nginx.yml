@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: List repository files
-        run: ls -a
+        run: ls -al
 
       - name: Copy Nginx Configuration
         uses: appleboy/ssh-action@master
