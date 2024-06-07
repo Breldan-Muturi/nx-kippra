@@ -1,6 +1,15 @@
 name: Deploy Docker Images to Droplet
 on:
   workflow_call:
+    secrets:
+      host:
+        required: true
+      username:
+        required: true
+      password:
+        required: true
+      port:
+        required: true
 
 jobs:
   deploy-to-droplet:
@@ -15,10 +24,10 @@ jobs:
       - name: SSH into Droplet, pull image, and run container
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.DROPLET_SSH_HOST }}
-          username: ${{ secrets.DROPLET_SSH_USERNAME }}
-          password: ${{ secrets.DROPLET_SSH_PASSWORD }}
-          port: ${{ secrets.DROPLET_SSH_PORT }}
+          host: ${{ secrets.host }}
+          username: ${{ secrets.username }}
+          password: ${{ secrets.password }}
+          port: ${{ secrets.port }}
           script: |
             docker pull breldan/nx-kippraportal
             docker stop nx-portal || true
