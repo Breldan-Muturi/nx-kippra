@@ -27,7 +27,7 @@ jobs:
   build-and-push-portal:
     needs: changes
     if: ${{ needs.changes.outputs.portal == 'true' }}
-    uses: ./.github/workflows/build/build-portal.yml
+    uses: ./.github/workflows/build-portal.yml
     secrets:
       username: ${{ secrets.DOCKERHUB_USERNAME }}
       password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -36,14 +36,14 @@ jobs:
   build-and-push-puppeteer:
     needs: changes
     if: ${{ needs.changes.outputs.puppeteer == 'true' }}
-    uses: ./.github/workflows/build/build-puppeteer.yml
+    uses: ./.github/workflows/build-puppeteer.yml
     secrets:
       username: ${{ secrets.DOCKERHUB_USERNAME }}
       password: ${{ secrets.DOCKERHUB_TOKEN }}
 
   deploy-portal:
     needs: build-and-push-portal
-    uses: ./.github/workflows/deploy/deploy-portal.yml
+    uses: ./.github/workflows/deploy-portal.yml
     secrets:
       host: ${{ secrets.DROPLET_SSH_HOST }}
       username: ${{ secrets.DROPLET_SSH_USERNAME }}
@@ -52,7 +52,7 @@ jobs:
 
   deploy-puppeteer:
     needs: build-and-push-puppeteer
-    uses: ./.github/workflows/deploy/deploy-puppeteer.yml
+    uses: ./.github/workflows/deploy-puppeteer.yml
     secrets:
       host: ${{ secrets.DROPLET_SSH_HOST }}
       username: ${{ secrets.DROPLET_SSH_USERNAME }}

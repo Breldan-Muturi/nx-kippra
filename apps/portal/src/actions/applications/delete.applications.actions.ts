@@ -12,7 +12,7 @@ export const deleteApplication = async (
   const user = await currentUser();
 
   if (!user) {
-    return { error: 'First log in to delete this application' };
+    return { error: 'You need to be logged in to delete this application' };
   }
 
   const existingApplication = await db.application.findUnique({
