@@ -6,6 +6,7 @@ on:
 
 jobs:
   build-and-push:
+    if: contains(github.event.head_commit.modified_files, 'nginx.conf')
     uses: ./.github/workflows/build-and-push.yml
     secrets:
       username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -14,6 +15,7 @@ jobs:
 
   deploy-to-droplet:
     needs: build-and-push
+    if: contains(github.event.head_commit.modified_files, 'nginx.conf')
     uses: ./.github/workflows/deploy-to-droplet.yml
     secrets:
       host: ${{ secrets.DROPLET_SSH_HOST }}
@@ -23,7 +25,6 @@ jobs:
 
   updates-nginx:
     needs: deploy-to-droplet
-    if: contains(github.event.head_commit.modified_files, 'nginx.conf')
     uses: ./.github/workflows/update-nginx.yml
     secrets:
       host: ${{ secrets.DROPLET_SSH_HOST }}
