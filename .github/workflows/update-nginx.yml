@@ -30,8 +30,8 @@ jobs:
           port: ${{ secrets.port }}
           source: 'nginx.conf'
           target: '/etc/nginx/sites-available/nx-portal'
-          timeout: 180
-          command_timeout: 120
+          timeout: '180s'
+          command_timeout: '120s'
 
       - name: Test and Restart Nginx
         uses: appleboy/ssh-action@master
