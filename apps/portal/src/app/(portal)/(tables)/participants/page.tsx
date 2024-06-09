@@ -6,13 +6,13 @@ import {
 import ParticipantsTable from '../../components/tables/participants-table/participants-table';
 
 const Participants = async ({
-  searchParams,
+  searchParams: { participantId, ...fetchParams },
 }: {
-  searchParams: FetchParticipantsType;
+  searchParams: FetchParticipantsType & { participantId?: string };
 }) => {
-  const fetchParams: FetchParticipantsType =
-    fetchParticipantsSchema.parse(searchParams);
-  const participantsInfo = await fetchParticipantsTable({ fetchParams });
+  const participantsInfo = await fetchParticipantsTable({
+    fetchParams: fetchParticipantsSchema.parse(fetchParams),
+  });
 
   if ('error' in participantsInfo) {
     return (
@@ -20,7 +20,11 @@ const Participants = async ({
       <div>{`There was an error fetching participants ${participantsInfo.error}`}</div>
     );
   }
-  return <ParticipantsTable {...participantsInfo} />;
+  return (
+    <ParticipantsTable
+      {...{ ...participantsInfo, selectedParticipantId: participantId }}
+    />
+  );
 };
 
 export default Participants;

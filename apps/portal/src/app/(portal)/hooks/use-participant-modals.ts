@@ -5,7 +5,7 @@ import {
 import { useCurrentRole } from '@/hooks/use-current-role';
 import { UserRole } from '@prisma/client';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useState, useTransition } from 'react';
+import { useCallback, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 
 export type UpdateRoleParams = { id: string; updateToAdmin: boolean };
@@ -15,7 +15,13 @@ export type ViewParticipantParams = {
   prevId?: string;
 };
 
-const useParticipantModals = (participantIds: string[]) => {
+const useParticipantModals = ({
+  participantIds,
+  selectedParticipantId,
+}: {
+  participantIds: string[];
+  selectedParticipantId?: string;
+}) => {
   const path = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -26,20 +32,15 @@ const useParticipantModals = (participantIds: string[]) => {
     | { type: 'update-role'; updateData: UpdateRoleParams }
     | { type: 'view'; viewData: ViewParticipantParams }
   >();
-  const selectedParticipantId = searchParams.get('participantId');
-
-  const removeParticipantIdFromUrl = useCallback(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete('participantId');
-    const updatedParams = params.toString();
-    const newParams = updatedParams ? `${path}?${updatedParams}` : path;
-    router.push(newParams);
-  }, [path, router, searchParams]);
 
   const dismissModal = useCallback(() => {
     setModal(undefined);
     if (selectedParticipantId) {
-      removeParticipantIdFromUrl();
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete('participantId');
+      const updatedParams = params.toString();
+      const newParams = updatedParams ? `${path}?${updatedParams}` : path;
+      router.push(newParams);
     } else {
       router.refresh();
     }
@@ -63,9 +64,6 @@ const useParticipantModals = (participantIds: string[]) => {
   const viewParticipant = useCallback(
     (id: string) =>
       startTransition(() => {
-        if (selectedParticipantId) {
-          removeParticipantIdFromUrl();
-        }
         getSingleParticipant(id).then((data) => {
           if ('error' in data) {
             toast.error(data.error);
@@ -82,18 +80,13 @@ const useParticipantModals = (participantIds: string[]) => {
           }
         });
       }),
-    [participantIds, removeParticipantIdFromUrl, selectedParticipantId],
+    [participantIds],
   );
 
   const dataView =
     !!modal && 'viewData' in modal && modal.type === 'view'
       ? modal.viewData
       : undefined;
-
-  useEffect(() => {
-    if (selectedParticipantId && participantIds.includes(selectedParticipantId))
-      viewParticipant(selectedParticipantId);
-  }, [selectedParticipantId, participantIds]);
 
   return {
     path,

@@ -6,16 +6,14 @@ import {
 } from '@/validation/participants/participants.validation';
 
 const OrganizationMembers = async ({
-  searchParams,
+  searchParams: { participantId, ...fetchParams },
   params: { organizationId },
 }: {
-  searchParams: FetchParticipantsType;
+  searchParams: FetchParticipantsType & { participantId?: string };
   params: { organizationId: string };
 }) => {
-  const fetchParams: FetchParticipantsType =
-    fetchParticipantsSchema.parse(searchParams);
   const participantsInfo = await fetchParticipantsTable({
-    fetchParams,
+    fetchParams: fetchParticipantsSchema.parse(fetchParams),
     organizationId,
   });
 
@@ -25,7 +23,12 @@ const OrganizationMembers = async ({
       <div>{`There was an error fetching participants ${participantsInfo.error}`}</div>
     );
   }
-  return <ParticipantsTable className="mt-8" {...participantsInfo} />;
+  return (
+    <ParticipantsTable
+      className="mt-8"
+      {...{ ...participantsInfo, selectedParticipantId: participantId }}
+    />
+  );
 };
 
 export default OrganizationMembers;

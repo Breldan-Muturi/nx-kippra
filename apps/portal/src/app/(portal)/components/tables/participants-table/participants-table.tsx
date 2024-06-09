@@ -19,7 +19,7 @@ import {
   pathParticipantsSchema,
 } from '@/validation/participants/participants.validation';
 import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { SubmitHandler } from 'react-hook-form';
 import participantColumnActions from './columns/participant-column-actions';
 import participantColumnApplication from './columns/participant-column-application';
@@ -34,12 +34,13 @@ import UpdateRoleModal from './modals/update-role-modal';
 import ViewParticipant from './modals/view-participant';
 
 type TableParticipantsProps = React.ComponentPropsWithoutRef<'div'> &
-  ParticipantsTableProps;
+  ParticipantsTableProps & { selectedParticipantId?: string };
 
 export type ParticipantModal = { id: string; handleDismiss: () => void };
 
 const ParticipantsTable = ({
   participants,
+  selectedParticipantId,
   count,
   fetchParams,
   className,
@@ -55,7 +56,10 @@ const ParticipantsTable = ({
     dismissModal,
     updateUserRole,
     viewParticipant,
-  } = useParticipantModals(participants.map(({ id }) => id));
+  } = useParticipantModals({
+    participantIds: participants.map(({ id }) => id),
+    selectedParticipantId,
+  });
   const pathParams: PathParticipantsType = pathParticipantsSchema.parse({
     ...fetchParams,
     path,
@@ -111,6 +115,12 @@ const ParticipantsTable = ({
       });
     });
   };
+
+  useEffect(() => {
+    if (selectedParticipantId) {
+      viewParticipant(selectedParticipantId);
+    }
+  }, [selectedParticipantId]);
 
   const hiddenColumnsArray = useMemo(
     () => (hiddenColumns ? hiddenColumns.split(',') : []),
