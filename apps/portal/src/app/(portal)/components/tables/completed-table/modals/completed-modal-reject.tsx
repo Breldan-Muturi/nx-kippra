@@ -55,9 +55,9 @@ const CompletedModalReject = ({
     startTransition(() => {
       respondCompleted({ ids, approved: false, message: values.message })
         .then((data) => {
-          if (data.error) {
+          if ('error' in data) {
             toast.error(data.error);
-          } else if (data.success) {
+          } else {
             toast.success(data.success);
           }
         })

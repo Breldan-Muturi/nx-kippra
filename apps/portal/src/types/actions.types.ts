@@ -1,9 +1,6 @@
 import { Path } from 'react-hook-form';
 
-export type ActionReturnType = {
-  error?: string;
-  success?: string;
-};
+export type ActionReturnType = { error: string } | { success: string };
 
 export type ActionTriggerType = (actionString: string) => void;
 

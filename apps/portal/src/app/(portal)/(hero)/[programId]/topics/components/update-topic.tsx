@@ -63,9 +63,9 @@ const UpdateTopic = ({
   const onSubmit = (updateTopicData: UpdateTopicForm) => {
     startTransition(() => {
       updateTopic(updateTopicData).then((data) => {
-        if (data.error) {
+        if ('error' in data) {
           toast.error(data.error);
-        } else if (data.success) {
+        } else {
           toast.success(data.success);
           form.reset();
         }

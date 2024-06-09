@@ -2,6 +2,7 @@
 
 import { getTopicById, getTopicByTitle } from '@/helpers/topics.helpers';
 import { db } from '@/lib/db';
+import { ActionReturnType } from '@/types/actions.types';
 import {
   AddTopicForm,
   UpdateTopicForm,
@@ -11,7 +12,7 @@ import {
 
 export const addTopic = async (
   data: AddTopicForm,
-): Promise<{ error?: string; success?: string }> => {
+): Promise<ActionReturnType> => {
   const validTopic = addTopicsSchema.safeParse(data);
   if (!validTopic.success) {
     return { error: 'Invalid fields' };
@@ -38,7 +39,7 @@ export const addTopic = async (
 
 export const updateTopic = async (
   data: UpdateTopicForm,
-): Promise<{ error?: string; success?: string }> => {
+): Promise<ActionReturnType> => {
   const validTopic = updateTopicsSchema.safeParse(data);
   if (!validTopic.success) return { error: 'Invalid fields' };
 
@@ -72,9 +73,7 @@ export const updateTopic = async (
   }
 };
 
-export const deleteTopic = async (
-  id: string,
-): Promise<{ error?: string; success?: string }> => {
+export const deleteTopic = async (id: string): Promise<ActionReturnType> => {
   try {
     await db.topic.delete({ where: { id } });
     return { success: 'Topic deleted successfully' };

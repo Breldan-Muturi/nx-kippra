@@ -6,8 +6,14 @@ const participantColumnUser: ColumnDef<SingleParticipantDetail> = {
   id: 'User',
   header: 'User',
   cell: ({ row }) => {
-    const { name, image } = row.original;
-    return <TableUserCell userName={name} userImage={image?.fileUrl} />;
+    const { name, image, email } = row.original;
+    return (
+      <TableUserCell
+        userName={name}
+        userImage={image?.fileUrl}
+        userTableInfo={email}
+      />
+    );
   },
   enableHiding: false,
 };

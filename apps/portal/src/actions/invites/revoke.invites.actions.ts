@@ -2,6 +2,7 @@
 
 import { currentUserId } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { ActionReturnType } from '@/types/actions.types';
 import { OrganizationRole } from '@prisma/client';
 
 const userPromise = async ({
@@ -31,7 +32,7 @@ export const revokeInvite = async ({
 }: {
   ids: string[];
   organizationId: string;
-}) => {
+}): Promise<ActionReturnType> => {
   const userId = await currentUserId();
   if (!userId) return { error: 'You need to be logged in to revoke invites' };
 

@@ -3,6 +3,7 @@
 import { currentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { inviteResendEmail } from '@/mail/organization.mail';
+import { ActionReturnType } from '@/types/actions.types';
 import { OrganizationRole, UserRole } from '@prisma/client';
 
 const invitesPromise = async (ids: string[]) =>
@@ -50,7 +51,7 @@ const invitesResend = async ({
 }: {
   organizationId: string;
   inviteIds: string[];
-}): Promise<{ error: string } | { success: string }> => {
+}): Promise<ActionReturnType> => {
   const user = await currentUser();
   if (!user || !user.id || !user.name)
     return { error: 'You must be logged in to resend invites' };

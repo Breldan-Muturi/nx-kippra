@@ -54,7 +54,7 @@ const CompletedModalDelete = ({
     startTransition(() => {
       deleteCompleted({ ids, message: values.message })
         .then((data) => {
-          if (data.error) {
+          if ('error' in data) {
             toast.error(data.error);
           } else {
             toast.success(data.success);

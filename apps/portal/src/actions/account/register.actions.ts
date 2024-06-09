@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import { generateVerificationToken } from '@/lib/tokens';
 import { sendVerificationEmail } from '@/mail/account.mail';
 import { inviteResponseEmail } from '@/mail/organization.mail';
+import { ActionReturnType } from '@/types/actions.types';
 import {
   RegisterForm,
   registerSchema,
@@ -39,7 +40,9 @@ const invitePromise = async ({
   });
 type InvitePromise = Awaited<ReturnType<typeof invitePromise>>;
 
-export const register = async (values: RegisterForm) => {
+export const register = async (
+  values: RegisterForm,
+): Promise<ActionReturnType> => {
   const validatedFields = registerSchema.safeParse(values);
 
   if (!validatedFields.success) {

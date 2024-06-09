@@ -2,13 +2,16 @@
 
 import { getUserByEmail } from '@/helpers/user.helper';
 import { generatePasswordResetToken } from '@/lib/tokens';
+import { sendPasswordResetEmail } from '@/mail/account.mail';
+import { ActionReturnType } from '@/types/actions.types';
 import {
   EmailValidationType,
   emailValidation,
 } from '@/validation/account/account.validation';
-import { sendPasswordResetEmail } from '@/mail/account.mail';
 
-export const reset = async (values: EmailValidationType) => {
+export const reset = async (
+  values: EmailValidationType,
+): Promise<ActionReturnType> => {
   const validateFields = emailValidation.safeParse(values);
   if (!validateFields.success) return { error: 'Invalid email' };
   const { email } = validateFields.data;

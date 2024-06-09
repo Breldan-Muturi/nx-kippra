@@ -8,6 +8,7 @@ const getApplicationParticipant = async (participantId: string) => {
   return await db.user.findUnique({
     where: { id: participantId },
     include: {
+      image: { select: { fileUrl: true } },
       organizations: true,
       applications: true,
       ownedApplications: true,

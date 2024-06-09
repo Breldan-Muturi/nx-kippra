@@ -1,5 +1,10 @@
 'use client';
-import React, { useTransition } from 'react';
+import {
+  RemoveOrgData,
+  removeOrganization,
+} from '@/actions/organization/remove.organization.actions';
+import ReusableForm from '@/components/form/ReusableForm';
+import SubmitButton from '@/components/form/SubmitButton';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -9,24 +14,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { toast } from 'sonner';
+import { Form } from '@/components/ui/form';
+import { FormFieldType } from '@/types/form-field.types';
 import { TableModalProps } from '@/types/tables.types';
-import {
-  RemoveOrgData,
-  removeOrganization,
-} from '@/actions/organization/remove.organization.actions';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import {
   RemoveOrgInfo,
   createRemoveOrgSchema,
 } from '@/validation/organization/organization.validation';
-import { FormFieldType } from '@/types/form-field.types';
-import OrgUser from './org-user-info';
-import { Form } from '@/components/ui/form';
-import ReusableForm from '@/components/form/ReusableForm';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import SubmitButton from '@/components/form/SubmitButton';
+import { useTransition } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import OrgUser from './org-user-info';
 
 type RemoveOrgModalProps = Omit<TableModalProps, 'id'> &
   Omit<RemoveOrgData, 'deleteOrg'>;
@@ -116,7 +116,7 @@ const RemoveOrgModal = ({
   const onSubmit: SubmitHandler<RemoveOrgInfo> = (values) =>
     startTransition(() => {
       removeOrganization({ id: orgId, ...values }).then((data) => {
-        if (data.error) {
+        if ('error' in data) {
           toast.error(data.error);
         } else {
           toast.success(data.success);

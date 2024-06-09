@@ -26,10 +26,9 @@ const useNewPassword = () => {
   const onSubmit: SubmitHandler<NewPasswordForm> = (values) => {
     startTransition(() => {
       newPassword(values, token).then((data) => {
-        if (data.error) {
+        if ('error' in data) {
           toast.error(data.error);
-        }
-        if (data.success) {
+        } else {
           toast.success(data.success);
         }
       });

@@ -67,9 +67,9 @@ const useInviteTable = ({
               organizationId,
             })
               .then((data) => {
-                if (data.error) {
+                if ('error' in data) {
                   toast.error(data.error);
-                } else if (data.success) {
+                } else {
                   toast.success(data.success);
                 }
               })
@@ -90,8 +90,11 @@ const useInviteTable = ({
     startTransition(() => {
       invitesResend({ organizationId, inviteIds })
         .then((data) => {
-          if ('error' in data) toast.error(data.error);
-          if ('success' in data) toast.success(data.success);
+          if ('error' in data) {
+            toast.error(data.error);
+          } else {
+            toast.success(data.success);
+          }
         })
         .finally(() => router.push(path));
     });
@@ -100,9 +103,9 @@ const useInviteTable = ({
     startTransition(() => {
       revokeInvite({ ids: inviteIds, organizationId })
         .then((data) => {
-          if (data.error) {
+          if ('error' in data) {
             toast.error(data.error);
-          } else if (data.success) {
+          } else {
             toast.success(data.success);
           }
         })

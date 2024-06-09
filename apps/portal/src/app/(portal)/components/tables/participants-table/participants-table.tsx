@@ -5,12 +5,12 @@ import {
   SingleParticipantDetail,
   filterParticipants,
 } from '@/actions/participants/fetch.participants.actions';
+import useParticipantModals from '@/app/(portal)/hooks/use-participant-modals';
 import handleTableColumns from '@/components/table/handle-table-columns';
 import ReusableTable from '@/components/table/reusable-table';
 import TablesPagination from '@/components/table/table-pagination';
 import tableSelectColumn from '@/components/table/table-select-column';
 import TableViews from '@/components/table/table-views';
-import { useCurrentRole } from '@/hooks/use-current-role';
 import { cn } from '@/lib/utils';
 import {
   FilterParticipantsType,
@@ -18,22 +18,25 @@ import {
   filterParticipantsSchema,
   pathParticipantsSchema,
 } from '@/validation/participants/participants.validation';
-import { UserRole } from '@prisma/client';
 import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { usePathname } from 'next/navigation';
-import React, { useMemo, useState, useTransition } from 'react';
+import React, { useMemo } from 'react';
 import { SubmitHandler } from 'react-hook-form';
+import participantColumnActions from './columns/participant-column-actions';
 import participantColumnApplication from './columns/participant-column-application';
-import participantColumnEmail from './columns/participant-column-email';
+import participantColumnPhone from './columns/participant-column-email';
 import participantColumnNationalId from './columns/participant-column-nationalid';
 import participantColumnOrganization from './columns/participant-column-organization';
 import participantColumnRole from './columns/participant-column-role';
 import participantColumnUser from './columns/participant-column-user';
 import filterParticipantsFields from './filters/participants-filter-fields';
 import ParticipantsFilterForm from './filters/participants-filter-form';
+import UpdateRoleModal from './modals/update-role-modal';
+import ViewParticipant from './modals/view-participant';
 
 type TableParticipantsProps = React.ComponentPropsWithoutRef<'div'> &
   ParticipantsTableProps;
+
+export type ParticipantModal = { id: string; handleDismiss: () => void };
 
 const ParticipantsTable = ({
   participants,
@@ -42,10 +45,17 @@ const ParticipantsTable = ({
   className,
   ...props
 }: TableParticipantsProps) => {
-  const isAdmin = useCurrentRole() === UserRole.ADMIN;
-  const path = usePathname();
-  const [isPending, startTransition] = useTransition();
-  const [modal, setModal] = useState();
+  const {
+    path,
+    isAdmin,
+    isPending,
+    startTransition,
+    dataUpdate,
+    dataView,
+    dismissModal,
+    updateUserRole,
+    viewParticipant,
+  } = useParticipantModals(participants.map(({ id }) => id));
   const pathParams: PathParticipantsType = pathParticipantsSchema.parse({
     ...fetchParams,
     path,
@@ -54,10 +64,6 @@ const ParticipantsTable = ({
   const { hiddenColumns, page, pageSize } = pathParams;
   const filterValues: FilterParticipantsType =
     filterParticipantsSchema.parse(pathParams);
-
-  const viewParticipant = (participantId: string) => {
-    startTransition(() => {});
-  };
 
   const changePage = (pageInt: number) => {
     startTransition(() => {
@@ -117,9 +123,12 @@ const ParticipantsTable = ({
       columns: [
         tableSelectColumn<SingleParticipantDetail>(isPending),
         participantColumnUser,
-        participantColumnEmail,
+        participantColumnActions({ isPending, viewParticipant }),
+        ...(isAdmin
+          ? [participantColumnRole({ isAdmin, updateRole: updateUserRole })]
+          : []),
+        participantColumnPhone,
         participantColumnNationalId,
-        ...(isAdmin ? [participantColumnRole] : []),
         participantColumnOrganization,
         participantColumnApplication,
       ],
@@ -132,31 +141,47 @@ const ParticipantsTable = ({
   });
 
   return (
-    <div className={cn('flex flex-col space-y-4', className)} {...props}>
-      <ParticipantsFilterForm
-        isPending={isPending}
-        clearFilters={clearFilters}
-        customSubmit={onSubmit}
-        filterValues={filterValues}
-        filterForm={filterParticipantsFields(isPending)}
-      />
-      <div className="pb-4 space-y-2">
-        <TableViews
-          columnIds={allColumnIds}
-          hiddenColumnArray={hiddenColumnsArray}
+    <>
+      <div className={cn('flex flex-col space-y-4', className)} {...props}>
+        <ParticipantsFilterForm
           isPending={isPending}
-          updateViews={updateViews}
+          clearFilters={clearFilters}
+          customSubmit={onSubmit}
+          filterValues={filterValues}
+          filterForm={filterParticipantsFields(isPending)}
         />
-        <ReusableTable table={table} />
+        <div className="pb-4 space-y-2">
+          <TableViews
+            columnIds={allColumnIds}
+            hiddenColumnArray={hiddenColumnsArray}
+            isPending={isPending}
+            updateViews={updateViews}
+          />
+          <ReusableTable table={table} />
+        </div>
+        <TablesPagination
+          changePage={changePage}
+          changePageSize={changePageSize}
+          isPending={isPending}
+          pagination={{ page, pageSize }}
+          count={count}
+        />
       </div>
-      <TablesPagination
-        changePage={changePage}
-        changePageSize={changePageSize}
-        isPending={isPending}
-        pagination={{ page, pageSize }}
-        count={count}
-      />
-    </div>
+      {dataUpdate && (
+        <UpdateRoleModal handleDismiss={dismissModal} {...dataUpdate} />
+      )}
+      {dataView && (
+        <ViewParticipant
+          {...{
+            dataView,
+            isPending,
+            dismissModal,
+            updateRole: updateUserRole,
+            viewParticipant,
+          }}
+        />
+      )}
+    </>
   );
 };
 

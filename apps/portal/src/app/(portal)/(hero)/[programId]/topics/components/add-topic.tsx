@@ -1,23 +1,23 @@
 'use client';
 
-import { FormFieldType } from '@/types/form-field.types';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { FormFieldType } from '@/types/form-field.types';
 
-import { Form } from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
+import { addTopic } from '@/actions/topics/topics.actions';
+import FormHeader from '@/components/form/FormHeader';
 import ReusableForm from '@/components/form/ReusableForm';
 import SubmitButton from '@/components/form/SubmitButton';
-import FormHeader from '@/components/form/FormHeader';
+import { Form } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
 import {
   AddTopicForm,
   addTopicsSchema,
 } from '@/validation/topics/topics.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useTransition } from 'react';
-import { toast } from 'sonner';
-import { addTopic } from '@/actions/topics/topics.actions';
 import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 const topicFields: FormFieldType<AddTopicForm>[] = [
   {
@@ -60,9 +60,9 @@ const AddTopic = ({ programId, className, ...props }: AddTopicProps) => {
   const onSubmit = (topicData: AddTopicForm) => {
     startTransition(() => {
       addTopic(topicData).then((data) => {
-        if (data.error) {
+        if ('error' in data) {
           toast.error(data.error);
-        } else if (data.success) {
+        } else {
           form.reset();
           toast.success(data.success);
         }

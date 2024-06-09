@@ -1,13 +1,13 @@
-"use client";
-import { deleteTopic } from "@/actions/topics/topics.actions";
-import FormHeader from "@/components/form/FormHeader";
-import SubmitButton from "@/components/form/SubmitButton";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
-import { Topic } from "@prisma/client";
-import { useRouter } from "next/navigation";
-import React, { useTransition } from "react";
-import { toast } from "sonner";
+'use client';
+import { deleteTopic } from '@/actions/topics/topics.actions';
+import FormHeader from '@/components/form/FormHeader';
+import SubmitButton from '@/components/form/SubmitButton';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
+import { Topic } from '@prisma/client';
+import { useRouter } from 'next/navigation';
+import React, { useTransition } from 'react';
+import { toast } from 'sonner';
 
 interface DeleteTopicProps extends React.HTMLAttributes<HTMLDivElement> {
   topic: Topic;
@@ -24,9 +24,9 @@ const DeleteTopic = ({
   const handleDelete = () => {
     startTransition(() => {
       deleteTopic(id).then((data) => {
-        if (data.error) {
+        if ('error' in data) {
           toast.error(data.error);
-        } else if (data.success) {
+        } else {
           toast.success(data.success);
         }
         dismissModal();
@@ -36,7 +36,7 @@ const DeleteTopic = ({
 
   return (
     <Dialog open onOpenChange={dismissModal}>
-      <DialogContent className={cn("w-full", className)} {...props}>
+      <DialogContent className={cn('w-full', className)} {...props}>
         <FormHeader
           label="Delete this topic"
           description="This action cannot be undone"

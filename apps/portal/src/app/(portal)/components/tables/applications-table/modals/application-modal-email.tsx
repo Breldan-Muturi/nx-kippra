@@ -22,9 +22,9 @@ const SendEmail = ({ id, handleDismiss }: ApplicationModalType) => {
     startTransition(() => {
       adminSendEmail(id)
         .then((data) => {
-          if (data.error) {
+          if ('error' in data) {
             toast.error(data.error);
-          } else if (data.success) {
+          } else {
             toast.success(data.success);
           }
         })
@@ -41,8 +41,8 @@ const SendEmail = ({ id, handleDismiss }: ApplicationModalType) => {
             Make changes to your profile here. Click save when you are done.
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4 grid gap-4">
-          <div className="items-center grid grid-cols-4 gap-4">
+        <div className="grid gap-4 py-4">
+          <div className="grid items-center grid-cols-4 gap-4">
             <Label htmlFor="name" className="text-right">
               Name
             </Label>
@@ -52,7 +52,7 @@ const SendEmail = ({ id, handleDismiss }: ApplicationModalType) => {
               className="col-span-3"
             />
           </div>
-          <div className="items-center grid grid-cols-4 gap-4">
+          <div className="grid items-center grid-cols-4 gap-4">
             <Label htmlFor="username" className="text-right">
               Username
             </Label>

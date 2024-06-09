@@ -62,9 +62,9 @@ const ApproveApplication = ({
     startTransition(() => {
       adminApproveApplication(values)
         .then((data) => {
-          if (data.error) {
+          if ('error' in data) {
             toast.error(data.error);
-          } else if (data.success) {
+          } else {
             toast.success(data.success);
           }
         })

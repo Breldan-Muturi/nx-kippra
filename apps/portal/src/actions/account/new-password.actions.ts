@@ -1,17 +1,18 @@
 'use server';
+import { ActionReturnType } from '@/types/actions.types';
 import bcrypt from 'bcryptjs';
+import { getPasswordResetTokenByToken } from '../../helpers/reset-token.helper';
+import { getUserByEmail } from '../../helpers/user.helper';
+import { db } from '../../lib/db';
 import {
   NewPasswordForm,
   newPasswordSchema,
 } from '../../validation/account/account.validation';
-import { getPasswordResetTokenByToken } from '../../helpers/reset-token.helper';
-import { getUserByEmail } from '../../helpers/user.helper';
-import { db } from '../../lib/db';
 
 export const newPassword = async (
   values: NewPasswordForm,
   token?: string | null,
-) => {
+): Promise<ActionReturnType> => {
   if (!token) {
     return { error: 'Missing token!' };
   }
