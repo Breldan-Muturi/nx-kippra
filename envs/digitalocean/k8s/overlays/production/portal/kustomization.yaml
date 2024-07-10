@@ -1,0 +1,45 @@
+resources:
+  - ../../../base
+
+namespace: production
+namePrefix: portal-production-
+
+commonLabels:
+  app: portal-production
+
+images:
+  - name: registry.digitalocean.com/sohnandsol/portal-production
+    newTag: v1.0.0
+
+patches:
+  - patch: |-
+      $patch: delete
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: auth
+        namespace: placeholder
+  - target:
+      kind: Ingress
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/http/paths/0/backend/service/name
+        value: portal-production-svc
+      - op: replace
+        path: /spec/rules/0/host
+        value: portalkippra.sohnandsol.com
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: portalkippra.sohnandsol.com
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: portal-production-tls-secret
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: registry.digitalocean.com/sohnandsol/portal-production:v1.0.0
+      - op: replace
+        path: /spec/template/spec/containers/0/name
+        value: portal-production

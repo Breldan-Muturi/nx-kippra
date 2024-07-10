@@ -1,0 +1,45 @@
+resources:
+  - ../../../base
+
+namespace: staging
+namePrefix: puppeteer-staging-
+
+commonLabels:
+  app: puppeteer-staging
+
+images:
+  - name: registry.digitalocean.com/sohnandsol/puppeteer-staging
+    newTag: v1.0.0
+
+patches:
+  - patch: |-
+      $patch: delete
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: auth
+        namespace: placeholder
+  - patch: |-
+      $patch: delete
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: in
+  - target:
+      kind: Service
+    patch: |-
+      - op: replace
+        path: /spec/ports/0/targetPort
+        value: 4001
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: registry.digitalocean.com/sohnandsol/puppeteer-staging:v1.0.0
+      - op: replace
+        path: /spec/template/spec/containers/0/name
+        value: puppeteer-staging        
+      - op: replace
+        path: /spec/template/spec/containers/0/ports/0/containerPort
+        value: 4001

@@ -5,6 +5,10 @@ dist
 tmp
 /out-tsc
 
+# InfR
+envs/digitalocean/k8s/overlays/production/postgres
+envs/digitalocean/k8s/overlays/staging/postgres
+
 # dependencies
 node_modules
 

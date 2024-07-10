@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ingress-nginx
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: ingress-nginx
+    repoURL: https://kubernetes.github.io/ingress-nginx
+    targetRevision: 4.10.1
+    helm:
+      values: |
+        controller:
+          admissionWebhooks:
+            enabled: false
+          replicaCount: 1
+          resources:
+            requests:
+              cpu: 100m
+              memory: 90Mi
+          service:
+            type: LoadBalancer
+            annotations:
+              service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol: 'true'
+              service.beta.kubernetes.io/do-loadbalancer-tls-passthrough: 'true'
+              service.beta.kubernetes.io/do-loadbalancer-hostname: 'kippralb.sohnandsol.com'
+          config:
+            use-proxy-protocol: 'true'
+            keep-alive-requests: '10000'
+            upstream-keepalive-requests: '1000'
+            worker-processes: 'auto'
+            max-worker-connections: '65535'
+            use-gzip: 'true'
+  destination:
+    namespace: ingress-nginx
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=false
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
