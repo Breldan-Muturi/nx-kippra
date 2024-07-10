@@ -42,6 +42,6 @@ spec:
       allowEmpty: false
     syncOptions:
       - Validate=true
-      - CreateNamespace=false
+      - CreateNamespace=true
       - PrunePropagationPolicy=foreground
       - PruneLast=true
