@@ -1,4 +1,12 @@
 {
   "workbench.colorTheme": "Default Dark Modern",
-  "cSpell.words": ["depl", "hookform", "sohnandsol"]
+  "cSpell.words": [
+    "argocd",
+    "argoproj",
+    "cloudnative",
+    "cnpg",
+    "depl",
+    "hookform",
+    "sohnandsol"
+  ]
 }

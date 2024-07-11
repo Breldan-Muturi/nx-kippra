@@ -12,13 +12,6 @@ images:
     newTag: v1.0.0
 
 patches:
-  - patch: |-
-      $patch: delete
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: auth
-        namespace: placeholder
   - target:
       kind: Ingress
     patch: |-
@@ -43,3 +36,16 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/name
         value: portal-production
+  - patch: |-
+      $patch: delete
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: auth
+        namespace: placeholder
+  - patch: |-
+      $patch: delete
+      apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      metadata:
+        name: postgres

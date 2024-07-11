@@ -1,0 +1,32 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  description: '{{ .Values.name }} db'
+  imageName: ghcr.io/cloudnative-pg/postgresql:15.1
+  instances: {{ .Values.instances }}
+  startDelay: 10
+  stopDelay: 10
+  primaryUpdateStrategy: unsupervised
+  bootstrap:
+    initdb:
+      database: {{ .Values.name }}
+      owner: app
+      secret:
+        name: {{ .Values.name }}-app-user
+  superuserSecret:
+    name: {{ .Values.name }}-superuser
+  storage:
+    size: {{ .Values.storage }}
+    storageClass: standard
+  monitoring:
+    enablePodMonitor: true
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 2Gi
+      cpu: 1

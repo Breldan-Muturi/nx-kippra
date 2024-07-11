@@ -1,0 +1,13 @@
+# staging-postgres.yaml
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+spec:
+  instances: 2
+  storage:
+    size: 2Gi
+  bootstrap:
+    initdb:
+      database: dbname
+      owner: dbowner
