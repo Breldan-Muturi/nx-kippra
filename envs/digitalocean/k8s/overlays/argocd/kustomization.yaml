@@ -1,0 +1,55 @@
+resources:
+  - ../../base
+
+namespace: argocd
+namePrefix: argocd-server-
+
+commonLabels:
+  app: argocd-server-ingress
+
+patches:
+  - patch: |-
+      $patch: delete
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: auth
+        namespace: placeholder
+  - patch: |-
+      $patch: delete
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: depl
+  - patch: |-
+      $patch: delete
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: svc
+  - target:
+      kind: Ingress
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/http/paths/0/backend/service/name
+        value: argocd-server
+      - op: replace
+        path: /spec/rules/0/host
+        value: argocd-kippra.sohnandsol.com
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: argocd-kippra.sohnandsol.com
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: argocd-secret
+      - op: add
+        path: /metadata/annotations
+        value:
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+          kubernetes.io/tls-acme: 'true'        
+          nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      - op: replace
+        path: /spec/rules/0/http/paths/0/backend/service/port
+        value:
+          name: https

@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE "Payment" ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN     "receipt_url" TEXT,
-ADD COLUMN     "updatedAt" TIMESTAMP(3);

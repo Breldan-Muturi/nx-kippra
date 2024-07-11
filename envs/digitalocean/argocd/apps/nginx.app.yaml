@@ -33,7 +33,7 @@ spec:
             max-worker-connections: '65535'
             use-gzip: 'true'
   destination:
-    namespace: ingress-nginx
+    namespace: nginx
     server: https://kubernetes.default.svc
   syncPolicy:
     automated:

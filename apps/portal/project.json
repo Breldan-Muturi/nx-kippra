@@ -5,35 +5,55 @@
   "projectType": "application",
   "tags": [],
   "targets": {
-    "container": {
-      "executor": "@nx-tools/nx-container:build",
-      "dependsOn": ["build"],
+    "build": {
+      "executor": "@nx/next:build",
+      "defaultConfiguration": "production",
+      "dependsOn": ["^build"],
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "engine": "docker",
-        "metadata": {
-          "images": ["portal"],
-          "load": true,
-          "tags": [
-            "type=schedule",
-            "type=ref,event=branch",
-            "type=ref,event=tag",
-            "type=ref,event=pr",
-            "type=sha,prefix=sha-"
-          ]
+        "outputPath": "dist/apps/portal"
+      },
+      "configurations": {
+        "development": {
+          "outputPath": "apps/portal"
         }
       }
     },
-    "debug": {
-      "executor": "@nx/next:server",
-      "options": {
-        "buildTarget": "portal:build",
-        "dev": true
-      },
-      "configurations": {
-        "production": {
-          "buildTarget": "portal:build:production"
-        }
-      }
+    "prisma-deploy": {
+      "executor": "@nx-tools/nx-prisma:deploy"
+    },
+    "prisma-format": {
+      "executor": "@nx-tools/nx-prisma:format"
+    },
+    "prisma-generate": {
+      "executor": "@nx-tools/nx-prisma:generate"
+    },
+    "prisma-migrate": {
+      "executor": "@nx-tools/nx-prisma:migrate"
+    },
+    "prisma-pull": {
+      "executor": "@nx-tools/nx-prisma:pull"
+    },
+    "prisma-push": {
+      "executor": "@nx-tools/nx-prisma:push"
+    },
+    "prisma-reset": {
+      "executor": "@nx-tools/nx-prisma:reset"
+    },
+    "prisma-resolve": {
+      "executor": "@nx-tools/nx-prisma:resolve"
+    },
+    "prisma-seed": {
+      "executor": "@nx-tools/nx-prisma:seed"
+    },
+    "prisma-status": {
+      "executor": "@nx-tools/nx-prisma:status"
+    },
+    "prisma-studio": {
+      "executor": "@nx-tools/nx-prisma:studio"
+    },
+    "prisma-validate": {
+      "executor": "@nx-tools/nx-prisma:validate"
     }
   }
 }
