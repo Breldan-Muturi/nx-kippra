@@ -1,11 +1,15 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: production-pg
+  name: production-postgres
   namespace: postgres
 spec:
-  instances: 1
+  description: 'Production db'
   imageName: ghcr.io/cloudnative-pg/postgresql:15.1
+  instances: 2
+  startDelay: 10
+  stopDelay: 10
+  primaryUpdateStrategy: unsupervised
   bootstrap:
     initdb:
       database: production
@@ -17,3 +21,12 @@ spec:
   storage:
     size: 5Gi
     storageClass: do-block-storage
+  monitoring:
+    enablePodMonitor: true
+  resources:
+    requests:
+      memory: i
+      cpu: 500m
+    limits:
+      memory: 2Gi
+      cpu: 1

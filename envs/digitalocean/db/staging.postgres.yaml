@@ -1,11 +1,15 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: staging-pg
+  name: staging-postgres
   namespace: postgres
 spec:
-  instances: 1
+  description: 'staging db'
   imageName: ghcr.io/cloudnative-pg/postgresql:15.1
+  instances: 1
+  startDelay: 10
+  stopDelay: 10
+  primaryUpdateStrategy: unsupervised
   bootstrap:
     initdb:
       database: staging
@@ -15,5 +19,14 @@ spec:
   superuserSecret:
     name: staging-superuser
   storage:
-    size: 5Gi
+    size: 3Gi
     storageClass: do-block-storage
+  monitoring:
+    enablePodMonitor: true
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
