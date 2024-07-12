@@ -1,7 +1,7 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: staging-pg
+  name: staging-postgres
   namespace: postgres
 spec:
   description: 'staging db'
