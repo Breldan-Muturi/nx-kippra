@@ -20,7 +20,7 @@ spec:
     name: production-superuser
   storage:
     size: 5Gi
-    storageClass: standard
+    storageClass: do-block-storage
   monitoring:
     enablePodMonitor: true
   resources:

@@ -20,7 +20,7 @@ spec:
     name: staging-superuser
   storage:
     size: 3Gi
-    storageClass: standard
+    storageClass: do-block-storage
   monitoring:
     enablePodMonitor: true
   resources:
