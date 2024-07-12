@@ -1,25 +1,25 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: {{ .Values.name }}
-  namespace: {{ .Values.namespace }}
+  name: staging-pg
+  namespace: postgres
 spec:
-  description: '{{ .Values.name }} db'
+  description: 'staging db'
   imageName: ghcr.io/cloudnative-pg/postgresql:15.1
-  instances: {{ .Values.instances }}
+  instances: 1
   startDelay: 10
   stopDelay: 10
   primaryUpdateStrategy: unsupervised
   bootstrap:
     initdb:
-      database: {{ .Values.name }}
+      database: staging
       owner: app
       secret:
-        name: {{ .Values.name }}-app-user
+        name: staging-app-user
   superuserSecret:
-    name: {{ .Values.name }}-superuser
+    name: staging-superuser
   storage:
-    size: {{ .Values.storage }}
+    size: 3Gi
     storageClass: standard
   monitoring:
     enablePodMonitor: true
