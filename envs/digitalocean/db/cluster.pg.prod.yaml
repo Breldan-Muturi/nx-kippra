@@ -11,7 +11,13 @@ spec:
   primaryUpdateStrategy: unsupervised
   postgresql:
     pg_hba:
+      - hostssl all all all scram-sha-256
+      # Keep your existing pg_hba rules if needed
       - host all all 10.0.0.0/8 md5
+    parameters:
+      ssl: 'on'
+      ssl_cert_file: '/etc/postgresql/certificates/tls.crt'
+      ssl_key_file: '/etc/postgresql/certificates/tls.key'
   bootstrap:
     initdb:
       database: app
